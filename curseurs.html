@@ -1,4 +1,37 @@
 <!DOCTYPE html>
+<!--
+================================================================================
+CONFIGURATION POUR L'ENSEIGNEMENT À DISTANCE
+================================================================================
+
+Description :
+Cette interface interactive permet aux enseignant·es de configurer leur 
+dispositif d'enseignement à distance en positionnant des curseurs sur 6 
+dimensions pédagogiques :
+- Présence / Distance
+- Petit groupe / Grand groupe  
+- Asynchrone / Synchrone
+- Individuel / Collaboratif
+- Appropriation / Production
+- Avec / Sans accompagnement
+
+L'outil détecte automatiquement les combinaisons potentiellement problématiques 
+et affiche des alertes avec des conseils pédagogiques.
+
+Inspiré de :
+Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). 
+Enseigner à distance: 5 balises pour vous lancer. 
+Presses universitaires de Louvain UCL.
+https://pul.uclouvain.be/book/?gcoi=29303100535600
+
+Auteurs de cette adaptation interactive :
+François Jourde et Jacques Dubois
+
+Licence : CC BY-SA 2025
+Creative Commons Attribution - Partage dans les Mêmes Conditions
+
+================================================================================
+-->
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -14,6 +47,10 @@
     .left-column { flex: 1; min-width: 400px; }
     .right-column { width: 320px; }
     
+    .btn-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
+    .btn-box button:hover { background: #4a2d3a; }
+    
     .order-selector { margin-bottom: 16px; }
     
     .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; }
@@ -26,6 +63,28 @@
     .apply-order-btn { margin-top: 12px; padding: 10px 20px; background: #5a3d4a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
     .apply-order-btn:hover { background: #4a2d3a; }
     .hidden { display: none; }
+    
+    .alerts-list-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
+    .alerts-list-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
+    .alerts-list-panel ul { list-style: none; padding: 0; margin: 0; }
+    .alerts-list-panel li { font-size: 12px; color: #555; padding: 8px 10px; margin-bottom: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ffc107; }
+    
+    .matrix-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; overflow-x: auto; }
+    .matrix-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
+    .matrix-panel p { font-size: 12px; color: #666; margin-bottom: 12px; }
+    .risk-matrix { border-collapse: collapse; font-size: 11px; }
+    .risk-matrix th, .risk-matrix td { border: 1px solid #ddd; padding: 6px 8px; text-align: center; }
+    .risk-matrix th { background: #f5f5f5; font-weight: bold; color: #444; }
+    .risk-matrix th.row-header { text-align: left; min-width: 100px; }
+    .risk-matrix td { min-width: 80px; }
+    .risk-matrix .risk-none { background: #f9f9f9; color: #999; }
+    .risk-matrix .risk-low { background: #d4edda; color: #155724; }
+    .risk-matrix .risk-medium { background: #fff3cd; color: #856404; }
+    .risk-matrix .risk-high { background: #f8d7da; color: #721c24; }
+    .risk-matrix .diagonal { background: #e9ecef; color: #6c757d; }
+    .matrix-legend { margin-top: 12px; display: flex; gap: 15px; flex-wrap: wrap; font-size: 11px; }
+    .matrix-legend span { display: flex; align-items: center; gap: 5px; }
+    .matrix-legend .dot { width: 14px; height: 14px; border-radius: 3px; }
     
     .dimension { border-radius: 10px; padding: 20px; margin-bottom: 14px; color: white; }
     .dim-dark { background: #5a3d4a; }
@@ -43,15 +102,6 @@
     .alerts { margin-top: 0; }
     .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
     .alert-icon { font-size: 16px; }
-    
-    .btn-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
-    .btn-box button:hover { background: #4a2d3a; }
-    
-    .alerts-list-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
-    .alerts-list-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
-    .alerts-list-panel ul { list-style: none; padding: 0; margin: 0; }
-    .alerts-list-panel li { font-size: 12px; color: #555; padding: 8px 10px; margin-bottom: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ffc107; }
     
     .source { margin-top: 36px; padding-top: 18px; border-top: 1px solid #999; font-size: 12px; color: #444; line-height: 1.7; }
     .source p { margin-bottom: 8px; }
@@ -73,9 +123,10 @@
     <div class="main-content">
       <div class="left-column">
         <div class="btn-box">
-          <button class="order-btn" id="orderBtn">Modifier l'ordre</button>
+          <button id="orderBtn">Modifier l'ordre</button>
           <button id="btnReset">Réinitialiser</button>
-          <button id="btnAlerts">Voir les alertes possibles</button>
+          <button id="btnAlerts">Répertoire des alertes</button>
+          <button id="btnMatrix">Matrice de risques</button>
         </div>
         
         <div class="order-selector">
@@ -109,6 +160,17 @@
               <li><strong>Présence + Asynchrone :</strong> cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.</li>
             </ul>
           </div>
+          
+          <div id="matrixPanel" class="matrix-panel hidden">
+            <h3>Matrice des risques de combinaison</h3>
+            <p>Cette matrice montre le niveau de risque lorsque deux dimensions sont positionnées vers leurs pôles extrêmes.</p>
+            <table class="risk-matrix" id="riskMatrix"></table>
+            <div class="matrix-legend">
+              <span><span class="dot" style="background:#d4edda;"></span> Faible risque</span>
+              <span><span class="dot" style="background:#fff3cd;"></span> Risque modéré</span>
+              <span><span class="dot" style="background:#f8d7da;"></span> Risque élevé</span>
+            </div>
+          </div>
         </div>
         
         <div id="slidersContainer"></div>
@@ -120,7 +182,7 @@
     </div>
 
     <div class="source">
-      <p><strong>Adapté de :</strong> Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). <em>Enseigner à distance: 5 balises pour vous lancer</em>. Presses universitaires de Louvain UCL. <a href="https://pul.uclouvain.be/book/?gcoi=29303100535600" target="_blank">https://pul.uclouvain.be/book/?gcoi=29303100535600</a></p>
+      <p><strong>Inspiré de :</strong> Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). <em>Enseigner à distance: 5 balises pour vous lancer</em>. Presses universitaires de Louvain UCL. <a href="https://pul.uclouvain.be/book/?gcoi=29303100535600" target="_blank">https://pul.uclouvain.be/book/?gcoi=29303100535600</a></p>
       <p><span class="cc">CC BY-SA</span>Licence Creative Commons Attribution - Partage dans les Mêmes Conditions</p>
     </div>
   </div>
@@ -292,6 +354,75 @@
       }
     }
     
+    // Définition des risques entre dimensions
+    var riskDefinitions = [
+      [0, 2, "high_high", 2],
+      [0, 3, "high_high", 2],
+      [0, 5, "high_high", 3],
+      [0, 2, "low_low", 2],
+      [1, 3, "high_high", 2],
+      [1, 4, "high_high", 2],
+      [1, 5, "high_low", 2],
+      [2, 3, "low_high", 2],
+      [2, 5, "high_high", 3],
+      [3, 5, "high_high", 2],
+      [4, 5, "high_high", 3],
+    ];
+    
+    var dimNames = ["Distance", "Grd groupe", "Synchrone", "Collaboratif", "Production", "Sans acc."];
+    
+    function getRiskLevel(dim1, dim2) {
+      var val1 = getVal(dim1);
+      var val2 = getVal(dim2);
+      
+      for (var i = 0; i < riskDefinitions.length; i++) {
+        var rd = riskDefinitions[i];
+        if ((rd[0] === dim1 && rd[1] === dim2) || (rd[0] === dim2 && rd[1] === dim1)) {
+          var cond = rd[2];
+          var level = rd[3];
+          
+          var match = false;
+          if (cond === "high_high" && val1 > 65 && val2 > 65) match = true;
+          if (cond === "low_low" && val1 < 35 && val2 < 35) match = true;
+          if (cond === "high_low" && val1 > 65 && val2 < 35) match = true;
+          if (cond === "low_high" && val1 < 35 && val2 > 65) match = true;
+          
+          if (match) return level;
+        }
+      }
+      return 0;
+    }
+    
+    function renderMatrix() {
+      var table = document.getElementById("riskMatrix");
+      var html = "<tr><th></th>";
+      
+      for (var i = 0; i < 6; i++) {
+        html += "<th>" + dimNames[i] + "</th>";
+      }
+      html += "</tr>";
+      
+      for (var row = 0; row < 6; row++) {
+        html += "<tr><th class='row-header'>" + dimNames[row] + "</th>";
+        for (var col = 0; col < 6; col++) {
+          if (row === col) {
+            html += "<td class='diagonal'>—</td>";
+          } else {
+            var risk = getRiskLevel(row, col);
+            var riskClass = "risk-none";
+            var riskText = "—";
+            if (risk === 1) { riskClass = "risk-low"; riskText = "Faible"; }
+            if (risk === 2) { riskClass = "risk-medium"; riskText = "Modéré"; }
+            if (risk === 3) { riskClass = "risk-high"; riskText = "Élevé"; }
+            html += "<td class='" + riskClass + "'>" + riskText + "</td>";
+          }
+        }
+        html += "</tr>";
+      }
+      
+      table.innerHTML = html;
+    }
+    
     function updateAll() {
       for (var i = 0; i < 6; i++) {
         var cursor = document.getElementById("cursor" + i);
@@ -300,6 +431,11 @@
         }
       }
       checkAlerts();
+      
+      var matrixPanel = document.getElementById("matrixPanel");
+      if (matrixPanel.className.indexOf("hidden") === -1) {
+        renderMatrix();
+      }
     }
     
     function resetAll() {
@@ -316,6 +452,10 @@
     // Bouton pour afficher/masquer la liste des alertes
     document.getElementById("btnAlerts").onclick = function() {
       var panel = document.getElementById("alertsListPanel");
+      var matrixPanel = document.getElementById("matrixPanel");
+      var orderPanel = document.getElementById("manualOrderPanel");
+      matrixPanel.className = "matrix-panel hidden";
+      orderPanel.className = "manual-order hidden";
       if (panel.className.indexOf("hidden") > -1) {
         panel.className = "alerts-list-panel";
       } else {
@@ -323,9 +463,28 @@
       }
     };
     
+    // Bouton pour afficher/masquer la matrice de risques
+    document.getElementById("btnMatrix").onclick = function() {
+      var panel = document.getElementById("matrixPanel");
+      var alertsPanel = document.getElementById("alertsListPanel");
+      var orderPanel = document.getElementById("manualOrderPanel");
+      alertsPanel.className = "alerts-list-panel hidden";
+      orderPanel.className = "manual-order hidden";
+      if (panel.className.indexOf("hidden") > -1) {
+        panel.className = "matrix-panel";
+        renderMatrix();
+      } else {
+        panel.className = "matrix-panel hidden";
+      }
+    };
+    
     // Bouton pour afficher/masquer le panneau d'ordre
     document.getElementById("orderBtn").onclick = function() {
       var panel = document.getElementById("manualOrderPanel");
+      var alertsPanel = document.getElementById("alertsListPanel");
+      var matrixPanel = document.getElementById("matrixPanel");
+      alertsPanel.className = "alerts-list-panel hidden";
+      matrixPanel.className = "matrix-panel hidden";
       if (panel.className.indexOf("hidden") > -1) {
         panel.className = "manual-order";
       } else {
