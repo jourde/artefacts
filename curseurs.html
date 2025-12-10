@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration Enseignement à Distance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #e8e8e8; padding: 20px; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 22px; color: #222; margin-bottom: 12px; }
+    .intro { font-size: 15px; color: #444; margin-bottom: 24px; }
+    .main-content { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
+    .left-column { flex: 1; min-width: 400px; }
+    .right-column { width: 320px; }
+    
+    .order-selector { margin-bottom: 20px; }
+    .order-selector label { font-size: 14px; color: #444; display: block; margin-bottom: 8px; }
+    .order-selector select { padding: 8px 12px; font-size: 14px; border-radius: 6px; border: 1px solid #ccc; background: white; cursor: pointer; width: 100%; max-width: 300px; }
+    
+    .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; }
+    .manual-order p { font-size: 13px; color: #666; margin-bottom: 10px; }
+    .sortable-list { list-style: none; padding: 0; margin: 0; }
+    .sortable-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px; background: #f5f5f5; border-radius: 6px; cursor: grab; border: 1px solid #ddd; font-size: 14px; color: #333; }
+    .sortable-item:hover { background: #eee; }
+    .sortable-item.dragging { opacity: 0.5; background: #ddd; }
+    .sortable-item .drag-handle { color: #999; font-size: 16px; }
+    .apply-order-btn { margin-top: 12px; padding: 10px 20px; background: #5a3d4a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .apply-order-btn:hover { background: #4a2d3a; }
+    .hidden { display: none; }
+    
+    .dimension { border-radius: 10px; padding: 20px; margin-bottom: 14px; color: white; }
+    .dim-dark { background: #5a3d4a; }
+    .dim-light { background: #6b5b7a; }
+    .labels { display: flex; justify-content: space-between; margin-bottom: 14px; }
+    .label-left { width: 45%; }
+    .label-right { width: 45%; text-align: right; }
+    .label-left h3, .label-right h3 { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
+    .label-left p, .label-right p { font-size: 13px; opacity: 0.95; margin: 0; }
+    .slider-box { position: relative; height: 50px; margin-top: 10px; }
+    .slider-track { position: absolute; top: 20px; left: 0; right: 0; height: 10px; background: rgba(255,255,255,0.4); border-radius: 5px; }
+    .slider-cursor { position: absolute; top: 10px; width: 24px; height: 30px; background: #4a8a4a; border-radius: 4px; border: 2px solid #3a7a3a; }
+    .slider-range { position: absolute; top: 10px; left: 0; width: 100%; height: 30px; opacity: 0; cursor: pointer; margin: 0; }
+    
+    .alerts { margin-top: 0; }
+    .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
+    .alert-icon { font-size: 16px; }
+    
+    .btn-box { margin-top: 16px; }
+    .btn-box button { padding: 12px 24px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; background: #5a3d4a; }
+    .btn-box button:hover { background: #4a2d3a; }
+    
+    .source { margin-top: 36px; padding-top: 18px; border-top: 1px solid #999; font-size: 12px; color: #444; line-height: 1.7; }
+    .source p { margin-bottom: 8px; }
+    .source a { color: #5a3d4a; word-break: break-all; }
+    .cc { display: inline-block; background: #a2a9a3; color: white; padding: 3px 8px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-right: 10px; }
+    
+    @media (max-width: 800px) {
+      .main-content { flex-direction: column; }
+      .left-column { min-width: 100%; }
+      .right-column { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Quelle configuration pour votre enseignement à distance ?</h1>
+    <p class="intro">Déplacez chaque curseur vert pour définir votre configuration.</p>
 
+    <div class="main-content">
+      <div class="left-column">
+        <div class="order-selector">
+          <label for="orderSelect">Ordre des dimensions :</label>
+          <select id="orderSelect">
+            <option value="0,1,2,3,4,5">Par défaut</option>
+            <option value="0,2,3,1,4,5">Contexte puis Pédagogie</option>
+            <option value="0,1,5,2,3,4">Accompagnement en priorité</option>
+            <option value="manual">Organisation manuelle...</option>
+          </select>
+          
+          <div id="manualOrderPanel" class="manual-order hidden">
+            <p>Glissez-déposez pour réorganiser :</p>
+            <ul class="sortable-list" id="sortableList">
+              <li class="sortable-item" data-id="0" draggable="true"><span class="drag-handle">☰</span> Présence / Distance</li>
+              <li class="sortable-item" data-id="1" draggable="true"><span class="drag-handle">☰</span> Petit groupe / Grand groupe</li>
+              <li class="sortable-item" data-id="2" draggable="true"><span class="drag-handle">☰</span> Asynchrone / Synchrone</li>
+              <li class="sortable-item" data-id="3" draggable="true"><span class="drag-handle">☰</span> Individuel / Collaboratif</li>
+              <li class="sortable-item" data-id="4" draggable="true"><span class="drag-handle">☰</span> Appropriation / Production</li>
+              <li class="sortable-item" data-id="5" draggable="true"><span class="drag-handle">☰</span> Avec / Sans accompagnement</li>
+            </ul>
+            <button class="apply-order-btn" id="applyOrderBtn">Appliquer cet ordre</button>
+          </div>
+        </div>
+        
+        <div id="slidersContainer"></div>
+
+        <div class="btn-box">
+          <button id="btnReset">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="alerts" id="alertsContainer"></div>
+      </div>
+    </div>
+
+    <div class="source">
+      <p><strong>Adapté de :</strong> Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). <em>Enseigner à distance: 5 balises pour vous lancer</em>. Presses universitaires de Louvain UCL. <a href="https://pul.uclouvain.be/book/?gcoi=29303100535600" target="_blank">https://pul.uclouvain.be/book/?gcoi=29303100535600</a></p>
+      <p><span class="cc">CC BY-SA</span>Licence Creative Commons Attribution - Partage dans les Mêmes Conditions</p>
+    </div>
+  </div>
+
+  <script>
+    var dimensions = [
+      {
+        id: 0,
+        leftTitle: "PRÉSENCE",
+        rightTitle: "DISTANCE",
+        leftDesc: "Le dispositif institutionnalise un temps de formation.",
+        rightDesc: "Le dispositif permet une souplesse temporelle, géographique et pédagogique.",
+        value: 50
+      },
+      {
+        id: 1,
+        leftTitle: "PETIT GROUPE",
+        rightTitle: "GRAND GROUPE",
+        leftDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.",
+        rightDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.",
+        value: 50
+      },
+      {
+        id: 2,
+        leftTitle: "ASYNCHRONE",
+        rightTitle: "SYNCHRONE",
+        leftDesc: "Le dispositif offre la flexibilité d'activités réalisées en temps différé.",
+        rightDesc: "Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.",
+        value: 50
+      },
+      {
+        id: 3,
+        leftTitle: "INDIVIDUEL",
+        rightTitle: "COLLABORATIF",
+        leftDesc: "Le dispositif privilégie des activités et travaux individuels.",
+        rightDesc: "Le dispositif stimule des activités et travaux de groupe.",
+        value: 50
+      },
+      {
+        id: 4,
+        leftTitle: "APPROPRIATION",
+        rightTitle: "PRODUCTION",
+        leftDesc: "L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.",
+        rightDesc: "Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.",
+        value: 50
+      },
+      {
+        id: 5,
+        leftTitle: "AVEC ACCOMPAGNEMENT",
+        rightTitle: "SANS ACCOMPAGNEMENT",
+        leftDesc: "L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.",
+        rightDesc: "Les étudiant·es gèrent leurs apprentissages en autonomie.",
+        value: 50
+      }
+    ];
+    
+    function renderSliders(order) {
+      var container = document.getElementById("slidersContainer");
+      var html = "";
+      var indices = order.split(",");
+      
+      for (var i = 0; i < indices.length; i++) {
+        var idx = parseInt(indices[i]);
+        var dim = dimensions[idx];
+        var colorClass = (i % 2 === 0) ? "dim-dark" : "dim-light";
+        
+        html += '<div class="dimension ' + colorClass + '">';
+        html += '<div class="labels">';
+        html += '<div class="label-left"><h3>' + dim.leftTitle + '</h3><p>' + dim.leftDesc + '</p></div>';
+        html += '<div class="label-right"><h3>' + dim.rightTitle + '</h3><p>' + dim.rightDesc + '</p></div>';
+        html += '</div>';
+        html += '<div class="slider-box">';
+        html += '<div class="slider-track"></div>';
+        html += '<div class="slider-cursor" id="cursor' + dim.id + '"></div>';
+        html += '<input type="range" min="0" max="100" value="' + dim.value + '" class="slider-range" id="slider' + dim.id + '" data-id="' + dim.id + '">';
+        html += '</div>';
+        html += '</div>';
+      }
+      
+      container.innerHTML = html;
+      
+      for (var i = 0; i < 6; i++) {
+        (function(index) {
+          var slider = document.getElementById("slider" + index);
+          if (slider) {
+            slider.oninput = function() {
+              var id = parseInt(this.getAttribute("data-id"));
+              dimensions[id].value = parseInt(this.value);
+              updateAll();
+            };
+          }
+        })(i);
+      }
+      
+      updateAll();
+    }
+    
+    function getVal(i) {
+      return dimensions[i].value;
+    }
+    
+    function checkAlerts() {
+      var presence = getVal(0);
+      var nombre = getVal(1);
+      var tempo = getVal(2);
+      var collab = getVal(3);
+      var ressources = getVal(4);
+      var accomp = getVal(5);
+      
+      var alerts = [];
+      
+      if (tempo > 65 && accomp > 65) {
+        alerts.push("Synchrone + Sans accompagnement : les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
+      }
+      
+      if (collab > 65 && tempo < 35) {
+        alerts.push("Collaboratif + Asynchrone : la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
+      }
+      
+      if (ressources > 65 && accomp > 65) {
+        alerts.push("Production + Sans accompagnement : les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
+      }
+      
+      if (tempo > 65 && collab > 65 && ressources > 65 && accomp > 65) {
+        alerts.push("Configuration très exigeante : cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es. Assurez-vous qu'ils y sont préparés.");
+      }
+      
+      if (tempo > 65 && ressources > 65 && collab > 65 && accomp <= 65) {
+        alerts.push("Synchrone + Production + Collaboratif : cette combinaison demande une coordination importante en temps réel. Prévoyez des consignes claires.");
+      }
+      
+      if (nombre > 65 && accomp < 35) {
+        alerts.push("Grand groupe + Accompagnement fort : l'accompagnement individualisé devient difficile avec un grand nombre de participants. Pensez à des stratégies de tutorat par les pairs.");
+      }
+      
+      if (presence > 65 && tempo > 65) {
+        alerts.push("Distance + Synchrone : les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion pour tous les participants.");
+      }
+      
+      if (presence > 65 && nombre > 65 && accomp > 65) {
+        alerts.push("Distance + Grand groupe + Sans accompagnement : cette configuration est très risquée. Les étudiant·es peuvent facilement se sentir isolés et perdus.");
+      }
+      
+      if (presence > 65 && collab > 65) {
+        alerts.push("Distance + Collaboratif : la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse pour coordonner les équipes.");
+      }
+      
+      if (nombre > 65 && collab > 65) {
+        alerts.push("Grand groupe + Collaboratif : organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte des groupes et des consignes.");
+      }
+      
+      if (nombre > 65 && ressources > 65) {
+        alerts.push("Grand groupe + Production : accompagner la production de ressources par un grand groupe est exigeant. Prévoyez des critères d'évaluation clairs et du feedback par les pairs.");
+      }
+      
+      if (presence < 35 && tempo < 35) {
+        alerts.push("Présence + Asynchrone : cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
+      }
+      
+      var container = document.getElementById("alertsContainer");
+      if (alerts.length === 0) {
+        container.innerHTML = "";
+      } else {
+        var html = "";
+        for (var i = 0; i < alerts.length; i++) {
+          html += '<div class="alert"><span class="alert-icon">⚠️</span><span>' + alerts[i] + '</span></div>';
+        }
+        container.innerHTML = html;
+      }
+    }
+    
+    function updateAll() {
+      for (var i = 0; i < 6; i++) {
+        var cursor = document.getElementById("cursor" + i);
+        if (cursor) {
+          cursor.style.left = "calc(" + dimensions[i].value + "% - 12px)";
+        }
+      }
+      checkAlerts();
+    }
+    
+    function resetAll() {
+      for (var i = 0; i < 6; i++) {
+        dimensions[i].value = 50;
+        var slider = document.getElementById("slider" + i);
+        if (slider) {
+          slider.value = 50;
+        }
+      }
+      updateAll();
+    }
+    
+    // Sélecteur d'ordre
+    document.getElementById("orderSelect").onchange = function() {
+      var panel = document.getElementById("manualOrderPanel");
+      if (this.value === "manual") {
+        panel.className = "manual-order";
+      } else {
+        panel.className = "manual-order hidden";
+        renderSliders(this.value);
+      }
+    };
+    
+    // Drag and drop
+    var draggedItem = null;
+    var sortableList = document.getElementById("sortableList");
+    
+    sortableList.addEventListener("dragstart", function(e) {
+      if (e.target.classList.contains("sortable-item")) {
+        draggedItem = e.target;
+        e.target.classList.add("dragging");
+      }
+    });
+    
+    sortableList.addEventListener("dragend", function(e) {
+      if (e.target.classList.contains("sortable-item")) {
+        e.target.classList.remove("dragging");
+        draggedItem = null;
+      }
+    });
+    
+    sortableList.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      var afterElement = getDragAfterElement(sortableList, e.clientY);
+      if (draggedItem) {
+        if (afterElement == null) {
+          sortableList.appendChild(draggedItem);
+        } else {
+          sortableList.insertBefore(draggedItem, afterElement);
+        }
+      }
+    });
+    
+    function getDragAfterElement(container, y) {
+      var draggableElements = Array.prototype.slice.call(container.querySelectorAll(".sortable-item:not(.dragging)"));
+      var result = null;
+      var closestOffset = Number.NEGATIVE_INFINITY;
+      
+      for (var i = 0; i < draggableElements.length; i++) {
+        var box = draggableElements[i].getBoundingClientRect();
+        var offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closestOffset) {
+          closestOffset = offset;
+          result = draggableElements[i];
+        }
+      }
+      return result;
+    }
+    
+    document.getElementById("applyOrderBtn").onclick = function() {
+      var items = sortableList.querySelectorAll(".sortable-item");
+      var order = [];
+      for (var i = 0; i < items.length; i++) {
+        order.push(items[i].getAttribute("data-id"));
+      }
+      renderSliders(order.join(","));
+    };
+    
+    document.getElementById("btnReset").onclick = resetAll;
+    
+    // Initialisation
+    renderSliders("0,1,2,3,4,5");
+  </script>
+</body>
+</html>
