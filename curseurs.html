@@ -50,10 +50,12 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
     .btn-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
     .btn-box button:hover { background: #4a2d3a; }
+    .btn-box button.btn-info { background: #4a6a7a; }
+    .btn-box button.btn-info:hover { background: #3a5a6a; }
     
     .order-selector { margin-bottom: 16px; }
     
-    .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; }
+    .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
     .manual-order p { font-size: 13px; color: #666; margin-bottom: 10px; }
     .sortable-list { list-style: none; padding: 0; margin: 0; }
     .sortable-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px; background: #f5f5f5; border-radius: 6px; cursor: grab; border: 1px solid #ddd; font-size: 14px; color: #333; }
@@ -99,6 +101,12 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
     .slider-cursor { position: absolute; top: 10px; width: 24px; height: 30px; background: #4a8a4a; border-radius: 4px; border: 2px solid #3a7a3a; }
     .slider-range { position: absolute; top: 10px; left: 0; width: 100%; height: 30px; opacity: 0; cursor: pointer; margin: 0; }
     
+    .about-box { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd; font-size: 12px; color: #555; line-height: 1.6; }
+    .about-box h3 { font-size: 14px; color: #333; margin-bottom: 10px; }
+    .about-box p { margin-bottom: 8px; }
+    .about-box a { color: #5a3d4a; word-break: break-all; }
+    .about-box .cc { display: inline-block; background: #a2a9a3; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 10px; margin-right: 5px; }
+    
     .alerts { margin-top: 0; }
     .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
     .alert-icon { font-size: 16px; }
@@ -123,10 +131,10 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
     <div class="main-content">
       <div class="left-column">
         <div class="btn-box">
-          <button id="orderBtn">Modifier l'ordre</button>
           <button id="btnReset">Réinitialiser</button>
-          <button id="btnAlerts">Répertoire des alertes</button>
-          <button id="btnMatrix">Matrice de risques</button>
+          <button id="orderBtn">Modifier l'ordre</button>
+          <button id="btnAlerts" class="btn-info">Répertoire des alertes</button>
+          <button id="btnMatrix" class="btn-info">Matrice de risques</button>
         </div>
         
         <div class="order-selector">
@@ -174,6 +182,7 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
         </div>
         
         <div id="slidersContainer"></div>
+
       </div>
 
       <div class="right-column">
@@ -189,368 +198,157 @@ Creative Commons Attribution - Partage dans les Mêmes Conditions
 
   <script>
     var dimensions = [
-      {
-        id: 0,
-        leftTitle: "PRÉSENCE",
-        rightTitle: "DISTANCE",
-        leftDesc: "Le dispositif institutionnalise un temps de formation.",
-        rightDesc: "Le dispositif permet une souplesse temporelle, géographique et pédagogique.",
-        value: 50
-      },
-      {
-        id: 1,
-        leftTitle: "PETIT GROUPE",
-        rightTitle: "GRAND GROUPE",
-        leftDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.",
-        rightDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.",
-        value: 50
-      },
-      {
-        id: 2,
-        leftTitle: "ASYNCHRONE",
-        rightTitle: "SYNCHRONE",
-        leftDesc: "Le dispositif offre la flexibilité d'activités réalisées en temps différé.",
-        rightDesc: "Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.",
-        value: 50
-      },
-      {
-        id: 3,
-        leftTitle: "INDIVIDUEL",
-        rightTitle: "COLLABORATIF",
-        leftDesc: "Le dispositif privilégie des activités et travaux individuels.",
-        rightDesc: "Le dispositif stimule des activités et travaux de groupe.",
-        value: 50
-      },
-      {
-        id: 4,
-        leftTitle: "APPROPRIATION",
-        rightTitle: "PRODUCTION",
-        leftDesc: "L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.",
-        rightDesc: "Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.",
-        value: 50
-      },
-      {
-        id: 5,
-        leftTitle: "AVEC ACCOMPAGNEMENT",
-        rightTitle: "SANS ACCOMPAGNEMENT",
-        leftDesc: "L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.",
-        rightDesc: "Les étudiant·es gèrent leurs apprentissages en autonomie.",
-        value: 50
-      }
+      { id: 0, leftTitle: "PRÉSENCE", rightTitle: "DISTANCE", leftDesc: "Le dispositif institutionnalise un temps de formation.", rightDesc: "Le dispositif permet une souplesse temporelle, géographique et pédagogique.", value: 50 },
+      { id: 1, leftTitle: "PETIT GROUPE", rightTitle: "GRAND GROUPE", leftDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.", rightDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.", value: 50 },
+      { id: 2, leftTitle: "ASYNCHRONE", rightTitle: "SYNCHRONE", leftDesc: "Le dispositif offre la flexibilité d'activités réalisées en temps différé.", rightDesc: "Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.", value: 50 },
+      { id: 3, leftTitle: "INDIVIDUEL", rightTitle: "COLLABORATIF", leftDesc: "Le dispositif privilégie des activités et travaux individuels.", rightDesc: "Le dispositif stimule des activités et travaux de groupe.", value: 50 },
+      { id: 4, leftTitle: "APPROPRIATION", rightTitle: "PRODUCTION", leftDesc: "L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.", rightDesc: "Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.", value: 50 },
+      { id: 5, leftTitle: "AVEC ACCOMPAGNEMENT", rightTitle: "SANS ACCOMPAGNEMENT", leftDesc: "L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.", rightDesc: "Les étudiant·es gèrent leurs apprentissages en autonomie.", value: 50 }
     ];
+    
+    var riskDefinitions = [
+      [0, 2, "high_high", 2], [0, 3, "high_high", 2], [0, 5, "high_high", 3], [0, 2, "low_low", 2],
+      [1, 3, "high_high", 2], [1, 4, "high_high", 2], [1, 5, "high_low", 2], [2, 3, "low_high", 2],
+      [2, 5, "high_high", 3], [3, 5, "high_high", 2], [4, 5, "high_high", 3]
+    ];
+    
+    var dimNames = ["Distance", "Grd groupe", "Synchrone", "Collaboratif", "Production", "Sans acc."];
+    
+    function getVal(i) { return dimensions[i].value; }
     
     function renderSliders(order) {
       var container = document.getElementById("slidersContainer");
       var html = "";
       var indices = order.split(",");
-      
       for (var i = 0; i < indices.length; i++) {
         var idx = parseInt(indices[i]);
         var dim = dimensions[idx];
         var colorClass = (i % 2 === 0) ? "dim-dark" : "dim-light";
-        
-        html += '<div class="dimension ' + colorClass + '">';
-        html += '<div class="labels">';
-        html += '<div class="label-left"><h3>' + dim.leftTitle + '</h3><p>' + dim.leftDesc + '</p></div>';
-        html += '<div class="label-right"><h3>' + dim.rightTitle + '</h3><p>' + dim.rightDesc + '</p></div>';
-        html += '</div>';
-        html += '<div class="slider-box">';
-        html += '<div class="slider-track"></div>';
-        html += '<div class="slider-cursor" id="cursor' + dim.id + '"></div>';
-        html += '<input type="range" min="0" max="100" value="' + dim.value + '" class="slider-range" id="slider' + dim.id + '" data-id="' + dim.id + '">';
-        html += '</div>';
-        html += '</div>';
+        html += '<div class="dimension ' + colorClass + '"><div class="labels"><div class="label-left"><h3>' + dim.leftTitle + '</h3><p>' + dim.leftDesc + '</p></div><div class="label-right"><h3>' + dim.rightTitle + '</h3><p>' + dim.rightDesc + '</p></div></div><div class="slider-box"><div class="slider-track"></div><div class="slider-cursor" id="cursor' + dim.id + '"></div><input type="range" min="0" max="100" value="' + dim.value + '" class="slider-range" id="slider' + dim.id + '" data-id="' + dim.id + '"></div></div>';
       }
-      
       container.innerHTML = html;
-      
       for (var i = 0; i < 6; i++) {
         (function(index) {
           var slider = document.getElementById("slider" + index);
           if (slider) {
             slider.oninput = function() {
-              var id = parseInt(this.getAttribute("data-id"));
-              dimensions[id].value = parseInt(this.value);
+              dimensions[parseInt(this.getAttribute("data-id"))].value = parseInt(this.value);
               updateAll();
             };
           }
         })(i);
       }
-      
       updateAll();
     }
     
-    function getVal(i) {
-      return dimensions[i].value;
-    }
-    
     function checkAlerts() {
-      var presence = getVal(0);
-      var nombre = getVal(1);
-      var tempo = getVal(2);
-      var collab = getVal(3);
-      var ressources = getVal(4);
-      var accomp = getVal(5);
-      
+      var p = getVal(0), n = getVal(1), t = getVal(2), c = getVal(3), r = getVal(4), a = getVal(5);
       var alerts = [];
-      
-      if (tempo > 65 && accomp > 65) {
-        alerts.push("Synchrone + Sans accompagnement : les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
-      }
-      
-      if (collab > 65 && tempo < 35) {
-        alerts.push("Collaboratif + Asynchrone : la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
-      }
-      
-      if (ressources > 65 && accomp > 65) {
-        alerts.push("Production + Sans accompagnement : les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
-      }
-      
-      if (tempo > 65 && collab > 65 && ressources > 65 && accomp > 65) {
-        alerts.push("Configuration très exigeante : cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es. Assurez-vous qu'ils y sont préparés.");
-      }
-      
-      if (tempo > 65 && ressources > 65 && collab > 65 && accomp <= 65) {
-        alerts.push("Synchrone + Production + Collaboratif : cette combinaison demande une coordination importante en temps réel. Prévoyez des consignes claires.");
-      }
-      
-      if (nombre > 65 && accomp < 35) {
-        alerts.push("Grand groupe + Accompagnement fort : l'accompagnement individualisé devient difficile avec un grand nombre de participants. Pensez à des stratégies de tutorat par les pairs.");
-      }
-      
-      if (presence > 65 && tempo > 65) {
-        alerts.push("Distance + Synchrone : les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion pour tous les participants.");
-      }
-      
-      if (presence > 65 && nombre > 65 && accomp > 65) {
-        alerts.push("Distance + Grand groupe + Sans accompagnement : cette configuration est très risquée. Les étudiant·es peuvent facilement se sentir isolés et perdus.");
-      }
-      
-      if (presence > 65 && collab > 65) {
-        alerts.push("Distance + Collaboratif : la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse pour coordonner les équipes.");
-      }
-      
-      if (nombre > 65 && collab > 65) {
-        alerts.push("Grand groupe + Collaboratif : organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte des groupes et des consignes.");
-      }
-      
-      if (nombre > 65 && ressources > 65) {
-        alerts.push("Grand groupe + Production : accompagner la production de ressources par un grand groupe est exigeant. Prévoyez des critères d'évaluation clairs et du feedback par les pairs.");
-      }
-      
-      if (presence < 35 && tempo < 35) {
-        alerts.push("Présence + Asynchrone : cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
-      }
-      
+      if (t > 65 && a > 65) alerts.push("Synchrone + Sans accompagnement : les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
+      if (c > 65 && t < 35) alerts.push("Collaboratif + Asynchrone : la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
+      if (r > 65 && a > 65) alerts.push("Production + Sans accompagnement : les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
+      if (t > 65 && c > 65 && r > 65 && a > 65) alerts.push("Configuration très exigeante : cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es.");
+      if (t > 65 && r > 65 && c > 65 && a <= 65) alerts.push("Synchrone + Production + Collaboratif : cette combinaison demande une coordination importante en temps réel.");
+      if (n > 65 && a < 35) alerts.push("Grand groupe + Accompagnement fort : l'accompagnement individualisé devient difficile avec un grand nombre de participants.");
+      if (p > 65 && t > 65) alerts.push("Distance + Synchrone : les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.");
+      if (p > 65 && n > 65 && a > 65) alerts.push("Distance + Grand groupe + Sans accompagnement : les étudiant·es peuvent facilement se sentir isolés et perdus.");
+      if (p > 65 && c > 65) alerts.push("Distance + Collaboratif : la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.");
+      if (n > 65 && c > 65) alerts.push("Grand groupe + Collaboratif : organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.");
+      if (n > 65 && r > 65) alerts.push("Grand groupe + Production : accompagner la production de ressources par un grand groupe est exigeant.");
+      if (p < 35 && t < 35) alerts.push("Présence + Asynchrone : cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
       var container = document.getElementById("alertsContainer");
-      if (alerts.length === 0) {
-        container.innerHTML = "";
-      } else {
-        var html = "";
-        for (var i = 0; i < alerts.length; i++) {
-          html += '<div class="alert"><span class="alert-icon">⚠️</span><span>' + alerts[i] + '</span></div>';
-        }
-        container.innerHTML = html;
-      }
+      container.innerHTML = alerts.length === 0 ? "" : alerts.map(function(a) { return '<div class="alert"><span class="alert-icon">⚠️</span><span>' + a + '</span></div>'; }).join("");
     }
     
-    // Définition des risques entre dimensions
-    var riskDefinitions = [
-      [0, 2, "high_high", 2],
-      [0, 3, "high_high", 2],
-      [0, 5, "high_high", 3],
-      [0, 2, "low_low", 2],
-      [1, 3, "high_high", 2],
-      [1, 4, "high_high", 2],
-      [1, 5, "high_low", 2],
-      [2, 3, "low_high", 2],
-      [2, 5, "high_high", 3],
-      [3, 5, "high_high", 2],
-      [4, 5, "high_high", 3],
-    ];
-    
-    var dimNames = ["Distance", "Grd groupe", "Synchrone", "Collaboratif", "Production", "Sans acc."];
-    
-    function getRiskLevel(dim1, dim2) {
-      var val1 = getVal(dim1);
-      var val2 = getVal(dim2);
-      
+    function getRiskLevel(d1, d2) {
+      var v1 = getVal(d1), v2 = getVal(d2);
       for (var i = 0; i < riskDefinitions.length; i++) {
         var rd = riskDefinitions[i];
-        if ((rd[0] === dim1 && rd[1] === dim2) || (rd[0] === dim2 && rd[1] === dim1)) {
-          var cond = rd[2];
-          var level = rd[3];
-          
-          var match = false;
-          if (cond === "high_high" && val1 > 65 && val2 > 65) match = true;
-          if (cond === "low_low" && val1 < 35 && val2 < 35) match = true;
-          if (cond === "high_low" && val1 > 65 && val2 < 35) match = true;
-          if (cond === "low_high" && val1 < 35 && val2 > 65) match = true;
-          
-          if (match) return level;
+        if ((rd[0] === d1 && rd[1] === d2) || (rd[0] === d2 && rd[1] === d1)) {
+          var c = rd[2], l = rd[3], m = false;
+          if (c === "high_high" && v1 > 65 && v2 > 65) m = true;
+          if (c === "low_low" && v1 < 35 && v2 < 35) m = true;
+          if (c === "high_low" && v1 > 65 && v2 < 35) m = true;
+          if (c === "low_high" && v1 < 35 && v2 > 65) m = true;
+          if (m) return l;
         }
       }
       return 0;
     }
     
     function renderMatrix() {
-      var table = document.getElementById("riskMatrix");
       var html = "<tr><th></th>";
-      
-      for (var i = 0; i < 6; i++) {
-        html += "<th>" + dimNames[i] + "</th>";
-      }
+      for (var i = 0; i < 6; i++) html += "<th>" + dimNames[i] + "</th>";
       html += "</tr>";
-      
       for (var row = 0; row < 6; row++) {
         html += "<tr><th class='row-header'>" + dimNames[row] + "</th>";
         for (var col = 0; col < 6; col++) {
-          if (row === col) {
-            html += "<td class='diagonal'>—</td>";
-          } else {
+          if (row === col) { html += "<td class='diagonal'>—</td>"; }
+          else {
             var risk = getRiskLevel(row, col);
-            var riskClass = "risk-none";
-            var riskText = "—";
-            if (risk === 1) { riskClass = "risk-low"; riskText = "Faible"; }
-            if (risk === 2) { riskClass = "risk-medium"; riskText = "Modéré"; }
-            if (risk === 3) { riskClass = "risk-high"; riskText = "Élevé"; }
-            html += "<td class='" + riskClass + "'>" + riskText + "</td>";
+            var cls = "risk-none", txt = "—";
+            if (risk === 1) { cls = "risk-low"; txt = "Faible"; }
+            if (risk === 2) { cls = "risk-medium"; txt = "Modéré"; }
+            if (risk === 3) { cls = "risk-high"; txt = "Élevé"; }
+            html += "<td class='" + cls + "'>" + txt + "</td>";
           }
         }
         html += "</tr>";
       }
-      
-      table.innerHTML = html;
+      document.getElementById("riskMatrix").innerHTML = html;
     }
     
     function updateAll() {
       for (var i = 0; i < 6; i++) {
         var cursor = document.getElementById("cursor" + i);
-        if (cursor) {
-          cursor.style.left = "calc(" + dimensions[i].value + "% - 12px)";
-        }
+        if (cursor) cursor.style.left = "calc(" + dimensions[i].value + "% - 12px)";
       }
       checkAlerts();
-      
-      var matrixPanel = document.getElementById("matrixPanel");
-      if (matrixPanel.className.indexOf("hidden") === -1) {
-        renderMatrix();
-      }
+      if (document.getElementById("matrixPanel").className.indexOf("hidden") === -1) renderMatrix();
     }
     
     function resetAll() {
       for (var i = 0; i < 6; i++) {
         dimensions[i].value = 50;
-        var slider = document.getElementById("slider" + i);
-        if (slider) {
-          slider.value = 50;
-        }
+        var s = document.getElementById("slider" + i);
+        if (s) s.value = 50;
       }
       updateAll();
     }
     
-    // Bouton pour afficher/masquer la liste des alertes
     document.getElementById("btnAlerts").onclick = function() {
-      var panel = document.getElementById("alertsListPanel");
-      var matrixPanel = document.getElementById("matrixPanel");
-      var orderPanel = document.getElementById("manualOrderPanel");
-      matrixPanel.className = "matrix-panel hidden";
-      orderPanel.className = "manual-order hidden";
-      if (panel.className.indexOf("hidden") > -1) {
-        panel.className = "alerts-list-panel";
-      } else {
-        panel.className = "alerts-list-panel hidden";
-      }
+      var p = document.getElementById("alertsListPanel"), m = document.getElementById("matrixPanel"), o = document.getElementById("manualOrderPanel");
+      m.className = "matrix-panel hidden"; o.className = "manual-order hidden";
+      p.className = p.className.indexOf("hidden") > -1 ? "alerts-list-panel" : "alerts-list-panel hidden";
     };
     
-    // Bouton pour afficher/masquer la matrice de risques
     document.getElementById("btnMatrix").onclick = function() {
-      var panel = document.getElementById("matrixPanel");
-      var alertsPanel = document.getElementById("alertsListPanel");
-      var orderPanel = document.getElementById("manualOrderPanel");
-      alertsPanel.className = "alerts-list-panel hidden";
-      orderPanel.className = "manual-order hidden";
-      if (panel.className.indexOf("hidden") > -1) {
-        panel.className = "matrix-panel";
-        renderMatrix();
-      } else {
-        panel.className = "matrix-panel hidden";
-      }
+      var p = document.getElementById("matrixPanel"), a = document.getElementById("alertsListPanel"), o = document.getElementById("manualOrderPanel");
+      a.className = "alerts-list-panel hidden"; o.className = "manual-order hidden";
+      if (p.className.indexOf("hidden") > -1) { p.className = "matrix-panel"; renderMatrix(); }
+      else { p.className = "matrix-panel hidden"; }
     };
     
-    // Bouton pour afficher/masquer le panneau d'ordre
     document.getElementById("orderBtn").onclick = function() {
-      var panel = document.getElementById("manualOrderPanel");
-      var alertsPanel = document.getElementById("alertsListPanel");
-      var matrixPanel = document.getElementById("matrixPanel");
-      alertsPanel.className = "alerts-list-panel hidden";
-      matrixPanel.className = "matrix-panel hidden";
-      if (panel.className.indexOf("hidden") > -1) {
-        panel.className = "manual-order";
-      } else {
-        panel.className = "manual-order hidden";
-      }
+      var p = document.getElementById("manualOrderPanel"), a = document.getElementById("alertsListPanel"), m = document.getElementById("matrixPanel");
+      a.className = "alerts-list-panel hidden"; m.className = "matrix-panel hidden";
+      p.className = p.className.indexOf("hidden") > -1 ? "manual-order" : "manual-order hidden";
     };
     
-    // Drag and drop
     var draggedItem = null;
     var sortableList = document.getElementById("sortableList");
-    
-    sortableList.addEventListener("dragstart", function(e) {
-      if (e.target.classList.contains("sortable-item")) {
-        draggedItem = e.target;
-        e.target.classList.add("dragging");
-      }
-    });
-    
-    sortableList.addEventListener("dragend", function(e) {
-      if (e.target.classList.contains("sortable-item")) {
-        e.target.classList.remove("dragging");
-        draggedItem = null;
-      }
-    });
-    
+    sortableList.addEventListener("dragstart", function(e) { if (e.target.classList.contains("sortable-item")) { draggedItem = e.target; e.target.classList.add("dragging"); } });
+    sortableList.addEventListener("dragend", function(e) { if (e.target.classList.contains("sortable-item")) { e.target.classList.remove("dragging"); draggedItem = null; } });
     sortableList.addEventListener("dragover", function(e) {
       e.preventDefault();
-      var afterElement = getDragAfterElement(sortableList, e.clientY);
-      if (draggedItem) {
-        if (afterElement == null) {
-          sortableList.appendChild(draggedItem);
-        } else {
-          sortableList.insertBefore(draggedItem, afterElement);
-        }
-      }
+      var after = getDragAfterElement(sortableList, e.clientY);
+      if (draggedItem) { if (after == null) sortableList.appendChild(draggedItem); else sortableList.insertBefore(draggedItem, after); }
     });
     
     function getDragAfterElement(container, y) {
-      var draggableElements = Array.prototype.slice.call(container.querySelectorAll(".sortable-item:not(.dragging)"));
-      var result = null;
-      var closestOffset = Number.NEGATIVE_INFINITY;
-      
-      for (var i = 0; i < draggableElements.length; i++) {
-        var box = draggableElements[i].getBoundingClientRect();
+      var els = Array.prototype.slice.call(container.querySelectorAll(".sortable-item:not(.dragging)"));
+      var result = null, closest = Number.NEGATIVE_INFINITY;
+      for (var i = 0; i < els.length; i++) {
+        var box = els[i].getBoundingClientRect();
         var offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closestOffset) {
-          closestOffset = offset;
-          result = draggableElements[i];
-        }
-      }
-      return result;
-    }
-    
-    document.getElementById("applyOrderBtn").onclick = function() {
-      var items = sortableList.querySelectorAll(".sortable-item");
-      var order = [];
-      for (var i = 0; i < items.length; i++) {
-        order.push(items[i].getAttribute("data-id"));
-      }
-      renderSliders(order.join(","));
-    };
-    
-    document.getElementById("btnReset").onclick = resetAll;
-    
-    // Initialisation
-    renderSliders("0,1,2,3,4,5");
-  </script>
-</body>
-</html>
+        if (offset < 0 && offset
