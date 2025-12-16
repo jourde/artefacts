@@ -1,1 +1,533 @@
-test
+import React, { useState } from 'react';
+import { Download, Save, Trash2, Plus } from 'lucide-react';
+
+const PersonaCanvas = () => {
+  const [persona, setPersona] = useState({
+    nom: '',
+    role: '',
+    age: '',
+    contexte: '',
+    contraintesGeo: [],
+    contraintesTemp: [],
+    specificites: [],
+    autresSpecificites: '',
+    competences: [],
+    autresCompetences: '',
+    motivations: [],
+    autresMotivations: '',
+    freins: [],
+    autresFreins: '',
+    besoins: [],
+    autresBesoins: '',
+    objectifs: [],
+    autresObjectifs: '',
+    scenarios: [],
+    autresScenarios: ''
+  });
+
+  const contraintesGeoOptions = [
+    'Déplacements réguliers vers des zones isolées (fleuve, forêt)',
+    'Accès internet instable ou inexistant dans certaines zones',
+    'Infrastructures numériques limitées dans les établissements',
+    'Distances importantes entre les sites de formation',
+    'Transports difficiles (pirogue, petit avion, piste)'
+  ];
+
+  const contraintesTempOptions = [
+    'Décalage horaire de -5h avec la France métropolitaine',
+    'Difficultés pour participer à des formations synchrones avec la métropole',
+    'Disponibilité limitée des formateurs métropolitains en temps réel',
+    'Contraintes liées aux horaires de vol pour les déplacements inter-Guyane'
+  ];
+
+  const specificitesOptions = [
+    'Public enseignant très hétérogène (métropole, Antilles, locaux)',
+    'Contexte multiculturel et plurilingue',
+    'Adaptation nécessaire aux réalités locales',
+    'Isolement professionnel de certains enseignants',
+    'Turnover important du personnel enseignant'
+  ];
+
+  const competencesOptions = [
+    'Maîtrise du courriel et du traitement de texte',
+    'Utilise les réseaux sociaux professionnels',
+    'À l\'aise avec les visioconférences (Zoom, Teams, Meet)',
+    'Utilise des plateformes pédagogiques (Moodle, Magistère)',
+    'Crée des contenus numériques (vidéos, présentations)',
+    'Maîtrise les outils collaboratifs (documents partagés, tableaux blancs)',
+    'Peu à l\'aise avec la technologie',
+    'Autodidacte en numérique'
+  ];
+
+  const motivationsOptions = [
+    'Former efficacement malgré les distances géographiques',
+    'Réduire le temps de déplacement',
+    'Toucher davantage d\'enseignants isolés',
+    'Développer de nouvelles compétences en formation à distance',
+    'S\'adapter aux contraintes du territoire guyanais',
+    'Mutualiser les ressources avec d\'autres formateurs',
+    'Améliorer le suivi des enseignants formés',
+    'Créer une communauté de formateurs ultra-marins'
+  ];
+
+  const freinsOptions = [
+    'Manque de temps (déplacements chronophages)',
+    'Appréhension face aux outils de formation à distance',
+    'Connexion internet instable ou insuffisante',
+    'Équipement informatique inadéquat (personnel ou des stagiaires)',
+    'Manque de formation à l\'hybridation',
+    'Charge de travail déjà très élevée',
+    'Résistance des enseignants à la formation à distance',
+    'Manque de soutien technique local',
+    'Décalage horaire compliquant les échanges avec la métropole'
+  ];
+
+  const besoinsOptions = [
+    'Tutoriels adaptés aux contraintes de connexion',
+    'Support technique réactif et disponible en décalé',
+    'Temps de pratique guidée en asynchrone',
+    'Communauté d\'entraide entre formateurs ultra-marins',
+    'Ressources clés en main téléchargeables',
+    'Formation courte et très flexible',
+    'Exemples concrets adaptés au contexte guyanais',
+    'Accompagnement personnalisé à distance'
+  ];
+
+  const objectifsOptions = [
+    'Concevoir des parcours de formation hybrides',
+    'Animer des formations à distance efficaces',
+    'Créer des ressources numériques réutilisables',
+    'Gérer l\'asynchrone dans ses formations',
+    'Adapter les contenus aux contraintes de connexion',
+    'Accompagner les enseignants à distance',
+    'Collaborer en ligne avec d\'autres formateurs',
+    'Évaluer les apprentissages en formation hybride'
+  ];
+
+  const scenariosOptions = [
+    'Préfère se former le soir après les formations',
+    'A besoin de modules courts (15-20 min)',
+    'Veut pouvoir télécharger les contenus pour consultation hors ligne',
+    'Apprend mieux en pratiquant',
+    'Préfère les sessions synchrones adaptées au décalage horaire',
+    'A besoin de flexibilité totale (déplacements imprévisibles)',
+    'Souhaite échanger avec des pairs ultra-marins',
+    'Préfère les ressources vidéo aux textes longs',
+    'Contraintes familiales limitant la disponibilité en soirée',
+    'Disponibilité irrégulière liée aux missions sur le terrain'
+  ];
+
+  const handleCheckbox = (field, value) => {
+    setPersona(prev => ({
+      ...prev,
+      [field]: prev[field].includes(value)
+        ? prev[field].filter(item => item !== value)
+        : [...prev[field], value]
+    }));
+  };
+
+  const handleInput = (field, value) => {
+    setPersona(prev => ({ ...prev, [field]: value }));
+  };
+
+  const resetForm = () => {
+    if (window.confirm('Êtes-vous sûr de vouloir réinitialiser le formulaire ?')) {
+      setPersona({
+        nom: '',
+        role: '',
+        age: '',
+        contexte: '',
+        contraintesGeo: [],
+        contraintesTemp: [],
+        specificites: [],
+        autresSpecificites: '',
+        competences: [],
+        autresCompetences: '',
+        motivations: [],
+        autresMotivations: '',
+        freins: [],
+        autresFreins: '',
+        besoins: [],
+        autresBesoins: '',
+        objectifs: [],
+        autresObjectifs: '',
+        scenarios: [],
+        autresScenarios: ''
+      });
+    }
+  };
+
+  const downloadPersona = () => {
+    const content = `# Canevas de Personas
+## Formation hybride pour formateurs d'enseignants en Guyane française
+
+---
+
+## PERSONA
+
+### 1. IDENTITÉ
+
+**Nom du persona :** ${persona.nom || '_________________'}
+
+**Rôle / Fonction :** ${persona.role || '_________________'}
+
+**Âge / Ancienneté :** ${persona.age || '_________________'}
+
+**Contexte professionnel :**
+${persona.contexte || '_______________________________________________________________________________'}
+
+---
+
+### 2. CONTEXTE ULTRA-MARIN
+
+**Contraintes géographiques et logistiques :**
+${contraintesGeoOptions.map(opt => `- [${persona.contraintesGeo.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Contraintes temporelles et organisationnelles :**
+${contraintesTempOptions.map(opt => `- [${persona.contraintesTemp.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Spécificités du territoire :**
+${specificitesOptions.map(opt => `- [${persona.specificites.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres spécificités ultra-marines :**
+${persona.autresSpecificites || '_______________________________________________________________________________'}
+
+---
+
+### 3. COMPÉTENCES NUMÉRIQUES
+
+${competencesOptions.map(opt => `- [${persona.competences.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres compétences :**
+${persona.autresCompetences || '_______________________________________________________________________________'}
+
+---
+
+### 4. MOTIVATIONS
+
+${motivationsOptions.map(opt => `- [${persona.motivations.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres motivations :**
+${persona.autresMotivations || '_______________________________________________________________________________'}
+
+---
+
+### 5. FREINS / OBSTACLES
+
+${freinsOptions.map(opt => `- [${persona.freins.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres freins :**
+${persona.autresFreins || '_______________________________________________________________________________'}
+
+---
+
+### 6. BESOINS SPÉCIFIQUES
+
+${besoinsOptions.map(opt => `- [${persona.besoins.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres besoins :**
+${persona.autresBesoins || '_______________________________________________________________________________'}
+
+---
+
+### 7. OBJECTIFS D'APPRENTISSAGE
+
+${objectifsOptions.map(opt => `- [${persona.objectifs.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres objectifs :**
+${persona.autresObjectifs || '_______________________________________________________________________________'}
+
+---
+
+### 8. SCÉNARIO D'UTILISATION
+
+${scenariosOptions.map(opt => `- [${persona.scenarios.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
+
+**Autres préférences :**
+${persona.autresScenarios || '_______________________________________________________________________________'}`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `persona_${persona.nom || 'nouveau'}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const CheckboxGroup = ({ title, options, field }) => (
+    <div className="mb-6">
+      <h4 className="font-semibold text-gray-700 mb-3">{title}</h4>
+      <div className="space-y-2">
+        {options.map((option, idx) => (
+          <label key={idx} className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+            <input
+              type="checkbox"
+              checked={persona[field].includes(option)}
+              onChange={() => handleCheckbox(field, option)}
+              className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700 flex-1">{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
+        <div className="border-b border-gray-200 pb-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Canevas de Personas</h1>
+          <p className="text-gray-600">Formation hybride pour formateurs d'enseignants en Guyane française</p>
+        </div>
+
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={downloadPersona}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            <Download size={18} />
+            Télécharger
+          </button>
+          <button
+            onClick={resetForm}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            <Trash2 size={18} />
+            Réinitialiser
+          </button>
+        </div>
+
+        {/* Section 1: Identité */}
+        <section className="mb-8 p-6 bg-blue-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-blue-800 mb-4">1. IDENTITÉ</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Nom du persona :</label>
+              <input
+                type="text"
+                value={persona.nom}
+                onChange={(e) => handleInput('nom', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Marie Dubois"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Rôle / Fonction :</label>
+              <input
+                type="text"
+                value={persona.role}
+                onChange={(e) => handleInput('role', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Formateur INSPE, Conseiller pédagogique"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Âge / Ancienneté :</label>
+              <input
+                type="text"
+                value={persona.age}
+                onChange={(e) => handleInput('age', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: 42 ans, 15 ans d'expérience en formation"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Contexte professionnel :</label>
+              <textarea
+                value={persona.contexte}
+                onChange={(e) => handleInput('contexte', e.target.value)}
+                rows="3"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Ex: Basé à Cayenne, intervient auprès d'enseignants du primaire et secondaire..."
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: Contexte Ultra-marin */}
+        <section className="mb-8 p-6 bg-green-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-green-800 mb-4">2. CONTEXTE ULTRA-MARIN</h2>
+          
+          <CheckboxGroup
+            title="Contraintes géographiques et logistiques :"
+            options={contraintesGeoOptions}
+            field="contraintesGeo"
+          />
+
+          <CheckboxGroup
+            title="Contraintes temporelles et organisationnelles :"
+            options={contraintesTempOptions}
+            field="contraintesTemp"
+          />
+
+          <CheckboxGroup
+            title="Spécificités du territoire :"
+            options={specificitesOptions}
+            field="specificites"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres spécificités ultra-marines :</label>
+            <textarea
+              value={persona.autresSpecificites}
+              onChange={(e) => handleInput('autresSpecificites', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 3: Compétences Numériques */}
+        <section className="mb-8 p-6 bg-purple-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-purple-800 mb-4">3. COMPÉTENCES NUMÉRIQUES</h2>
+          
+          <CheckboxGroup
+            title="Compétences maîtrisées :"
+            options={competencesOptions}
+            field="competences"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres compétences :</label>
+            <textarea
+              value={persona.autresCompetences}
+              onChange={(e) => handleInput('autresCompetences', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 4: Motivations */}
+        <section className="mb-8 p-6 bg-yellow-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-yellow-800 mb-4">4. MOTIVATIONS</h2>
+          
+          <CheckboxGroup
+            title="Motivations principales :"
+            options={motivationsOptions}
+            field="motivations"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres motivations :</label>
+            <textarea
+              value={persona.autresMotivations}
+              onChange={(e) => handleInput('autresMotivations', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 5: Freins */}
+        <section className="mb-8 p-6 bg-red-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-red-800 mb-4">5. FREINS / OBSTACLES</h2>
+          
+          <CheckboxGroup
+            title="Freins rencontrés :"
+            options={freinsOptions}
+            field="freins"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres freins :</label>
+            <textarea
+              value={persona.autresFreins}
+              onChange={(e) => handleInput('autresFreins', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 6: Besoins */}
+        <section className="mb-8 p-6 bg-indigo-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-indigo-800 mb-4">6. BESOINS SPÉCIFIQUES</h2>
+          
+          <CheckboxGroup
+            title="Besoins prioritaires :"
+            options={besoinsOptions}
+            field="besoins"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres besoins :</label>
+            <textarea
+              value={persona.autresBesoins}
+              onChange={(e) => handleInput('autresBesoins', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 7: Objectifs */}
+        <section className="mb-8 p-6 bg-pink-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-pink-800 mb-4">7. OBJECTIFS D'APPRENTISSAGE</h2>
+          
+          <CheckboxGroup
+            title="Objectifs visés :"
+            options={objectifsOptions}
+            field="objectifs"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres objectifs :</label>
+            <textarea
+              value={persona.autresObjectifs}
+              onChange={(e) => handleInput('autresObjectifs', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        {/* Section 8: Scénarios */}
+        <section className="mb-8 p-6 bg-teal-50 rounded-lg">
+          <h2 className="text-2xl font-bold text-teal-800 mb-4">8. SCÉNARIO D'UTILISATION</h2>
+          
+          <CheckboxGroup
+            title="Préférences d'apprentissage :"
+            options={scenariosOptions}
+            field="scenarios"
+          />
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres préférences :</label>
+            <textarea
+              value={persona.autresScenarios}
+              onChange={(e) => handleInput('autresScenarios', e.target.value)}
+              rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            />
+          </div>
+        </section>
+
+        <div className="flex gap-3 pt-6 border-t border-gray-200">
+          <button
+            onClick={downloadPersona}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+          >
+            <Download size={20} />
+            Télécharger le persona
+          </button>
+          <button
+            onClick={resetForm}
+            className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-semibold"
+          >
+            <Trash2 size={20} />
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PersonaCanvas;
