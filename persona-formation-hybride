@@ -1,533 +1,470 @@
-import React, { useState } from 'react';
-import { Download, Save, Trash2, Plus } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { 
+  User, MapPin, Wifi, Monitor, Target, AlertTriangle, 
+  Lightbulb, BookOpen, Printer, RefreshCw, Save 
+} from 'lucide-react';
 
-const PersonaCanvas = () => {
-  const [persona, setPersona] = useState({
-    nom: '',
+// --- DATA DEFINITIONS ---
+
+const SECTIONS = {
+  context: {
+    id: 'context',
+    title: '2. Contexte Ultra-Marin',
+    icon: <MapPin className="w-5 h-5" />,
+    options: [
+      "Déplacements réguliers vers des zones isolées (fleuve, forêt)",
+      "Accès internet instable ou inexistant dans certaines zones",
+      "Infrastructures numériques limitées dans les établissements",
+      "Distances importantes entre les sites de formation",
+      "Transports difficiles (pirogue, petit avion, piste)",
+      "Décalage horaire de -5h avec la France métropolitaine",
+      "Difficultés pour participer à des formations synchrones avec la métropole",
+      "Disponibilité limitée des formateurs métropolitains en temps réel",
+      "Contraintes liées aux horaires de vol pour les déplacements inter-Guyane",
+      "Public enseignant très hétérogène (métropole, Antilles, locaux)",
+      "Contexte multiculturel et plurilingue",
+      "Adaptation nécessaire aux réalités locales",
+      "Isolement professionnel de certains enseignants",
+      "Turnover important du personnel enseignant"
+    ]
+  },
+  skills: {
+    id: 'skills',
+    title: '3. Compétences Numériques',
+    icon: <Monitor className="w-5 h-5" />,
+    options: [
+      "Maîtrise du courriel et du traitement de texte",
+      "Utilise les réseaux sociaux professionnels",
+      "À l'aise avec les visioconférences (Zoom, Teams, Meet)",
+      "Utilise des plateformes pédagogiques (Moodle, Magistère)",
+      "Crée des contenus numériques (vidéos, présentations)",
+      "Maîtrise les outils collaboratifs (docs partagés, tableaux blancs)",
+      "Peu à l'aise avec la technologie",
+      "Autodidacte en numérique"
+    ]
+  },
+  motivations: {
+    id: 'motivations',
+    title: '4. Motivations',
+    icon: <Target className="w-5 h-5" />,
+    options: [
+      "Former efficacement malgré les distances géographiques",
+      "Réduire le temps de déplacement",
+      "Toucher davantage d'enseignants isolés",
+      "Développer de nouvelles compétences en formation à distance",
+      "S'adapter aux contraintes du territoire guyanais",
+      "Mutualiser les ressources avec d'autres formateurs",
+      "Améliorer le suivi des enseignants formés",
+      "Créer une communauté de formateurs ultra-marins"
+    ]
+  },
+  obstacles: {
+    id: 'obstacles',
+    title: '5. Freins / Obstacles',
+    icon: <AlertTriangle className="w-5 h-5" />,
+    options: [
+      "Manque de temps (déplacements chronophages)",
+      "Appréhension face aux outils de formation à distance",
+      "Connexion internet instable ou insuffisante",
+      "Équipement informatique inadéquat (personnel ou des stagiaires)",
+      "Manque de formation à l'hybridation",
+      "Charge de travail déjà très élevée",
+      "Résistance des enseignants à la formation à distance",
+      "Manque de soutien technique local",
+      "Décalage horaire compliquant les échanges avec la métropole"
+    ]
+  },
+  needs: {
+    id: 'needs',
+    title: '6. Besoins Spécifiques',
+    icon: <Lightbulb className="w-5 h-5" />,
+    options: [
+      "Tutoriels adaptés aux contraintes de connexion",
+      "Support technique réactif et disponible en décalé",
+      "Temps de pratique guidée en asynchrone",
+      "Communauté d'entraide entre formateurs ultra-marins",
+      "Ressources clés en main téléchargeables",
+      "Formation courte et très flexible",
+      "Exemples concrets adaptés au contexte guyanais",
+      "Accompagnement personnalisé à distance"
+    ]
+  },
+  objectives: {
+    id: 'objectives',
+    title: "7. Objectifs d'Apprentissage",
+    icon: <BookOpen className="w-5 h-5" />,
+    options: [
+      "Concevoir des parcours de formation hybrides",
+      "Animer des formations à distance efficaces",
+      "Créer des ressources numériques réutilisables",
+      "Gérer l'asynchrone dans ses formations",
+      "Adapter les contenus aux contraintes de connexion",
+      "Accompagner les enseignants à distance",
+      "Collaborer en ligne avec d'autres formateurs",
+      "Évaluer les apprentissages en formation hybride"
+    ]
+  },
+  scenario: {
+    id: 'scenario',
+    title: "8. Scénario d'Utilisation",
+    icon: <User className="w-5 h-5" />,
+    options: [
+      "Préfère se former le soir après les formations",
+      "A besoin de modules courts (15-20 min)",
+      "Veut pouvoir télécharger les contenus pour consultation hors ligne",
+      "Apprend mieux en pratiquant",
+      "Préfère les sessions synchrones adaptées au décalage horaire",
+      "A besoin de flexibilité totale (déplacements imprévisibles)",
+      "Souhaite échanger avec des pairs ultra-marins",
+      "Préfère les ressources vidéo aux textes longs",
+      "Contraintes familiales limitant la disponibilité en soirée",
+      "Disponibilité irrégulière liée aux missions sur le terrain"
+    ]
+  }
+};
+
+export default function PersonaBuilder() {
+  const [activeTab, setActiveTab] = useState('identity');
+  
+  const [formData, setFormData] = useState({
+    name: '',
     role: '',
     age: '',
-    contexte: '',
-    contraintesGeo: [],
-    contraintesTemp: [],
-    specificites: [],
-    autresSpecificites: '',
-    competences: [],
-    autresCompetences: '',
-    motivations: [],
-    autresMotivations: '',
-    freins: [],
-    autresFreins: '',
-    besoins: [],
-    autresBesoins: '',
-    objectifs: [],
-    autresObjectifs: '',
-    scenarios: [],
-    autresScenarios: ''
+    context: '',
+    selections: {
+      context: [],
+      skills: [],
+      motivations: [],
+      obstacles: [],
+      needs: [],
+      objectives: [],
+      scenario: []
+    },
+    custom: {
+      context: '',
+      skills: '',
+      motivations: '',
+      obstacles: '',
+      needs: '',
+      objectives: '',
+      scenario: ''
+    }
   });
 
-  const contraintesGeoOptions = [
-    'Déplacements réguliers vers des zones isolées (fleuve, forêt)',
-    'Accès internet instable ou inexistant dans certaines zones',
-    'Infrastructures numériques limitées dans les établissements',
-    'Distances importantes entre les sites de formation',
-    'Transports difficiles (pirogue, petit avion, piste)'
-  ];
-
-  const contraintesTempOptions = [
-    'Décalage horaire de -5h avec la France métropolitaine',
-    'Difficultés pour participer à des formations synchrones avec la métropole',
-    'Disponibilité limitée des formateurs métropolitains en temps réel',
-    'Contraintes liées aux horaires de vol pour les déplacements inter-Guyane'
-  ];
-
-  const specificitesOptions = [
-    'Public enseignant très hétérogène (métropole, Antilles, locaux)',
-    'Contexte multiculturel et plurilingue',
-    'Adaptation nécessaire aux réalités locales',
-    'Isolement professionnel de certains enseignants',
-    'Turnover important du personnel enseignant'
-  ];
-
-  const competencesOptions = [
-    'Maîtrise du courriel et du traitement de texte',
-    'Utilise les réseaux sociaux professionnels',
-    'À l\'aise avec les visioconférences (Zoom, Teams, Meet)',
-    'Utilise des plateformes pédagogiques (Moodle, Magistère)',
-    'Crée des contenus numériques (vidéos, présentations)',
-    'Maîtrise les outils collaboratifs (documents partagés, tableaux blancs)',
-    'Peu à l\'aise avec la technologie',
-    'Autodidacte en numérique'
-  ];
-
-  const motivationsOptions = [
-    'Former efficacement malgré les distances géographiques',
-    'Réduire le temps de déplacement',
-    'Toucher davantage d\'enseignants isolés',
-    'Développer de nouvelles compétences en formation à distance',
-    'S\'adapter aux contraintes du territoire guyanais',
-    'Mutualiser les ressources avec d\'autres formateurs',
-    'Améliorer le suivi des enseignants formés',
-    'Créer une communauté de formateurs ultra-marins'
-  ];
-
-  const freinsOptions = [
-    'Manque de temps (déplacements chronophages)',
-    'Appréhension face aux outils de formation à distance',
-    'Connexion internet instable ou insuffisante',
-    'Équipement informatique inadéquat (personnel ou des stagiaires)',
-    'Manque de formation à l\'hybridation',
-    'Charge de travail déjà très élevée',
-    'Résistance des enseignants à la formation à distance',
-    'Manque de soutien technique local',
-    'Décalage horaire compliquant les échanges avec la métropole'
-  ];
-
-  const besoinsOptions = [
-    'Tutoriels adaptés aux contraintes de connexion',
-    'Support technique réactif et disponible en décalé',
-    'Temps de pratique guidée en asynchrone',
-    'Communauté d\'entraide entre formateurs ultra-marins',
-    'Ressources clés en main téléchargeables',
-    'Formation courte et très flexible',
-    'Exemples concrets adaptés au contexte guyanais',
-    'Accompagnement personnalisé à distance'
-  ];
-
-  const objectifsOptions = [
-    'Concevoir des parcours de formation hybrides',
-    'Animer des formations à distance efficaces',
-    'Créer des ressources numériques réutilisables',
-    'Gérer l\'asynchrone dans ses formations',
-    'Adapter les contenus aux contraintes de connexion',
-    'Accompagner les enseignants à distance',
-    'Collaborer en ligne avec d\'autres formateurs',
-    'Évaluer les apprentissages en formation hybride'
-  ];
-
-  const scenariosOptions = [
-    'Préfère se former le soir après les formations',
-    'A besoin de modules courts (15-20 min)',
-    'Veut pouvoir télécharger les contenus pour consultation hors ligne',
-    'Apprend mieux en pratiquant',
-    'Préfère les sessions synchrones adaptées au décalage horaire',
-    'A besoin de flexibilité totale (déplacements imprévisibles)',
-    'Souhaite échanger avec des pairs ultra-marins',
-    'Préfère les ressources vidéo aux textes longs',
-    'Contraintes familiales limitant la disponibilité en soirée',
-    'Disponibilité irrégulière liée aux missions sur le terrain'
-  ];
-
-  const handleCheckbox = (field, value) => {
-    setPersona(prev => ({
+  const handleIdentityChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
       ...prev,
-      [field]: prev[field].includes(value)
-        ? prev[field].filter(item => item !== value)
-        : [...prev[field], value]
+      [name]: value
     }));
   };
 
-  const handleInput = (field, value) => {
-    setPersona(prev => ({ ...prev, [field]: value }));
+  const toggleSelection = (sectionId, option) => {
+    setFormData(prev => {
+      const currentList = prev.selections[sectionId];
+      const newList = currentList.includes(option)
+        ? currentList.filter(item => item !== option)
+        : [...currentList, option];
+      
+      return {
+        ...prev,
+        selections: {
+          ...prev.selections,
+          [sectionId]: newList
+        }
+      };
+    });
+  };
+
+  const handleCustomChange = (sectionId, value) => {
+    setFormData(prev => ({
+      ...prev,
+      custom: {
+        ...prev.custom,
+        [sectionId]: value
+      }
+    }));
   };
 
   const resetForm = () => {
-    if (window.confirm('Êtes-vous sûr de vouloir réinitialiser le formulaire ?')) {
-      setPersona({
-        nom: '',
+    if (window.confirm("Voulez-vous vraiment effacer tout le formulaire ?")) {
+      setFormData({
+        name: '',
         role: '',
         age: '',
-        contexte: '',
-        contraintesGeo: [],
-        contraintesTemp: [],
-        specificites: [],
-        autresSpecificites: '',
-        competences: [],
-        autresCompetences: '',
-        motivations: [],
-        autresMotivations: '',
-        freins: [],
-        autresFreins: '',
-        besoins: [],
-        autresBesoins: '',
-        objectifs: [],
-        autresObjectifs: '',
-        scenarios: [],
-        autresScenarios: ''
+        context: '',
+        selections: { context: [], skills: [], motivations: [], obstacles: [], needs: [], objectives: [], scenario: [] },
+        custom: { context: '', skills: '', motivations: '', obstacles: '', needs: '', objectives: '', scenario: '' }
       });
     }
   };
 
-  const downloadPersona = () => {
-    const content = `# Canevas de Personas
-## Formation hybride pour formateurs d'enseignants en Guyane française
-
----
-
-## PERSONA
-
-### 1. IDENTITÉ
-
-**Nom du persona :** ${persona.nom || '_________________'}
-
-**Rôle / Fonction :** ${persona.role || '_________________'}
-
-**Âge / Ancienneté :** ${persona.age || '_________________'}
-
-**Contexte professionnel :**
-${persona.contexte || '_______________________________________________________________________________'}
-
----
-
-### 2. CONTEXTE ULTRA-MARIN
-
-**Contraintes géographiques et logistiques :**
-${contraintesGeoOptions.map(opt => `- [${persona.contraintesGeo.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Contraintes temporelles et organisationnelles :**
-${contraintesTempOptions.map(opt => `- [${persona.contraintesTemp.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Spécificités du territoire :**
-${specificitesOptions.map(opt => `- [${persona.specificites.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres spécificités ultra-marines :**
-${persona.autresSpecificites || '_______________________________________________________________________________'}
-
----
-
-### 3. COMPÉTENCES NUMÉRIQUES
-
-${competencesOptions.map(opt => `- [${persona.competences.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres compétences :**
-${persona.autresCompetences || '_______________________________________________________________________________'}
-
----
-
-### 4. MOTIVATIONS
-
-${motivationsOptions.map(opt => `- [${persona.motivations.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres motivations :**
-${persona.autresMotivations || '_______________________________________________________________________________'}
-
----
-
-### 5. FREINS / OBSTACLES
-
-${freinsOptions.map(opt => `- [${persona.freins.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres freins :**
-${persona.autresFreins || '_______________________________________________________________________________'}
-
----
-
-### 6. BESOINS SPÉCIFIQUES
-
-${besoinsOptions.map(opt => `- [${persona.besoins.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres besoins :**
-${persona.autresBesoins || '_______________________________________________________________________________'}
-
----
-
-### 7. OBJECTIFS D'APPRENTISSAGE
-
-${objectifsOptions.map(opt => `- [${persona.objectifs.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres objectifs :**
-${persona.autresObjectifs || '_______________________________________________________________________________'}
-
----
-
-### 8. SCÉNARIO D'UTILISATION
-
-${scenariosOptions.map(opt => `- [${persona.scenarios.includes(opt) ? 'x' : ' '}] ${opt}`).join('\n')}
-
-**Autres préférences :**
-${persona.autresScenarios || '_______________________________________________________________________________'}`;
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `persona_${persona.nom || 'nouveau'}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handlePrint = () => {
+    window.print();
   };
 
-  const CheckboxGroup = ({ title, options, field }) => (
-    <div className="mb-6">
-      <h4 className="font-semibold text-gray-700 mb-3">{title}</h4>
-      <div className="space-y-2">
-        {options.map((option, idx) => (
-          <label key={idx} className="flex items-start space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
-            <input
-              type="checkbox"
-              checked={persona[field].includes(option)}
-              onChange={() => handleCheckbox(field, option)}
-              className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700 flex-1">{option}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
-        <div className="border-b border-gray-200 pb-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Canevas de Personas</h1>
-          <p className="text-gray-600">Formation hybride pour formateurs d'enseignants en Guyane française</p>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      
+      {/* Navigation Header */}
+      <nav className="bg-emerald-800 text-white shadow-lg sticky top-0 z-50 print:hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center space-x-3">
+              <MapPin className="h-6 w-6 text-emerald-300" />
+              <span className="font-bold text-xl">Persona Guyane</span>
+            </div>
+            <div className="flex space-x-4">
+              <button 
+                onClick={resetForm}
+                className="flex items-center space-x-2 px-3 py-2 rounded bg-emerald-700 hover:bg-emerald-600 transition text-sm"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden sm:inline">Réinitialiser</span>
+              </button>
+              <button 
+                onClick={handlePrint}
+                className="flex items-center space-x-2 px-4 py-2 rounded bg-white text-emerald-900 font-medium hover:bg-emerald-50 transition shadow-sm text-sm"
+              >
+                <Printer className="h-4 w-4" />
+                <span>Imprimer / PDF</span>
+              </button>
+            </div>
+          </div>
         </div>
+      </nav>
 
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={downloadPersona}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            <Download size={18} />
-            Télécharger
-          </button>
-          <button
-            onClick={resetForm}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-          >
-            <Trash2 size={18} />
-            Réinitialiser
-          </button>
-        </div>
-
-        {/* Section 1: Identité */}
-        <section className="mb-8 p-6 bg-blue-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-blue-800 mb-4">1. IDENTITÉ</h2>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Nom du persona :</label>
-              <input
-                type="text"
-                value={persona.nom}
-                onChange={(e) => handleInput('nom', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: Marie Dubois"
-              />
+          {/* LEFT COLUMN: EDIT FORM */}
+          <div className="lg:col-span-5 print:hidden space-y-6">
+            
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-4 bg-slate-100 border-b border-slate-200 flex items-center space-x-2">
+                <User className="text-emerald-600 w-5 h-5" />
+                <h2 className="font-semibold text-slate-800">1. Identité</h2>
+              </div>
+              <div className="p-5 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Nom du persona</label>
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleIdentityChange}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                    placeholder="Ex: Jean-Pierre"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Rôle / Fonction</label>
+                    <input 
+                      type="text" 
+                      name="role"
+                      value={formData.role}
+                      onChange={handleIdentityChange}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Ex: CPC"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Âge / Ancienneté</label>
+                    <input 
+                      type="text" 
+                      name="age"
+                      value={formData.age}
+                      onChange={handleIdentityChange}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="Ex: 45 ans"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Contexte professionnel</label>
+                  <textarea 
+                    name="context"
+                    value={formData.context}
+                    onChange={handleIdentityChange}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    placeholder="Basé à Cayenne, itinérant..."
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Rôle / Fonction :</label>
-              <input
-                type="text"
-                value={persona.role}
-                onChange={(e) => handleInput('role', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: Formateur INSPE, Conseiller pédagogique"
-              />
+            {/* Accordion-like sections for checks */}
+            <div className="space-y-4">
+              {Object.values(SECTIONS).map((section) => (
+                <div key={section.id} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <button 
+                    onClick={() => setActiveTab(activeTab === section.id ? null : section.id)}
+                    className={`w-full p-4 flex items-center justify-between text-left transition-colors ${activeTab === section.id ? 'bg-emerald-50 border-b border-emerald-100' : 'hover:bg-slate-50'}`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-1.5 rounded-lg ${activeTab === section.id ? 'bg-emerald-200 text-emerald-800' : 'bg-slate-100 text-slate-500'}`}>
+                        {section.icon}
+                      </div>
+                      <span className={`font-semibold ${activeTab === section.id ? 'text-emerald-900' : 'text-slate-700'}`}>
+                        {section.title}
+                      </span>
+                    </div>
+                    <span className="text-xs font-medium px-2 py-1 bg-slate-100 rounded-full text-slate-600">
+                      {formData.selections[section.id].length} séléctionnés
+                    </span>
+                  </button>
+
+                  {activeTab === section.id && (
+                    <div className="p-5 bg-white animate-in slide-in-from-top-2 duration-200">
+                      <div className="space-y-3">
+                        {section.options.map((option, idx) => (
+                          <label key={idx} className="flex items-start space-x-3 group cursor-pointer p-2 rounded-lg hover:bg-slate-50 transition">
+                            <input 
+                              type="checkbox"
+                              checked={formData.selections[section.id].includes(option)}
+                              onChange={() => toggleSelection(section.id, option)}
+                              className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                            />
+                            <span className="text-sm text-slate-700 group-hover:text-slate-900">{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-slate-100">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                          Autre (Spécifiez)
+                        </label>
+                        <textarea
+                          value={formData.custom[section.id]}
+                          onChange={(e) => handleCustomChange(section.id, e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                          rows="2"
+                          placeholder="Saisissez d'autres détails ici..."
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Âge / Ancienneté :</label>
-              <input
-                type="text"
-                value={persona.age}
-                onChange={(e) => handleInput('age', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: 42 ans, 15 ans d'expérience en formation"
-              />
+          {/* RIGHT COLUMN: PREVIEW (And Print View) */}
+          <div className="lg:col-span-7">
+            <div className="sticky top-24">
+              <div className="bg-white rounded-none sm:rounded-2xl shadow-xl print:shadow-none print:border-none print:w-full overflow-hidden border border-slate-200" id="persona-card">
+                
+                {/* Header Card */}
+                <div className="bg-emerald-900 text-white p-6 sm:p-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <MapPin className="w-32 h-32" />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                      <div>
+                        <h4 className="text-emerald-300 text-sm font-bold tracking-wider uppercase mb-1">
+                          Persona Formation Hybride
+                        </h4>
+                        <h1 className="text-3xl sm:text-4xl font-bold">
+                          {formData.name || <span className="opacity-50 italic">Nom du persona</span>}
+                        </h1>
+                        <p className="text-emerald-100 text-lg mt-1">
+                          {formData.role || <span className="opacity-50 italic">Rôle / Fonction</span>}
+                        </p>
+                      </div>
+                      <div className="text-emerald-200 text-sm sm:text-right bg-emerald-800/50 p-3 rounded-lg backdrop-blur-sm">
+                        <p>{formData.age || "Âge non défini"}</p>
+                        <p className="font-mono text-xs opacity-75 mt-1">Guyane Française</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content Body */}
+                <div className="p-6 sm:p-8 space-y-8 bg-white">
+                  
+                  {/* Context Block */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                     <h3 className="text-emerald-800 font-bold flex items-center mb-3">
+                        <User className="w-4 h-4 mr-2" />
+                        Contexte Professionnel
+                     </h3>
+                     <p className="text-slate-700 italic leading-relaxed">
+                       {formData.context ? `"${formData.context}"` : <span className="text-slate-400">Aucun contexte défini...</span>}
+                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+                    {/* Dynamic Sections Loop */}
+                    {Object.values(SECTIONS).map((section) => {
+                      const hasItems = formData.selections[section.id].length > 0;
+                      const hasCustom = formData.custom[section.id].length > 0;
+                      
+                      if (!hasItems && !hasCustom) return null;
+
+                      return (
+                        <div key={section.id} className="break-inside-avoid">
+                          <h3 className="text-emerald-800 font-bold border-b-2 border-emerald-100 pb-2 mb-3 flex items-center text-sm uppercase tracking-wide">
+                            <span className="bg-emerald-100 text-emerald-800 p-1 rounded mr-2">
+                              {section.icon}
+                            </span>
+                            {section.title.replace(/^\d+\.\s/, '')}
+                          </h3>
+                          <ul className="space-y-2">
+                            {formData.selections[section.id].map((item, i) => (
+                              <li key={i} className="flex items-start text-sm text-slate-700">
+                                <span className="mr-2 text-emerald-500">•</span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                            {formData.custom[section.id] && (
+                              <li className="flex items-start text-sm text-slate-700 italic bg-amber-50 p-2 rounded border border-amber-100 mt-2">
+                                <span className="mr-2 text-amber-500">✎</span>
+                                <span>{formData.custom[section.id]}</span>
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Empty State visual */}
+                  {Object.values(formData.selections).every(arr => arr.length === 0) && !formData.context && (
+                    <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-xl">
+                      <p className="text-slate-400 mb-2">La fiche est vide.</p>
+                      <p className="text-sm text-slate-400">Remplissez le formulaire à gauche pour générer le persona.</p>
+                    </div>
+                  )}
+
+                </div>
+                
+                {/* Footer for Print */}
+                <div className="bg-slate-50 p-4 border-t border-slate-200 text-center text-xs text-slate-400 flex justify-between items-center print:flex">
+                  <span>Canevas de Persona • Formation Hybride Guyane</span>
+                  <span>{new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Contexte professionnel :</label>
-              <textarea
-                value={persona.contexte}
-                onChange={(e) => handleInput('contexte', e.target.value)}
-                rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Ex: Basé à Cayenne, intervient auprès d'enseignants du primaire et secondaire..."
-              />
-            </div>
           </div>
-        </section>
 
-        {/* Section 2: Contexte Ultra-marin */}
-        <section className="mb-8 p-6 bg-green-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-green-800 mb-4">2. CONTEXTE ULTRA-MARIN</h2>
-          
-          <CheckboxGroup
-            title="Contraintes géographiques et logistiques :"
-            options={contraintesGeoOptions}
-            field="contraintesGeo"
-          />
-
-          <CheckboxGroup
-            title="Contraintes temporelles et organisationnelles :"
-            options={contraintesTempOptions}
-            field="contraintesTemp"
-          />
-
-          <CheckboxGroup
-            title="Spécificités du territoire :"
-            options={specificitesOptions}
-            field="specificites"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres spécificités ultra-marines :</label>
-            <textarea
-              value={persona.autresSpecificites}
-              onChange={(e) => handleInput('autresSpecificites', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 3: Compétences Numériques */}
-        <section className="mb-8 p-6 bg-purple-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-purple-800 mb-4">3. COMPÉTENCES NUMÉRIQUES</h2>
-          
-          <CheckboxGroup
-            title="Compétences maîtrisées :"
-            options={competencesOptions}
-            field="competences"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres compétences :</label>
-            <textarea
-              value={persona.autresCompetences}
-              onChange={(e) => handleInput('autresCompetences', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 4: Motivations */}
-        <section className="mb-8 p-6 bg-yellow-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-yellow-800 mb-4">4. MOTIVATIONS</h2>
-          
-          <CheckboxGroup
-            title="Motivations principales :"
-            options={motivationsOptions}
-            field="motivations"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres motivations :</label>
-            <textarea
-              value={persona.autresMotivations}
-              onChange={(e) => handleInput('autresMotivations', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 5: Freins */}
-        <section className="mb-8 p-6 bg-red-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-red-800 mb-4">5. FREINS / OBSTACLES</h2>
-          
-          <CheckboxGroup
-            title="Freins rencontrés :"
-            options={freinsOptions}
-            field="freins"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres freins :</label>
-            <textarea
-              value={persona.autresFreins}
-              onChange={(e) => handleInput('autresFreins', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 6: Besoins */}
-        <section className="mb-8 p-6 bg-indigo-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-indigo-800 mb-4">6. BESOINS SPÉCIFIQUES</h2>
-          
-          <CheckboxGroup
-            title="Besoins prioritaires :"
-            options={besoinsOptions}
-            field="besoins"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres besoins :</label>
-            <textarea
-              value={persona.autresBesoins}
-              onChange={(e) => handleInput('autresBesoins', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 7: Objectifs */}
-        <section className="mb-8 p-6 bg-pink-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-pink-800 mb-4">7. OBJECTIFS D'APPRENTISSAGE</h2>
-          
-          <CheckboxGroup
-            title="Objectifs visés :"
-            options={objectifsOptions}
-            field="objectifs"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres objectifs :</label>
-            <textarea
-              value={persona.autresObjectifs}
-              onChange={(e) => handleInput('autresObjectifs', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        {/* Section 8: Scénarios */}
-        <section className="mb-8 p-6 bg-teal-50 rounded-lg">
-          <h2 className="text-2xl font-bold text-teal-800 mb-4">8. SCÉNARIO D'UTILISATION</h2>
-          
-          <CheckboxGroup
-            title="Préférences d'apprentissage :"
-            options={scenariosOptions}
-            field="scenarios"
-          />
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Autres préférences :</label>
-            <textarea
-              value={persona.autresScenarios}
-              onChange={(e) => handleInput('autresScenarios', e.target.value)}
-              rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            />
-          </div>
-        </section>
-
-        <div className="flex gap-3 pt-6 border-t border-gray-200">
-          <button
-            onClick={downloadPersona}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
-          >
-            <Download size={20} />
-            Télécharger le persona
-          </button>
-          <button
-            onClick={resetForm}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-semibold"
-          >
-            <Trash2 size={20} />
-            Réinitialiser
-          </button>
         </div>
       </div>
+      
+      {/* Print Styles Injection */}
+      <style>{`
+        @media print {
+          body { background: white; }
+          nav, button, .no-print { display: none !important; }
+          .print\\:hidden { display: none !important; }
+          .lg\\:col-span-7 { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .sticky { position: static !important; }
+          .shadow-xl { shadow: none !important; box-shadow: none !important; }
+          .border { border: none !important; }
+          #persona-card { border: 1px solid #ccc !important; break-inside: avoid; }
+        }
+      `}</style>
     </div>
   );
-};
-
-export default PersonaCanvas;
+}
