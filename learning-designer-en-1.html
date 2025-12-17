@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .activity-container {
+            border-left: 4px solid #cbd5e1;
+        }
+
+        .step-card {
+            transition: all 0.2s ease;
+        }
+
+        .type-acquisition { border-left: 8px solid #3b82f6; } 
+        .type-investigation { border-left: 8px solid #eab308; } 
+        .type-practice { border-left: 8px solid #22c55e; } 
+        .type-discussion { border-left: 8px solid #f97316; } 
+        .type-collaboration { border-left: 8px solid #a855f7; } 
+        .type-production { border-left: 8px solid #ef4444; } 
+
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            .activity-group { break-inside: avoid; margin-bottom: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+            .step-card { border: 1px solid #e2e8f0; break-inside: avoid; margin-bottom: 1rem; }
+            select { appearance: none; border: none; padding: 0; background: none; }
+            textarea { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">Learning Designer</h1>
+                <p class="text-slate-500">Structure your training into Activities and Learning Steps</p>
+            </div>
+            <div class="flex gap-2 no-print">
+                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    New Activity
+                </button>
+                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
+                    Print / PDF
+                </button>
+            </div>
+        </header>
+
+        <!-- Global Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 no-print">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Est. Time</span>
+                <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Steps</span>
+                <div id="total-steps" class="text-2xl font-bold text-slate-800">0</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Primary Method</span>
+                <div id="primary-mode" class="text-2xl font-bold text-slate-800">-</div>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div id="activities-root" class="space-y-12">
+            <!-- Activities will be injected here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+            <h3 class="mt-2 text-lg font-medium text-slate-900">No activities designed yet</h3>
+            <p class="mt-1 text-sm text-slate-500">Start by creating your first Activity container.</p>
+            <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                Create Activity
+            </button>
+        </div>
+    </div>
+
+    <!-- Activity Template -->
+    <template id="activity-template">
+        <div class="activity-group relative">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex-1 flex items-center gap-4">
+                    <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index">1</div>
+                    <input type="text" placeholder="Activity Title (e.g. Module 1: Introduction)" class="text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                </div>
+                <div class="flex gap-2 no-print">
+                    <button onclick="addStepToActivity(this)" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Add Step
+                    </button>
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]">
+                <!-- Step cards go here -->
+            </div>
+        </div>
+    </template>
+
+    <!-- Step Card Template -->
+    <template id="step-template">
+        <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group">
+            <div class="p-5">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Column 1: Config -->
+                    <div class="lg:w-1/3 space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Step Title</label>
+                            <input type="text" placeholder="Title for this card..." class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Learning Type</label>
+                            <select onchange="updateStepType(this)" class="learning-type-select w-full px-3 py-1.5 text-sm font-medium border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="acquisition">Acquisition</option>
+                                <option value="investigation">Investigation</option>
+                                <option value="practice">Practice</option>
+                                <option value="discussion">Discussion</option>
+                                <option value="collaboration">Collaboration</option>
+                                <option value="production">Production</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2">Duration</label>
+                            <div class="flex gap-2">
+                                <input type="number" oninput="updateStats()" placeholder="0" class="duration-input w-2/3 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <select onchange="updateStats()" class="duration-unit w-1/3 px-1 py-1.5 text-[11px] border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <option value="60">Mins</option>
+                                    <option value="3600">Hours</option>
+                                    <option value="86400">Days</option>
+                                    <option value="604800">Weeks</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Group Size</label>
+                            <input type="text" placeholder="e.g. 10" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div class="space-y-2 pt-1 border-t border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Trainer</span>
+                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Place</span>
+                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="situ">In Situ</option>
+                                    <option value="online">Online</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase">Time</span>
+                                <select class="flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
+                                    <option value="sync">Synchronous</option>
+                                    <option value="async">Asynchronous</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Content -->
+                    <div class="lg:w-2/3 space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">What learners must do</label>
+                            <textarea rows="6" placeholder="Describe the steps, instructions, and tasks..." class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Notes</label>
+                            <textarea rows="3" placeholder="Trainer notes, resources, or links..." class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Delete -->
+                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const root = document.getElementById('activities-root');
+        const emptyState = document.getElementById('empty-state');
+        const activityTemplate = document.getElementById('activity-template');
+        const stepTemplate = document.getElementById('step-template');
+
+        function updateEmptyState() {
+            const hasActivities = root.children.length > 0;
+            emptyState.classList.toggle('hidden', hasActivities);
+            
+            // Re-index activity bubbles
+            document.querySelectorAll('.activity-index').forEach((el, i) => {
+                el.innerText = i + 1;
+            });
+            updateStats();
+        }
+
+        function addActivity() {
+            const clone = activityTemplate.content.cloneNode(true);
+            root.appendChild(clone);
+            
+            // Add one initial step to the new activity
+            const lastActivity = root.lastElementChild;
+            const stepBtn = lastActivity.querySelector('button');
+            addStepToActivity(stepBtn);
+            
+            updateEmptyState();
+        }
+
+        function addStepToActivity(btn) {
+            const activityGroup = btn.closest('.activity-group');
+            const container = activityGroup.querySelector('.activity-steps-container');
+            
+            const clone = stepTemplate.content.cloneNode(true);
+            const card = clone.querySelector('.step-card');
+            card.classList.add('type-acquisition');
+            
+            container.appendChild(clone);
+            updateStats();
+        }
+
+        function deleteActivity(btn) {
+            if(confirm("Delete this entire activity and all its steps?")) {
+                btn.closest('.activity-group').remove();
+                updateEmptyState();
+            }
+        }
+
+        function deleteStep(btn) {
+            btn.closest('.step-card').remove();
+            updateStats();
+        }
+
+        function updateStepType(select) {
+            const card = select.closest('.step-card');
+            const type = select.value;
+            
+            const types = ['type-acquisition', 'type-investigation', 'type-practice', 'type-discussion', 'type-collaboration', 'type-production'];
+            card.classList.remove(...types);
+            card.classList.add(`type-${type}`);
+            updateStats();
+        }
+
+        function updateStats() {
+            const steps = document.querySelectorAll('.step-card');
+            let totalSeconds = 0;
+            
+            steps.forEach(step => {
+                const val = parseFloat(step.querySelector('.duration-input').value) || 0;
+                const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
+                totalSeconds += (val * unit);
+            });
+
+            let displayTotal = "0 mins";
+            if (totalSeconds >= 604800) {
+                displayTotal = `${(totalSeconds / 604800).toFixed(1)} weeks`;
+            } else if (totalSeconds >= 86400) {
+                displayTotal = `${(totalSeconds / 86400).toFixed(1)} days`;
+            } else if (totalSeconds >= 3600) {
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.round((totalSeconds % 3600) / 60);
+                displayTotal = `${h}h ${m}m`;
+            } else if (totalSeconds > 0) {
+                displayTotal = `${Math.round(totalSeconds / 60)} mins`;
+            }
+
+            document.getElementById('total-duration').innerText = displayTotal;
+            document.getElementById('total-steps').innerText = steps.length;
+
+            const types = Array.from(document.querySelectorAll('.learning-type-select')).map(s => s.value);
+            if (types.length > 0) {
+                const mode = types.sort((a,b) =>
+                    types.filter(v => v===a).length - types.filter(v => v===b).length
+                ).pop();
+                document.getElementById('primary-mode').innerText = mode.charAt(0).toUpperCase() + mode.slice(1);
+            } else {
+                document.getElementById('primary-mode').innerText = '-';
+            }
+        }
+
+        // Initialize with one activity
+        window.onload = () => {
+            addActivity();
+        };
+    </script>
+</body>
+</html>
