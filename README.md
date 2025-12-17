@@ -13,5 +13,4 @@ Publication et partage d'essais (prompts, artefacts...). // Publication and shar
 - Persona
   - https://jourde.github.io/artefacts/persona-formation-hybride-gemini-1.html
 - Learning Designer
-  - https://jourde.github.io/artefacts/learning-designer-en-1.html
   - https://jourde.github.io/artefacts/learning-designer-en.html
