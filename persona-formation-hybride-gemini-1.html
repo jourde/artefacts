@@ -1,517 +1,135 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canevas Persona - Formation Hybride Guyane</title>
+    <title>Learning Designer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Drag and Drop Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Charts Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --primary: #00695c; /* Teal for tropical/official vibe */
-            --primary-light: #4db6ac;
-            --secondary: #263238;
-            --bg: #f4f7f6;
-            --card-bg: #ffffff;
-            --border: #e0e0e0;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--secondary);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        .activity-container {
+            border-left: 4px solid #cbd5e1;
         }
 
-        /* --- Header --- */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
+        .step-card {
+            transition: transform 0.1s ease;
         }
 
-        header h1 {
-            color: var(--primary);
-            margin-bottom: 5px;
+        /* Sortable ghost styles */
+        .sortable-ghost {
+            opacity: 0.3;
+            background-color: #f1f5f9 !important;
+            border: 2px dashed #94a3b8 !important;
         }
 
-        header p {
-            color: #666;
-            font-size: 1.1em;
+        .sortable-drag {
+            cursor: grabbing;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- Form Structure --- */
-        .card {
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+        /* Pedagogical Color Codes */
+        .type-acquisition { border-left: 8px solid #a1f5ed; } 
+        .type-collaboration { border-left: 8px solid #ffd966; } 
+        .type-discussion { border-left: 8px solid #7aaeea; } 
+        .type-investigation { border-left: 8px solid #f8807f; } 
+        .type-practice { border-left: 8px solid #bb98dc; } 
+        .type-production { border-left: 8px solid #bdea75; } 
+
+        .select-acquisition { background-color: #a1f5ed; color: #000; border-color: #7dded6; }
+        .select-collaboration { background-color: #ffd966; color: #000; border-color: #f0c953; }
+        .select-discussion { background-color: #7aaeea; color: #000; border-color: #6a9bd6; }
+        .select-investigation { background-color: #f8807f; color: #000; border-color: #e06e6d; }
+        .select-practice { background-color: #bb98dc; color: #000; border-color: #a582c6; }
+        .select-production { background-color: #bdea75; color: #000; border-color: #a6d15e; }
+
+        .drag-handle {
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
         }
 
-        fieldset {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #fff;
+        .nav-tab.active {
+            background-color: white;
+            color: #4f46e5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
-        legend {
-            font-weight: bold;
-            color: var(--primary);
-            padding: 0 10px;
-            font-size: 1.1em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        input[type="text"], 
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        /* --- Checkbox Grids --- */
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 10px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 8px;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .checkbox-item:hover {
-            background-color: #e0f2f1;
-        }
-
-        .checkbox-item input {
-            margin-top: 5px;
-            margin-right: 10px;
-            accent-color: var(--primary);
-            transform: scale(1.2);
-        }
-
-        .checkbox-item label {
-            font-weight: normal;
-            cursor: pointer;
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        .other-field {
-            margin-top: 15px;
-        }
-
-        /* --- Buttons --- */
-        .actions {
-            text-align: center;
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        button {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-            font-weight: bold;
-        }
-
-        .btn-generate {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-reset {
-            background-color: #b0bec5;
-            color: white;
-        }
-
-        .btn-print {
-            background-color: var(--secondary);
-            color: white;
-            display: none; /* Hidden until generated */
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        /* --- Result View (Hidden by default) --- */
-        #resultView {
-            display: none;
-        }
-
-        .persona-header {
-            background: var(--primary);
-            color: white;
-            padding: 20px;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .persona-body {
-            border: 2px solid var(--primary);
-            border-top: none;
-            padding: 20px;
-            border-radius: 0 0 8px 8px;
-            background: white;
-        }
-
-        .persona-section {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed #ccc;
-        }
-
-        .persona-section h3 {
-            color: var(--primary);
-            margin-top: 0;
-            font-size: 1.1em;
-            text-transform: uppercase;
-        }
-
-        .tag {
-            display: inline-block;
-            background: #e0f2f1;
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            margin: 2px;
-            border: 1px solid var(--primary-light);
-        }
-
-        /* --- Print Media Query --- */
         @media print {
+            .no-print { display: none; }
             body { background: white; padding: 0; }
-            .container { max-width: 100%; box-shadow: none; }
-            #inputForm, .actions { display: none !important; }
-            #resultView { display: block !important; }
-            .card { box-shadow: none; border: none; padding: 0; }
-            .persona-body { border: 2px solid #000; }
-            .persona-header { background: #eee !important; color: #000 !important; border: 2px solid #000; border-bottom: none; }
-            .tag { border: 1px solid #000; color: #000; background: none; }
+            .activity-group { break-inside: avoid; margin-bottom: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+            .step-card { border: 1px solid #e2e8f0; break-inside: avoid; margin-bottom: 1rem; }
+            select { appearance: none; border: none; padding: 0; background: none; }
+            textarea { border: none; padding: 0; }
         }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-8">
 
-<div class="container">
-    <header>
-        <h1>Canevas de Personas</h1>
-        <p>Formation hybride pour formateurs d'enseignants en Guyane française</p>
-    </header>
-
-    <form id="inputForm" class="card">
-        
-        <fieldset>
-            <legend>1. Identité</legend>
-            <div class="checkbox-group">
-                <div class="form-group">
-                    <label for="name">Nom du persona :</label>
-                    <input type="text" id="name" placeholder="Ex: Jean-Michel">
-                </div>
-                <div class="form-group">
-                    <label for="role">Rôle / Fonction :</label>
-                    <input type="text" id="role" placeholder="Ex: Formateur INSPE">
-                </div>
-                <div class="form-group">
-                    <label for="age">Âge / Ancienneté :</label>
-                    <input type="text" id="age" placeholder="Ex: 42 ans, 15 ans d'expérience">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="context">Contexte professionnel :</label>
-                <textarea id="context" placeholder="Ex: Basé à Cayenne, déplacements fréquents..."></textarea>
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>2. Contexte Ultra-marin</legend>
-            <p><strong>Contraintes géographiques et logistiques :</strong></p>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Déplacements zones isolées"><label>Déplacements zones isolées (fleuve, forêt)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Accès internet instable"><label>Accès internet instable/inexistant</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Infrastructures limitées"><label>Infrastructures numériques limitées</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Distances importantes"><label>Distances importantes entre sites</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Transports difficiles"><label>Transports difficiles (pirogue, avion)</label></div>
-            </div>
-            
-            <p style="margin-top:15px"><strong>Contraintes temporelles :</strong></p>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Décalage horaire -5h"><label>Décalage horaire (-5h avec Métropole)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Difficultés synchrone"><label>Difficultés formations synchrones</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Contraintes vols"><label>Contraintes horaires de vols inter-Guyane</label></div>
-            </div>
-
-            <p style="margin-top:15px"><strong>Spécificités territoire :</strong></p>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Public hétérogène"><label>Public hétérogène (Métro, Antilles, Locaux)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Multiculturel/Plurilingue"><label>Contexte multiculturel et plurilingue</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Isolement pro"><label>Isolement professionnel</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="geo" value="Turnover important"><label>Turnover important personnel enseignant</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="geo_other" placeholder="Autres spécificités...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>3. Compétences Numériques</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Courriel/Texte"><label>Maîtrise courriel / traitement texte</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Réseaux Sociaux"><label>Utilise réseaux sociaux pro</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Visioconférence"><label>À l'aise avec Visioconférence (Zoom, Meet)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="LMS"><label>Utilise plateformes (Moodle, Magistère)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Création Contenu"><label>Crée contenus (vidéos, présentations)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Collab"><label>Maîtrise outils collaboratifs</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Tech faible"><label>Peu à l'aise avec la technologie</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="comp" value="Autodidacte"><label>Autodidacte en numérique</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="comp_other" placeholder="Autres compétences...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>4. Motivations</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Efficacité malgré distance"><label>Former malgré distances géographiques</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Réduire déplacements"><label>Réduire le temps de déplacement</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Toucher isolés"><label>Toucher davantage d'enseignants isolés</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Nouvelles compétences"><label>Développer compétences FAD</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Adaptation locale"><label>S'adapter aux contraintes Guyane</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="motiv" value="Mutualisation"><label>Mutualiser ressources</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="motiv_other" placeholder="Autres motivations...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>5. Freins / Obstacles</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Manque de temps"><label>Manque de temps (déplacements)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Appréhension outils"><label>Appréhension outils à distance</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Connexion instable"><label>Connexion internet instable</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Matériel inadéquat"><label>Équipement informatique inadéquat</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Manque formation"><label>Manque formation à l'hybridation</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Charge travail"><label>Charge de travail élevée</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="freins" value="Soutien technique"><label>Manque soutien technique local</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="freins_other" placeholder="Autres freins...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>6. Besoins Spécifiques</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Tutos connexion"><label>Tutoriels adaptés contraintes connexion</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Support décalé"><label>Support technique réactif (décalage)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Pratique asynchrone"><label>Temps pratique guidée asynchrone</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Communauté"><label>Communauté entraide ultra-marine</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Ressources DL"><label>Ressources téléchargeables (offline)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="besoins" value="Formation flexible"><label>Formation courte et flexible</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="besoins_other" placeholder="Autres besoins...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>7. Objectifs d'Apprentissage</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="objectifs" value="Concevoir hybride"><label>Concevoir parcours hybrides</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="objectifs" value="Animer distance"><label>Animer formations à distance</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="objectifs" value="Créer ressources"><label>Créer ressources réutilisables</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="objectifs" value="Gérer asynchrone"><label>Gérer l'asynchrone</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="objectifs" value="Adapter connexion"><label>Adapter contenus à la connexion</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="obj_other" placeholder="Autres objectifs...">
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <legend>8. Scénario d'Utilisation</legend>
-            <div class="checkbox-group">
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Soir"><label>Préfère se former le soir</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Micro-learning"><label>Modules courts (15-20 min)</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Offline"><label>Téléchargement pour offline</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Pratique"><label>Apprend mieux en pratiquant</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Synchrone adapté"><label>Synchrone adapté au décalage</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Mobile/Flexible"><label>Besoin flexibilité totale</label></div>
-                <div class="checkbox-item"><input type="checkbox" name="scenario" value="Vidéo"><label>Préfère vidéo au texte</label></div>
-            </div>
-            <div class="other-field">
-                <input type="text" id="scen_other" placeholder="Autres préférences...">
-            </div>
-        </fieldset>
-
-        <div class="actions">
-            <button type="button" class="btn-reset" onclick="resetForm()">Réinitialiser</button>
-            <button type="button" class="btn-generate" onclick="generatePersona()">Générer la Fiche Persona</button>
-        </div>
-    </form>
-
-    <div id="resultView" class="container">
-        <div class="actions" style="margin-bottom: 20px; margin-top:0; justify-content: flex-start;">
-            <button type="button" class="btn-reset" onclick="editForm()">← Modifier</button>
-            <button type="button" class="btn-generate" onclick="window.print()">Imprimer / Sauvegarder PDF</button>
-        </div>
-
-        <div class="persona-header">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <div>
-                <h2 id="res_name" style="margin:0">Nom du Persona</h2>
-                <div id="res_role" style="font-style:italic; opacity: 0.9;">Rôle</div>
+                <h1 class="text-3xl font-bold text-slate-900">Learning Designer</h1>
+                <p class="text-slate-500">Pedagogical Design & Analytics</p>
             </div>
-            <div id="res_age" style="background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:5px;">
-                Age
+            <div class="flex flex-wrap gap-2 no-print">
+                <div class="bg-slate-200 p-1 rounded-lg flex mr-4">
+                    <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-4 py-1.5 rounded-md text-sm font-medium transition-all">Designer</button>
+                    <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-4 py-1.5 rounded-md text-sm font-medium transition-all">Analysis</button>
+                </div>
+                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    New Activity
+                </button>
+                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export Markdown
+                </button>
+                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
+                    Print / PDF
+                </button>
             </div>
-        </div>
-        
-        <div class="persona-body">
-            
-            <div class="persona-section">
-                <h3>Contexte Professionnel</h3>
-                <p id="res_context">...</p>
-            </div>
+        </header>
 
-            <div class="persona-section">
-                <h3>Contexte Ultra-Marin & Spécificités</h3>
-                <div id="res_geo"></div>
-            </div>
-
-            <div class="persona-section">
-                <h3>Compétences Numériques</h3>
-                <div id="res_comp"></div>
-            </div>
-
-            <div class="persona-section">
-                <h3>Motivations & Freins</h3>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div>
-                        <strong>Motivations :</strong>
-                        <div id="res_motiv"></div>
-                    </div>
-                    <div>
-                        <strong>Freins :</strong>
-                        <div id="res_freins"></div>
-                    </div>
+        <!-- Global Stats -->
+        <div class="mb-8 no-print">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 max-w-sm flex justify-between items-center">
+                <div>
+                    <span class="text-slate-500 text-sm font-medium uppercase tracking-wider">Total Est. Time</span>
+                    <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-400 text-xs italic" id="stats-update-info">Auto-calculating...</span>
                 </div>
             </div>
-
-            <div class="persona-section">
-                <h3>Besoins & Objectifs</h3>
-                <div id="res_besoins" style="margin-bottom:10px;"></div>
-                <div id="res_objectifs"></div>
-            </div>
-
-            <div class="persona-section" style="border-bottom:none;">
-                <h3>Scénario d'apprentissage privilégié</h3>
-                <div id="res_scenario"></div>
-            </div>
         </div>
-    </div>
-</div>
 
-<script>
-    function getCheckedValues(name, otherId) {
-        const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
-        let values = Array.from(checkboxes).map(cb => `<span class="tag">${cb.value}</span>`);
-        
-        const otherVal = document.getElementById(otherId).value;
-        if (otherVal.trim() !== "") {
-            values.push(`<span class="tag" style="border-style:dashed">${otherVal}</span>`);
-        }
-        
-        if (values.length === 0) return "<em>Aucun élément sélectionné</em>";
-        return values.join(" ");
-    }
+        <!-- Tab: Designer -->
+        <div id="view-designer">
+            <div id="activities-root" class="space-y-12">
+                <!-- Activities will be injected here -->
+            </div>
 
-    function generatePersona() {
-        // 1. Identité
-        const name = document.getElementById('name').value || "Persona Sans Nom";
-        const role = document.getElementById('role').value || "Fonction non définie";
-        const age = document.getElementById('age').value || "Âge non défini";
-        const context = document.getElementById('context').value || "Aucun contexte saisi.";
-
-        document.getElementById('res_name').textContent = name;
-        document.getElementById('res_role').textContent = role;
-        document.getElementById('res_age').textContent = age;
-        document.getElementById('res_context').innerText = context;
-
-        // 2. Loop through sections
-        document.getElementById('res_geo').innerHTML = getCheckedValues('geo', 'geo_other');
-        document.getElementById('res_comp').innerHTML = getCheckedValues('comp', 'comp_other');
-        document.getElementById('res_motiv').innerHTML = getCheckedValues('motiv', 'motiv_other');
-        document.getElementById('res_freins').innerHTML = getCheckedValues('freins', 'freins_other');
-        document.getElementById('res_besoins').innerHTML = "<strong>Besoins : </strong>" + getCheckedValues('besoins', 'besoins_other');
-        document.getElementById('res_objectifs').innerHTML = "<strong>Objectifs : </strong>" + getCheckedValues('objectifs', 'obj_other');
-        document.getElementById('res_scenario').innerHTML = getCheckedValues('scenario', 'scen_other');
-
-        // Switch Views
-        document.getElementById('inputForm').style.display = 'none';
-        document.querySelector('header').style.display = 'none';
-        document.getElementById('resultView').style.display = 'block';
-        window.scrollTo(0,0);
-    }
-
-    function editForm() {
-        document.getElementById('inputForm').style.display = 'block';
-        document.querySelector('header').style.display = 'block';
-        document.getElementById('resultView').style.display = 'none';
-    }
-
-    function resetForm() {
-        if(confirm("Voulez-vous vraiment effacer tout le formulaire ?")) {
-            document.getElementById('inputForm').reset();
-        }
-    }
-</script>
-
-</body>
-</html>
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
+                <h3 class="mt-2 text-lg font-medium text-slate-900">No activities designed yet</h3>
+                <p class="mt-1 text-sm text-slate-500">Start by creating your first Activity container.</p>
+                <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text
