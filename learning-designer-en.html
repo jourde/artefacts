@@ -9,6 +9,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <!-- Charts Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -67,6 +70,14 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
+        /* Helper for Material Icons vertical alignment */
+        .material-icons-round {
+            display: inline-flex;
+            vertical-align: middle;
+            align-items: center;
+            justify-content: center;
+        }
+
         @media print {
             .no-print { display: none; }
             body { background: white; padding: 0; }
@@ -91,19 +102,16 @@
                     <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-4 py-1.5 rounded-md text-sm font-medium transition-all">Designer</button>
                     <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-4 py-1.5 rounded-md text-sm font-medium transition-all">Analysis</button>
                 </div>
-                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
+                <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
+                    <span class="material-icons-round text-xl">add_circle</span>
                     New Activity
                 </button>
-                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export the Learning Design in Markdown
+                <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <span class="material-icons-round text-xl">download</span>
+                    Export Markdown
                 </button>
-                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-5 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors">
+                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
+                    <span class="material-icons-round text-xl">print</span>
                     Print / PDF
                 </button>
             </div>
@@ -137,21 +145,18 @@
                 <h3 class="mt-2 text-lg font-medium text-slate-900">No activities designed yet</h3>
                 <p class="mt-1 text-sm text-slate-500">Start by creating your first Activity container.</p>
                 <button onclick="addActivity()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                    Create Activity
+                    <span class="material-icons-round mr-2">add</span> Create Activity
                 </button>
             </div>
         </div>
 
         <!-- Tab: Analysis -->
-        <div id="view-analysis" class="hidden space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div id="view-analysis" class="hidden">
+            <div id="analysis-dashboard" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Learning Type Distribution -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                        </svg>
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">pie_chart</span>
                         Pedagogical Balance
                     </h3>
                     <div class="h-64 flex justify-center">
@@ -159,13 +164,10 @@
                     </div>
                 </div>
 
-                <!-- Learning Context mirrored example -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M12 3v9l6 6" />
-                        </svg>
+                <!-- Learning Context -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">donut_large</span>
                         Learning Context
                     </h3>
                     <div class="grid grid-cols-3 gap-6 h-64 items-start">
@@ -191,27 +193,12 @@
                             <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight">Synchronous</span>
                         </div>
                     </div>
-                    <!-- Mirrored Legend -->
-                    <div class="mt-4 pt-4 border-t border-slate-50 flex justify-center gap-8 no-print">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-[#4f46e5]"></div>
-                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Active Setting</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-[#f1f5f9]"></div>
-                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Flexible Setting</span>
-                        </div>
-                    </div>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Social Organization -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">groups</span>
                         Social Organization
                     </h3>
                     <div class="h-64">
@@ -219,16 +206,25 @@
                     </div>
                 </div>
 
-                <!-- Timeline -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                        </svg>
-                        Activity Timeline
+                <!-- Activity Overview -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">view_timeline</span>
+                        Activity Overview
                     </h3>
                     <div class="h-64">
                         <canvas id="chartTimeline"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pedagogical Timeline (Types) -->
+                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
+                        <span class="material-icons-round text-slate-300">timeline</span>
+                        Pedagogical Timeline (Learning Types)
+                    </h3>
+                    <div class="h-64">
+                        <canvas id="chartTypeTimeline"></canvas>
                     </div>
                 </div>
             </div>
@@ -245,25 +241,19 @@
         <div class="activity-group relative">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 px-2 gap-4">
                 <div class="flex-1 flex items-center gap-4">
-                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                        </svg>
+                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8 cursor-grab">
+                        <span class="material-icons-round text-2xl">drag_indicator</span>
                     </div>
                     <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
                     <input type="text" oninput="updateStats()" placeholder="Activity Title (e.g. Module 1: Introduction)" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                 </div>
                 <div class="flex items-center gap-3 no-print">
-                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-5 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
+                    <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
+                        <span class="material-icons-round text-xl">add</span>
                         Add Step
                     </button>
-                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity">
+                        <span class="material-icons-round text-2xl">delete_outline</span>
                     </button>
                 </div>
             </div>
@@ -271,16 +261,22 @@
             <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]">
                 <!-- Step cards go here -->
             </div>
+
+            <!-- Footer Add Step Button -->
+            <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
+                <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50">
+                    <span class="material-icons-round text-base">add</span>
+                    Add Step
+                </button>
+            </div>
         </div>
     </template>
 
     <!-- Step Card Template -->
     <template id="step-template">
         <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex">
-            <div class="drag-handle-step drag-handle flex items-center justify-center w-8 bg-slate-50 hover:bg-slate-100 border-r border-slate-100 no-print transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-300" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M7 7h2v2H7V7zm0 4h2v2H7v-2zm4-4h2v2h-2V7zm0 4h2v2h-2v-2z" />
-                </svg>
+            <div class="drag-handle-step drag-handle flex items-center justify-center w-8 bg-slate-50 hover:bg-slate-100 border-r border-slate-100 no-print transition-colors cursor-grab">
+                <span class="material-icons-round text-slate-300 text-lg">drag_indicator</span>
             </div>
 
             <div class="p-5 flex-1 relative">
@@ -317,13 +313,22 @@
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Group Size</label>
-                            <div class="flex gap-2">
-                                <select onchange="toggleGroupMode(this)" class="step-group-mode w-1/2 px-2 py-1.5 text-xs rounded-lg border border-slate-200 bg-white outline-none">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Grouping</label>
+                            <div class="space-y-1">
+                                <select onchange="toggleGroupMode(this)" class="step-group-mode w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 bg-white outline-none">
                                     <option value="class">Whole Class</option>
                                     <option value="groups">Groups</option>
                                 </select>
-                                <input type="number" oninput="updateStats()" placeholder="Size" class="step-group-size hidden w-1/2 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <div class="step-group-details hidden flex gap-2">
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" class="step-group-count w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Number of groups">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1">Grps</span>
+                                    </div>
+                                    <div class="relative flex-1">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'size')" placeholder="Per group" class="step-group-size w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Students per group">
+                                        <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1">Pers</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -364,10 +369,8 @@
                     </div>
                 </div>
 
-                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
+                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 transition-opacity" title="Delete Step">
+                    <span class="material-icons-round text-lg">close</span>
                 </button>
             </div>
         </div>
@@ -379,7 +382,7 @@
         const activityTemplate = document.getElementById('activity-template');
         const stepTemplate = document.getElementById('step-template');
 
-        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, social: null };
+        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, contextTimeline: null, social: null };
 
         const TYPE_COLORS = {
             acquisition: '#a1f5ed',
@@ -390,12 +393,21 @@
             production: '#bdea75'
         };
 
-        const sortableActivities = new Sortable(root, {
+        // Init Drag & Drop for Activities
+        new Sortable(root, {
             animation: 150,
             handle: '.drag-handle-activity',
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
             onEnd: () => { updateEmptyState(); }
+        });
+
+        // Init Drag & Drop for Analysis Dashboard
+        new Sortable(document.getElementById('analysis-dashboard'), {
+            animation: 150,
+            handle: '.drag-handle-analysis',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag'
         });
 
         function initSortableSteps(container) {
@@ -424,11 +436,43 @@
 
         function toggleGroupMode(select) {
             const card = select.closest('.step-card');
-            const input = card.querySelector('.step-group-size');
+            const details = card.querySelector('.step-group-details');
             if (select.value === 'groups') {
-                input.classList.remove('hidden');
+                details.classList.remove('hidden');
+                // Auto calc initial logic if not set
+                const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+                const countInput = card.querySelector('.step-group-count');
+                const sizeInput = card.querySelector('.step-group-size');
+                if(!countInput.value && classSize > 0) {
+                    countInput.value = Math.ceil(classSize / 5); // default estimate
+                    sizeInput.value = Math.floor(classSize / countInput.value);
+                }
             } else {
-                input.classList.add('hidden');
+                details.classList.add('hidden');
+            }
+            updateStats();
+        }
+
+        function updateGroupMath(input, type) {
+            const card = input.closest('.step-card');
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+            
+            if (classSize === 0) return;
+
+            const countInput = card.querySelector('.step-group-count');
+            const sizeInput = card.querySelector('.step-group-size');
+            const val = parseInt(input.value) || 0;
+
+            if (val > 0) {
+                if (type === 'count') {
+                    // Changing count -> update size
+                    const size = Math.max(1, Math.round(classSize / val));
+                    sizeInput.value = size;
+                } else {
+                    // Changing size -> update count
+                    const count = Math.max(1, Math.round(classSize / val));
+                    countInput.value = count;
+                }
             }
             updateStats();
         }
@@ -454,8 +498,12 @@
             const activityGroup = btn.closest('.activity-group');
             const container = activityGroup.querySelector('.activity-steps-container');
             const clone = stepTemplate.content.cloneNode(true);
-            const currentClassSize = document.getElementById('global-class-size').value;
-            clone.querySelector('.step-group-size').value = currentClassSize;
+            
+            // Set default group values
+            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
+            clone.querySelector('.step-group-count').value = 1;
+            clone.querySelector('.step-group-size').value = classSize;
+
             container.appendChild(clone);
             updateStats();
         }
@@ -495,18 +543,36 @@
             };
             const socialAllocation = { individual: 0, smallGroup: 0, wholeClass: 0 };
             const timelineData = [];
+            
+            // Timeline Data Containers
+            const typeTimelinePoints = [];
+            
             let totalSecs = 0;
+            let currentTimelineSecs = 0;
 
             activities.forEach((act, idx) => {
                 const title = act.querySelector('.activity-title').value || `Activity ${idx+1}`;
                 let actSecs = 0;
                 const steps = act.querySelectorAll('.step-card');
+                
                 steps.forEach(step => {
                     const dur = parseFloat(step.querySelector('.duration-input').value) || 0;
                     const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
                     const secs = dur * unit;
                     const type = step.querySelector('.learning-type-select').value;
                     
+                    const startMin = currentTimelineSecs / 60;
+                    const endMin = (currentTimelineSecs + secs) / 60;
+
+                    // Type Timeline Point
+                    typeTimelinePoints.push({
+                        x: [startMin, endMin],
+                        y: type.charAt(0).toUpperCase() + type.slice(1),
+                        type: type
+                    });
+                    
+                    currentTimelineSecs += secs;
+
                     const mode = step.querySelector('.step-group-mode').value;
                     let stepGroupSize = classSize;
                     if (mode === 'groups') {
@@ -525,9 +591,10 @@
                     contextCounts.place[step.querySelector('.place-select').value] += secs;
                     contextCounts.time[step.querySelector('.time-select').value] += secs;
                 });
+                
                 timelineData.push({ title, duration: Math.round(actSecs / 60) });
             });
-            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation };
+            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints };
         }
 
         function updateStats() {
@@ -618,6 +685,35 @@
                     datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }]
                 },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Mins' } } } }
+            });
+
+            // Pedagogical Timeline (Gantt-like)
+            if (charts.typeTimeline) charts.typeTimeline.destroy();
+            charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
+                type: 'bar',
+                data: {
+                    labels: ['Acquisition', 'Investigation', 'Practice', 'Discussion', 'Collaboration', 'Production'],
+                    datasets: [{
+                        label: 'Timeline',
+                        data: data.typeTimelinePoints,
+                        backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]),
+                        borderWidth: 0,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } }
+                    },
+                    scales: {
+                        x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } },
+                        y: { grid: { color: '#f3f4f6' } }
+                    }
+                }
             });
         }
 
