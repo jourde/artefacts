@@ -78,6 +78,24 @@
             justify-content: center;
         }
 
+        /* Foldable Panel Transition */
+        .panel-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .panel-content.open {
+            max-height: 1500px; /* Increased height to accommodate new fields */
+            opacity: 1;
+        }
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+        .rotate-icon.open {
+            transform: rotate(180deg);
+        }
+
         @media print {
             .no-print { display: none; }
             body { background: white; padding: 0; }
@@ -85,6 +103,7 @@
             .step-card { border: 1px solid #e2e8f0; break-inside: avoid; margin-bottom: 1rem; }
             select { appearance: none; border: none; padding: 0; background: none; }
             textarea { border: none; padding: 0; }
+            #key-params-panel { max-height: none !important; opacity: 1 !important; display: block !important; }
         }
     </style>
 </head>
@@ -98,42 +117,158 @@
                 <p class="text-slate-500" data-i18n="app_subtitle">Pedagogical Design & Analytics</p>
             </div>
             <div class="flex flex-wrap gap-2 no-print items-center">
-                <button onclick="toggleLanguage()" class="bg-white border border-slate-200 text-slate-700 w-10 h-10 rounded-lg font-bold hover:bg-slate-50 transition-colors flex items-center justify-center mr-2">
+                <!-- Save/Load Section -->
+                <div class="flex gap-1 mr-2 bg-slate-100 p-1 rounded-lg">
+                    <button onclick="saveProject()" class="bg-white text-slate-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm" title="Save Project (.json)">
+                        <span class="material-icons-round text-lg">save</span>
+                        <span data-i18n="btn_save">Save</span>
+                    </button>
+                    <button onclick="triggerFileLoad()" class="bg-white text-slate-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-1.5 shadow-sm" title="Load Project (.json)">
+                        <span class="material-icons-round text-lg">file_upload</span>
+                        <span data-i18n="btn_load">Load</span>
+                    </button>
+                    <input type="file" id="load-file-input" class="hidden" accept=".json" onchange="loadProject(event)">
+                </div>
+
+                <button onclick="toggleLanguage()" class="bg-white border border-slate-200 text-slate-700 px-3 h-10 rounded-lg font-bold hover:bg-slate-50 transition-colors flex items-center justify-center mr-2 gap-1">
+                    <span class="material-icons-round text-lg">language</span>
                     <span id="lang-btn-text">FR</span>
                 </button>
+
                 <div class="bg-slate-200 p-1 rounded-lg flex mr-4">
                     <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer">Designer</button>
                     <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-4 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis">Analysis</button>
                 </div>
+                
                 <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm flex items-center gap-2 transition-colors">
                     <span class="material-icons-round text-xl">add_circle</span>
-                    <span data-i18n="btn_new_activity">New Activity</span>
+                    <span data-i18n="btn_new_activity">New Activity/Module</span>
                 </button>
+
                 <button onclick="exportMarkdown()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
                     <span class="material-icons-round text-xl">download</span>
-                    <span data-i18n="btn_export_md">Export the Learning Design in Markdown</span>
-                </button>
-                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2">
-                    <span class="material-icons-round text-xl">print</span>
-                    <span data-i18n="btn_print">Print / PDF</span>
+                    <span data-i18n="btn_export_md">Export Markdown</span>
                 </button>
             </div>
         </header>
 
-        <!-- Global Stats & Class Size -->
-        <div class="mb-8 no-print flex flex-col md:flex-row gap-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex justify-between items-center">
-                <div>
-                    <span class="text-slate-500 text-sm font-medium uppercase tracking-wider" data-i18n="label_total_time">Total Est. Time</span>
-                    <div id="total-duration" class="text-2xl font-bold text-indigo-600">0 mins</div>
+        <!-- Foldable Key Parameters Panel -->
+        <div class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-slate-500">tune</span>
+                    <span class="font-bold text-slate-700 uppercase text-sm tracking-wide" data-i18n="panel_key_parameters">Key Parameters</span>
                 </div>
-                <div class="text-right">
-                    <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
+                <span id="key-params-panel-icon" class="material-icons-round text-slate-400 rotate-icon">expand_more</span>
+            </button>
+            <div id="key-params-panel" class="panel-content">
+                <div class="p-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- 1. Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_course_name">Course Name</label>
+                        <input type="text" id="param-name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter course name..." data-i18n-placeholder="ph_course_name">
+                    </div>
+                    
+                    <!-- 2. Topic -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_topic">Topic</label>
+                        <input type="text" id="param-topic" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter topic..." data-i18n-placeholder="ph_topic">
+                    </div>
+
+                    <!-- 3. Mode of Delivery -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_mode">Mode of delivery</label>
+                        <select id="param-mode" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                            <option value="" disabled selected data-i18n="opt_mode_placeholder">Select a mode…</option>
+                            <option value="online" data-i18n="opt_mode_online">Wholly online</option>
+                            <option value="blended" data-i18n="opt_mode_blended">Blended</option>
+                            <option value="classroom" data-i18n="opt_mode_classroom">Classroom-based</option>
+                            <option value="location" data-i18n="opt_mode_location">Location-based</option>
+                            <option value="other" data-i18n="opt_mode_other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. Size of class (Cohort Size) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_class_size">Cohort Size</label>
+                        <input type="number" id="global-class-size" oninput="updateStats()" value="30" min="1" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-800">
+                    </div>
+
+                    <!-- 5. Learning Time -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_learning_time">Learning Time (Target)</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="param-learning-val" placeholder="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select id="param-learning-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="mins" data-i18n="unit_mins">Mins</option>
+                                <option value="hours" data-i18n="unit_hours">Hours</option>
+                                <option value="days" data-i18n="unit_days">Days</option>
+                                <option value="weeks" data-i18n="unit_weeks">Weeks</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 6. Designed Time -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_designed_time">Designed Time (Planned)</label>
+                         <div class="flex gap-2">
+                            <input type="number" id="param-designed-val" placeholder="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select id="param-designed-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="mins" data-i18n="unit_mins">Mins</option>
+                                <option value="hours" data-i18n="unit_hours">Hours</option>
+                                <option value="days" data-i18n="unit_days">Days</option>
+                                <option value="weeks" data-i18n="unit_weeks">Weeks</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 7. Aims (New) -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_aims">Aims</label>
+                        <textarea id="param-aims" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="..." data-i18n-placeholder="ph_aims"></textarea>
+                    </div>
+
+                    <!-- 8. Outcomes (New - Dynamic List) -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Outcomes</label>
+                        <div class="flex gap-2 mb-2 no-print">
+                            <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
+                            <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center">
+                                <span class="material-icons-round">add</span>
+                            </button>
+                        </div>
+                        <ul id="outcomes-list" class="space-y-1">
+                            <!-- Outcomes go here -->
+                        </ul>
+                        <p id="no-outcomes-text" class="text-sm text-slate-400 italic mt-2" data-i18n="text_no_outcomes">No outcomes are set</p>
+                    </div>
+
+                    <!-- 9. Description -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_description">Description</label>
+                        <textarea id="param-description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Detailed description..." data-i18n-placeholder="ph_description"></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 w-full md:w-64 flex flex-col justify-center">
-                <label class="text-slate-500 text-sm font-medium uppercase tracking-wider mb-1" data-i18n="label_class_size">Class Size</label>
-                <input type="number" id="global-class-size" oninput="updateStats()" value="30" min="1" class="text-2xl font-bold text-slate-800 bg-transparent focus:outline-none focus:ring-0 w-full">
+        </div>
+
+        <!-- Global Stats Display -->
+        <div class="mb-8 no-print flex flex-col md:flex-row gap-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
+                <div class="flex justify-between items-center w-full mb-3">
+                    <div>
+                        <span class="text-slate-500 text-sm font-medium uppercase tracking-wider" data-i18n="label_total_time">Total Calculated Time and Distribution of Learning Types</span>
+                        <span id="total-duration" class="ml-2 text-2xl font-bold text-indigo-600">0 mins</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
+                    </div>
+                </div>
+                <div class="w-full flex flex-col gap-1">
+                    <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
+                    <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
+                </div>
             </div>
         </div>
 
@@ -156,7 +291,7 @@
         <!-- Tab: Analysis -->
         <div id="view-analysis" class="hidden">
             <div id="analysis-dashboard" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Learning Type Distribution -->
+                <!-- Pedagogical Balance -->
                 <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
                     <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
                         <span class="material-icons-round text-slate-300">pie_chart</span>
@@ -220,7 +355,7 @@
                     </div>
                 </div>
 
-                <!-- Pedagogical Timeline (Types) -->
+                <!-- Pedagogical Timeline -->
                 <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
                     <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
                         <span class="material-icons-round text-slate-300">timeline</span>
@@ -239,7 +374,7 @@
         </footer>
     </div>
 
-    <!-- Activity Template -->
+    <!-- Templates -->
     <template id="activity-template">
         <div class="activity-group relative">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 px-2 gap-4">
@@ -248,24 +383,24 @@
                         <span class="material-icons-round text-2xl">drag_indicator</span>
                     </div>
                     <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
-                    <input type="text" oninput="updateStats()" placeholder="Activity Title (e.g. Module 1: Introduction)" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                    <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                 </div>
                 <div class="flex items-center gap-3 no-print">
                     <button onclick="addStepToActivity(this)" class="text-base font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2 border border-indigo-200 active:scale-95">
                         <span class="material-icons-round text-xl">add</span>
                         <span data-i18n="btn_add_step">Add Step</span>
                     </button>
+                    <!-- Duplicate Button -->
+                    <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Duplicate Activity" data-i18n-title="title_duplicate">
+                        <span class="material-icons-round text-2xl">content_copy</span>
+                    </button>
+                    <!-- Delete Button -->
                     <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity">
                         <span class="material-icons-round text-2xl">delete_outline</span>
                     </button>
                 </div>
             </div>
-            
-            <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]">
-                <!-- Step cards go here -->
-            </div>
-
-            <!-- Footer Add Step Button -->
+            <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]"></div>
             <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
                 <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50">
                     <span class="material-icons-round text-base">add</span>
@@ -275,7 +410,6 @@
         </div>
     </template>
 
-    <!-- Step Card Template -->
     <template id="step-template">
         <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex">
             <div class="drag-handle-step drag-handle flex items-center justify-center w-8 bg-slate-50 hover:bg-slate-100 border-r border-slate-100 no-print transition-colors cursor-grab">
@@ -286,12 +420,18 @@
                 <div class="flex flex-col lg:flex-row gap-6">
                     <div class="lg:w-1/3 space-y-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_step_title">Step Title</label>
-                            <input type="text" placeholder="Title for this card..." data-i18n-placeholder="ph_step_title" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">title</span>
+                                <span data-i18n="label_step_title">Step Title</span>
+                            </label>
+                            <input type="text" placeholder="Title for this card..." data-i18n-placeholder="ph_step_title" class="step-input-title w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_learning_type">Learning Type</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">style</span>
+                                <span data-i18n="label_learning_type">Learning Type</span>
+                            </label>
                             <select onchange="updateStepType(this)" class="learning-type-select w-full px-3 py-1.5 text-sm font-bold border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all select-acquisition">
                                 <option value="acquisition" data-i18n="type_acquisition">Acquisition</option>
                                 <option value="collaboration" data-i18n="type_collaboration">Collaboration</option>
@@ -303,7 +443,10 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-3">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2" data-i18n="label_duration">Duration</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase -mb-2 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">schedule</span>
+                                <span data-i18n="label_duration">Duration</span>
+                            </label>
                             <div class="flex gap-2">
                                 <input type="number" oninput="updateStats()" placeholder="0" class="duration-input w-2/3 px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <select onchange="updateStats()" class="duration-unit w-1/3 px-1 py-1.5 text-[11px] border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -316,7 +459,10 @@
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_grouping">Grouping</label>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">groups</span>
+                                <span data-i18n="label_grouping">Grouping</span>
+                            </label>
                             <div class="space-y-1">
                                 <select onchange="toggleGroupMode(this)" class="step-group-mode w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 bg-white outline-none">
                                     <option value="class" data-i18n="opt_whole_class">Whole Class</option>
@@ -324,11 +470,11 @@
                                 </select>
                                 <div class="step-group-details hidden flex gap-2">
                                     <div class="relative flex-1">
-                                        <input type="number" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" data-i18n-placeholder="ph_nb_groups" class="step-group-count w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Number of groups">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" data-i18n-placeholder="ph_nb_groups" class="step-group-count w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none">
                                         <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_groups">Grps</span>
                                     </div>
                                     <div class="relative flex-1">
-                                        <input type="number" min="1" oninput="updateGroupMath(this, 'size')" placeholder="Per group" data-i18n-placeholder="ph_per_group" class="step-group-size w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none" title="Students per group">
+                                        <input type="number" min="1" oninput="updateGroupMath(this, 'size')" placeholder="Per group" data-i18n-placeholder="ph_per_group" class="step-group-size w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 outline-none">
                                         <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[9px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_pers">Pers</span>
                                     </div>
                                 </div>
@@ -337,21 +483,30 @@
 
                         <div class="space-y-2 pt-1 border-t border-slate-100">
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_trainer">Trainer</span>
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">face</span>
+                                    <span data-i18n="label_trainer">Trainer</span>
+                                </span>
                                 <select onchange="updateStats()" class="trainer-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
                                     <option value="present" data-i18n="opt_present">Present</option>
                                     <option value="absent" data-i18n="opt_absent">Absent</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_place">Place</span>
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">place</span>
+                                    <span data-i18n="label_place">Place</span>
+                                </span>
                                 <select onchange="updateStats()" class="place-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
                                     <option value="situ" data-i18n="opt_insitu">In Situ</option>
                                     <option value="online" data-i18n="opt_online">Online</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[9px] w-12 text-slate-400 font-bold uppercase" data-i18n="label_time">Time</span>
+                                <span class="text-[9px] w-14 text-slate-400 font-bold uppercase flex items-center gap-1">
+                                    <span class="material-icons-round text-[10px]">event</span>
+                                    <span data-i18n="label_time">Time</span>
+                                </span>
                                 <select onchange="updateStats()" class="time-select flex-1 px-2 py-1 text-xs rounded-md border border-slate-200 bg-white outline-none">
                                     <option value="sync" data-i18n="opt_sync">Synchronous</option>
                                     <option value="async" data-i18n="opt_async">Asynchronous</option>
@@ -362,19 +517,32 @@
 
                     <div class="lg:w-2/3 space-y-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_tasks">What learners must do</label>
-                            <textarea rows="6" placeholder="Describe the steps, instructions, and tasks..." data-i18n-placeholder="ph_tasks" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">assignment</span>
+                                <span data-i18n="label_tasks">What learners must do</span>
+                            </label>
+                            <textarea rows="6" placeholder="Instructions..." data-i18n-placeholder="ph_tasks" class="step-input-tasks w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none leading-relaxed"></textarea>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1" data-i18n="label_notes">Notes</label>
-                            <textarea rows="3" placeholder="Trainer notes, resources, or links..." data-i18n-placeholder="ph_notes" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                                <span class="material-icons-round text-sm text-slate-400">comment</span>
+                                <span data-i18n="label_notes">Notes</span>
+                            </label>
+                            <textarea rows="3" placeholder="Trainer notes..." data-i18n-placeholder="ph_notes" class="step-input-notes w-full px-4 py-3 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <button onclick="deleteStep(this)" class="no-print absolute top-2 right-2 text-slate-300 hover:text-red-400 p-1 transition-opacity" title="Delete Step">
-                    <span class="material-icons-round text-lg">close</span>
-                </button>
+                <div class="absolute top-2 right-2 flex flex-col gap-1 no-print opacity-0 group-hover:opacity-100 transition-opacity">
+                    <!-- Duplicate Step Button -->
+                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate">
+                        <span class="material-icons-round text-lg">content_copy</span>
+                    </button>
+                    <!-- Delete Step Button -->
+                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step">
+                        <span class="material-icons-round text-lg">close</span>
+                    </button>
+                </div>
             </div>
         </div>
     </template>
@@ -385,7 +553,7 @@
         const activityTemplate = document.getElementById('activity-template');
         const stepTemplate = document.getElementById('step-template');
 
-        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, contextTimeline: null, social: null };
+        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, social: null };
         let currentLang = 'en';
 
         const translations = {
@@ -394,12 +562,14 @@
                 app_subtitle: "Pedagogical Design & Analytics",
                 tab_designer: "Designer",
                 tab_analysis: "Analysis",
-                btn_new_activity: "New Activity",
-                btn_export_md: "Export the Learning Design in Markdown",
+                btn_new_activity: "New Activity/Module",
+                btn_export_md: "Export for AI/RAG",
                 btn_print: "Print / PDF",
-                label_total_time: "Total Est. Time",
+                btn_save: "Save",
+                btn_load: "Load",
+                label_total_time: "Total Calculated Time and Distribution of Learning Types",
                 status_calculating: "Auto-calculating...",
-                label_class_size: "Class Size",
+                label_class_size: "Cohort Size",
                 empty_title: "No activities designed yet",
                 empty_subtitle: "Start by creating your first Activity container.",
                 btn_create_activity: "Create Activity",
@@ -457,27 +627,53 @@
                 chart_online: "Online",
                 chart_sync: "Synchronous",
                 chart_async: "Asynchronous",
-                md_title: "# Learning Experience Design",
-                md_class_size: "**Class Size:**",
-                md_total_duration: "**Total Duration:**",
+                md_title: "# Learning Experience Design Profile",
+                md_class_size: "Cohort Size",
+                md_total_duration: "Total Estimated Duration",
                 md_untitled_activity: "Untitled Activity",
                 md_untitled_step: "Untitled Step",
                 md_format_whole: "Whole Class",
                 md_format_groups: "Groups of",
-                md_tasks: "**Tasks:**",
-                md_notes: "**Notes:**"
+                md_tasks: "Student Tasks & Instructions",
+                md_notes: "Pedagogical Notes",
+                title_duplicate: "Duplicate",
+                panel_key_parameters: "Key Parameters",
+                label_course_name: "Course Name",
+                ph_course_name: "Enter course name...",
+                label_topic: "Topic",
+                ph_topic: "Enter topic...",
+                label_learning_time: "Learning Time (Target)",
+                label_designed_time: "Designed Time (Planned)",
+                label_hours: "h",
+                label_minutes: "m",
+                label_description: "Description",
+                ph_description: "Detailed description...",
+                label_mode: "Mode of delivery",
+                opt_mode_placeholder: "Select a mode…",
+                opt_mode_online: "Wholly online",
+                opt_mode_blended: "Blended",
+                opt_mode_classroom: "Classroom-based",
+                opt_mode_location: "Location-based",
+                opt_mode_other: "Other",
+                label_aims: "Aims",
+                ph_aims: "Enter session aims...",
+                label_outcomes: "Outcomes",
+                ph_add_outcome: "Add an outcome...",
+                text_no_outcomes: "No outcomes are set"
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
                 app_subtitle: "Design Pédagogique & Analytique",
                 tab_designer: "Design",
                 tab_analysis: "Analyse",
-                btn_new_activity: "Nouvelle Activité",
-                btn_export_md: "Exporter le Design en Markdown",
+                btn_new_activity: "Nouvelle Activité/Module",
+                btn_export_md: "Exporter pour IA/RAG",
                 btn_print: "Imprimer / PDF",
-                label_total_time: "Durée Totale Est.",
+                btn_save: "Enregistrer",
+                btn_load: "Charger",
+                label_total_time: "Durée Totale Calculée et Répartition des Types d'Apprentissage",
                 status_calculating: "Calcul auto...",
-                label_class_size: "Taille de la classe",
+                label_class_size: "Taille de la cohorte",
                 empty_title: "Aucune activité conçue",
                 empty_subtitle: "Commencez par créer votre première activité.",
                 btn_create_activity: "Créer une Activité",
@@ -535,15 +731,39 @@
                 chart_online: "En ligne",
                 chart_sync: "Synchrone",
                 chart_async: "Asynchrone",
-                md_title: "# Design d'Expérience d'Apprentissage",
-                md_class_size: "**Taille de la classe :**",
-                md_total_duration: "**Durée Totale :**",
+                md_title: "# Profil de Design d'Expérience d'Apprentissage",
+                md_class_size: "Taille de la cohorte",
+                md_total_duration: "Durée totale estimée",
                 md_untitled_activity: "Activité sans titre",
                 md_untitled_step: "Étape sans titre",
                 md_format_whole: "Classe entière",
                 md_format_groups: "Groupes de",
-                md_tasks: "**Tâches :**",
-                md_notes: "**Notes :**"
+                md_tasks: "Tâches et instructions des apprenants",
+                md_notes: "Notes pédagogiques",
+                title_duplicate: "Dupliquer",
+                panel_key_parameters: "Paramètres Clés",
+                label_course_name: "Nom du Cours",
+                ph_course_name: "Entrez le nom...",
+                label_topic: "Sujet",
+                ph_topic: "Entrez le sujet...",
+                label_learning_time: "Temps d'Apprentissage (Cible)",
+                label_designed_time: "Temps Conçu (Planifié)",
+                label_hours: "h",
+                label_minutes: "m",
+                label_description: "Description",
+                ph_description: "Description détaillée...",
+                label_mode: "Mode de livraison",
+                opt_mode_placeholder: "Sélectionnez un mode...",
+                opt_mode_online: "Entièrement en ligne",
+                opt_mode_blended: "Hybride",
+                opt_mode_classroom: "En classe",
+                opt_mode_location: "Basé sur le lieu",
+                opt_mode_other: "Autre",
+                label_aims: "Objectifs",
+                ph_aims: "Entrez les objectifs...",
+                label_outcomes: "Résultats",
+                ph_add_outcome: "Ajouter un résultat...",
+                text_no_outcomes: "Aucun résultat défini"
             }
         };
 
@@ -556,7 +776,7 @@
             production: '#bdea75'
         };
 
-        // Init Drag & Drop for Activities
+        // Initialize Sortables
         new Sortable(root, {
             animation: 150,
             handle: '.drag-handle-activity',
@@ -565,7 +785,6 @@
             onEnd: () => { updateEmptyState(); }
         });
 
-        // Init Drag & Drop for Analysis Dashboard
         new Sortable(document.getElementById('analysis-dashboard'), {
             animation: 150,
             handle: '.drag-handle-analysis',
@@ -584,27 +803,229 @@
             });
         }
 
+        // --- Foldable Panel Logic ---
+        function togglePanel(panelId) {
+            const content = document.getElementById(panelId);
+            const icon = document.getElementById(panelId + '-icon');
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                icon.classList.add('open');
+            }
+        }
+
+        // --- Outcome List Logic ---
+        function addOutcome(text = null) {
+            const input = document.getElementById('new-outcome-input');
+            const value = text || input.value.trim();
+            if (!value) return;
+
+            const list = document.getElementById('outcomes-list');
+            
+            const li = document.createElement('li');
+            li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group";
+            li.innerHTML = `
+                <span class="text-sm text-slate-700 outcome-text">${value}</span>
+                <button onclick="this.parentElement.remove(); checkOutcomesEmpty();" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                    <span class="material-icons-round text-base">close</span>
+                </button>
+            `;
+            list.appendChild(li);
+
+            if (!text) input.value = ''; 
+            checkOutcomesEmpty();
+        }
+
+        function checkOutcomesEmpty() {
+            const list = document.getElementById('outcomes-list');
+            const emptyText = document.getElementById('no-outcomes-text');
+            if (list.children.length === 0) {
+                emptyText.classList.remove('hidden');
+            } else {
+                emptyText.classList.add('hidden');
+            }
+        }
+
+        function handleOutcomeEnter(e) {
+            if (e.key === 'Enter') addOutcome();
+        }
+
+        // --- Save / Load Feature Logic ---
+
+        function saveProject() {
+            // Collect outcomes
+            const outcomes = [];
+            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => outcomes.push(el.innerText));
+
+            const project = {
+                version: "1.4",
+                language: currentLang,
+                keyParams: {
+                    name: document.getElementById('param-name').value,
+                    topic: document.getElementById('param-topic').value,
+                    mode: document.getElementById('param-mode').value,
+                    cohortSize: document.getElementById('global-class-size').value,
+                    learningTimeVal: document.getElementById('param-learning-val').value,
+                    learningTimeUnit: document.getElementById('param-learning-unit').value,
+                    designedTimeVal: document.getElementById('param-designed-val').value,
+                    designedTimeUnit: document.getElementById('param-designed-unit').value,
+                    aims: document.getElementById('param-aims').value,
+                    outcomes: outcomes,
+                    description: document.getElementById('param-description').value
+                },
+                activities: []
+            };
+
+            document.querySelectorAll('.activity-group').forEach(actEl => {
+                const actData = {
+                    title: actEl.querySelector('.activity-title').value,
+                    steps: []
+                };
+                actEl.querySelectorAll('.step-card').forEach(stepEl => {
+                    actData.steps.push({
+                        title: stepEl.querySelector('.step-input-title').value,
+                        type: stepEl.querySelector('.learning-type-select').value,
+                        duration: stepEl.querySelector('.duration-input').value,
+                        unit: stepEl.querySelector('.duration-unit').value,
+                        groupMode: stepEl.querySelector('.step-group-mode').value,
+                        groupCount: stepEl.querySelector('.step-group-count').value,
+                        groupSize: stepEl.querySelector('.step-group-size').value,
+                        trainer: stepEl.querySelector('.trainer-select').value,
+                        place: stepEl.querySelector('.place-select').value,
+                        time: stepEl.querySelector('.time-select').value,
+                        tasks: stepEl.querySelector('.step-input-tasks').value,
+                        notes: stepEl.querySelector('.step-input-notes').value
+                    });
+                });
+                project.activities.push(actData);
+            });
+
+            const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `learning-design-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerFileLoad() {
+            document.getElementById('load-file-input').click();
+        }
+
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const project = JSON.parse(e.target.result);
+                    root.innerHTML = '';
+                    currentLang = project.language || 'en';
+                    document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
+                    
+                    // Restore Key Params
+                    if (project.keyParams) {
+                        document.getElementById('param-name').value = project.keyParams.name || "";
+                        document.getElementById('param-topic').value = project.keyParams.topic || "";
+                        document.getElementById('param-mode').value = project.keyParams.mode || "";
+                        document.getElementById('global-class-size').value = project.keyParams.cohortSize || 30;
+                        document.getElementById('param-learning-val').value = project.keyParams.learningTimeVal || "";
+                        document.getElementById('param-learning-unit').value = project.keyParams.learningTimeUnit || "mins";
+                        document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
+                        document.getElementById('param-designed-unit').value = project.keyParams.designedTimeUnit || "mins";
+                        document.getElementById('param-aims').value = project.keyParams.aims || "";
+                        document.getElementById('param-description').value = project.keyParams.description || "";
+                        
+                        // Restore Outcomes
+                        document.getElementById('outcomes-list').innerHTML = '';
+                        if (project.keyParams.outcomes && Array.isArray(project.keyParams.outcomes)) {
+                            project.keyParams.outcomes.forEach(out => addOutcome(out));
+                        }
+                        checkOutcomesEmpty();
+
+                    } else if (project.cohortSize) {
+                        document.getElementById('global-class-size').value = project.cohortSize;
+                    }
+
+                    applyTranslations();
+
+                    project.activities.forEach(actData => {
+                        addActivityFromData(actData);
+                    });
+
+                    updateEmptyState();
+                    updateStats();
+                    event.target.value = '';
+                } catch (err) {
+                    alert("Failed to load project file.");
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function addActivityFromData(data) {
+            const clone = activityTemplate.content.cloneNode(true);
+            root.appendChild(clone);
+            const actEl = root.lastElementChild;
+            const stepContainer = actEl.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            actEl.querySelector('.activity-title').value = data.title || "";
+            data.steps.forEach(stepData => {
+                addStepToActivityFromData(actEl.querySelector('button'), stepData);
+            });
+            return actEl;
+        }
+
+        function addStepToActivityFromData(btn, data) {
+            const activityGroup = btn.closest('.activity-group');
+            const container = activityGroup.querySelector('.activity-steps-container');
+            const clone = stepTemplate.content.cloneNode(true);
+            const stepEl = clone.querySelector('.step-card');
+            stepEl.querySelector('.step-input-title').value = data.title || "";
+            stepEl.querySelector('.learning-type-select').value = data.type || "acquisition";
+            stepEl.querySelector('.duration-input').value = data.duration || 0;
+            stepEl.querySelector('.duration-unit').value = data.unit || "60";
+            stepEl.querySelector('.step-group-mode').value = data.groupMode || "class";
+            stepEl.querySelector('.step-group-count').value = data.groupCount || 1;
+            stepEl.querySelector('.step-group-size').value = data.groupSize || 30;
+            stepEl.querySelector('.trainer-select').value = data.trainer || "present";
+            stepEl.querySelector('.place-select').value = data.place || "situ";
+            stepEl.querySelector('.time-select').value = data.time || "sync";
+            stepEl.querySelector('.step-input-tasks').value = data.tasks || "";
+            stepEl.querySelector('.step-input-notes').value = data.notes || "";
+            if (data.groupMode === 'groups') stepEl.querySelector('.step-group-details').classList.remove('hidden');
+            container.appendChild(clone);
+            updateStepType(stepEl.querySelector('.learning-type-select'));
+            applyTranslations();
+        }
+
+        // --- Core Application Logic ---
+
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'fr' : 'en';
-            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN'; // Switch button label to the *other* language
+            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
             applyTranslations();
-            refreshCharts(); // Refresh charts to update legends
+            refreshCharts();
+            updateStats();
         }
 
         function applyTranslations() {
-            // Text content
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (translations[currentLang][key]) {
-                    el.innerHTML = translations[currentLang][key]; // Use innerHTML to handle <br>
-                }
+                if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
             });
-            // Placeholders
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
-                if (translations[currentLang][key]) {
-                    el.placeholder = translations[currentLang][key];
-                }
+                if (translations[currentLang][key]) el.placeholder = translations[currentLang][key];
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[currentLang][key]) el.title = translations[currentLang][key];
             });
         }
 
@@ -626,12 +1047,11 @@
             const details = card.querySelector('.step-group-details');
             if (select.value === 'groups') {
                 details.classList.remove('hidden');
-                // Auto calc initial logic if not set
                 const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
                 const countInput = card.querySelector('.step-group-count');
                 const sizeInput = card.querySelector('.step-group-size');
                 if(!countInput.value && classSize > 0) {
-                    countInput.value = Math.ceil(classSize / 5); // default estimate
+                    countInput.value = Math.ceil(classSize / 5);
                     sizeInput.value = Math.floor(classSize / countInput.value);
                 }
             } else {
@@ -643,23 +1063,13 @@
         function updateGroupMath(input, type) {
             const card = input.closest('.step-card');
             const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
-            
             if (classSize === 0) return;
-
             const countInput = card.querySelector('.step-group-count');
             const sizeInput = card.querySelector('.step-group-size');
             const val = parseInt(input.value) || 0;
-
             if (val > 0) {
-                if (type === 'count') {
-                    // Changing count -> update size
-                    const size = Math.max(1, Math.round(classSize / val));
-                    sizeInput.value = size;
-                } else {
-                    // Changing size -> update count
-                    const count = Math.max(1, Math.round(classSize / val));
-                    countInput.value = count;
-                }
+                if (type === 'count') sizeInput.value = Math.max(1, Math.round(classSize / val));
+                else countInput.value = Math.max(1, Math.round(classSize / val));
             }
             updateStats();
         }
@@ -678,8 +1088,6 @@
             const stepContainer = lastActivity.querySelector('.activity-steps-container');
             initSortableSteps(stepContainer);
             addStepToActivity(lastActivity.querySelector('button'));
-            
-            // Apply current language to new elements
             applyTranslations();
             updateEmptyState();
         }
@@ -688,16 +1096,43 @@
             const activityGroup = btn.closest('.activity-group');
             const container = activityGroup.querySelector('.activity-steps-container');
             const clone = stepTemplate.content.cloneNode(true);
-            
-            // Set default group values
-            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
-            clone.querySelector('.step-group-count').value = 1;
-            clone.querySelector('.step-group-size').value = classSize;
-
+            const currentClassSize = document.getElementById('global-class-size').value;
+            clone.querySelector('.step-group-size').value = currentClassSize;
             container.appendChild(clone);
-            
-            // Apply translations to new step
             applyTranslations();
+            updateStats();
+        }
+
+        function copyFormValues(source, dest) {
+            const srcInputs = source.querySelectorAll('input');
+            const destInputs = dest.querySelectorAll('input');
+            srcInputs.forEach((inp, i) => destInputs[i].value = inp.value);
+            const srcText = source.querySelectorAll('textarea');
+            const destText = dest.querySelectorAll('textarea');
+            srcText.forEach((txt, i) => destText[i].value = txt.value);
+            const srcSelects = source.querySelectorAll('select');
+            const destSelects = dest.querySelectorAll('select');
+            srcSelects.forEach((sel, i) => destSelects[i].value = sel.value);
+        }
+
+        function duplicateActivity(btn) {
+            const original = btn.closest('.activity-group');
+            const clone = original.cloneNode(true);
+            original.after(clone);
+            copyFormValues(original, clone);
+            const stepContainer = clone.querySelector('.activity-steps-container');
+            initSortableSteps(stepContainer);
+            updateEmptyState();
+            updateStats();
+        }
+
+        function duplicateStep(btn) {
+            const original = btn.closest('.step-card');
+            const clone = original.cloneNode(true);
+            original.after(clone);
+            copyFormValues(original, clone);
+            const select = clone.querySelector('.learning-type-select');
+            updateStepType(select);
             updateStats();
         }
 
@@ -736,16 +1171,15 @@
             };
             const socialAllocation = { individual: 0, smallGroup: 0, wholeClass: 0 };
             const timelineData = [];
-            
-            // Timeline Data Containers
+            const detailedTimeline = [];
             const typeTimelinePoints = [];
-            
             let totalSecs = 0;
             let currentTimelineSecs = 0;
 
             activities.forEach((act, idx) => {
                 const title = act.querySelector('.activity-title').value || `${translations[currentLang].md_untitled_activity} ${idx+1}`;
                 let actSecs = 0;
+                const activitySteps = [];
                 const steps = act.querySelectorAll('.step-card');
                 
                 steps.forEach(step => {
@@ -753,43 +1187,35 @@
                     const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
                     const secs = dur * unit;
                     const type = step.querySelector('.learning-type-select').value;
-                    
                     const startMin = currentTimelineSecs / 60;
                     const endMin = (currentTimelineSecs + secs) / 60;
-
-                    // Type Timeline Point - Translate type label for chart
-                    const typeLabel = translations[currentLang][`type_${type}`];
+                    typeTimelinePoints.push({ x: [startMin, endMin], y: translations[currentLang][`type_${type}`], type: type });
                     
-                    typeTimelinePoints.push({
-                        x: [startMin, endMin],
-                        y: typeLabel,
-                        type: type
+                    const stepTitle = step.querySelector('.step-input-title').value || translations[currentLang].md_untitled_step;
+                    activitySteps.push({
+                        title: stepTitle,
+                        type: type,
+                        duration: secs,
+                        learningTypeLabel: translations[currentLang][`type_${type}`]
                     });
-                    
+
                     currentTimelineSecs += secs;
-
                     const mode = step.querySelector('.step-group-mode').value;
-                    let stepGroupSize = classSize;
-                    if (mode === 'groups') {
-                        stepGroupSize = parseInt(step.querySelector('.step-group-size').value) || classSize;
-                    }
-
+                    let stepGroupSize = mode === 'groups' ? (parseInt(step.querySelector('.step-group-size').value) || classSize) : classSize;
                     typeTime[type] += secs;
                     actSecs += secs;
                     totalSecs += secs;
-
                     if (stepGroupSize === 1) socialAllocation.individual += secs;
                     else if (mode === 'class' || stepGroupSize >= classSize * 0.8) socialAllocation.wholeClass += secs;
                     else socialAllocation.smallGroup += secs;
-
                     contextCounts.trainer[step.querySelector('.trainer-select').value] += secs;
                     contextCounts.place[step.querySelector('.place-select').value] += secs;
                     contextCounts.time[step.querySelector('.time-select').value] += secs;
                 });
-                
                 timelineData.push({ title, duration: Math.round(actSecs / 60) });
+                detailedTimeline.push({ title: title, duration: actSecs, steps: activitySteps });
             });
-            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints };
+            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints, detailedTimeline };
         }
 
         function updateStats() {
@@ -802,7 +1228,104 @@
                 const m = Math.round((totals.totalSecs % 3600) / 60);
                 display = `${h}h ${m}m`;
             } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${translations[currentLang].unit_mins}`;
+            
             document.getElementById('total-duration').innerText = display;
+
+            const barContainer = document.getElementById('modules-visual-bar');
+            const labelContainer = document.getElementById('modules-visual-labels');
+            const rulerContainer = document.getElementById('modules-visual-ruler');
+            
+            barContainer.innerHTML = '';
+            labelContainer.innerHTML = '';
+            rulerContainer.innerHTML = '';
+            
+            if (totals.totalSecs > 0) {
+                // Populate Bar
+                totals.detailedTimeline.forEach((activity) => {
+                    if (activity.duration > 0) {
+                        const actWidthPct = (activity.duration / totals.totalSecs) * 100;
+                        const actEl = document.createElement('div');
+                        actEl.className = 'flex h-full border-r border-white last:border-0 relative group';
+                        actEl.style.width = `${actWidthPct}%`;
+                        
+                        activity.steps.forEach(step => {
+                            if (step.duration > 0) {
+                                const stepWidthPct = (step.duration / activity.duration) * 100;
+                                const stepEl = document.createElement('div');
+                                stepEl.style.width = `${stepWidthPct}%`;
+                                stepEl.style.backgroundColor = TYPE_COLORS[step.type];
+                                stepEl.className = 'h-full hover:opacity-80 transition-opacity relative';
+                                const durationMins = Math.round(step.duration/60);
+                                stepEl.title = `${activity.title}\n• ${step.title} (${step.learningTypeLabel})\n• ${durationMins} ${translations[currentLang].unit_mins}`;
+                                actEl.appendChild(stepEl);
+                            }
+                        });
+                        barContainer.appendChild(actEl);
+
+                        const labelEl = document.createElement('div');
+                        labelEl.style.width = `${actWidthPct}%`;
+                        labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
+                        if (actWidthPct > 5) {
+                            labelEl.innerText = activity.title;
+                            labelEl.title = activity.title;
+                        } else {
+                            labelEl.innerText = '.';
+                            labelEl.classList.add('text-transparent');
+                        }
+                        labelContainer.appendChild(labelEl);
+                    }
+                });
+
+                // Populate Ruler
+                const totalMins = totals.totalSecs / 60;
+                let interval = 0;
+                
+                const roughStep = totalMins / 8; // aim for ~8 ticks
+                const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
+                interval = magnitudes.reduce((prev, curr) => Math.abs(curr - roughStep) < Math.abs(prev - roughStep) ? curr : prev);
+
+                if (totalMins / interval > 15) interval *= 2;
+
+                for (let t = 0; t <= totalMins; t += interval) {
+                    const leftPct = (t / totalMins) * 100;
+                    if (leftPct > 100.1) break; 
+
+                    const tick = document.createElement('div');
+                    tick.className = 'absolute top-0 w-px h-1.5 bg-slate-300';
+                    tick.style.left = `${leftPct}%`;
+                    rulerContainer.appendChild(tick);
+
+                    const label = document.createElement('div');
+                    label.className = 'absolute top-2 text-[9px] text-slate-400 font-mono transform -translate-x-1/2 whitespace-nowrap';
+                    label.style.left = `${leftPct}%`;
+                    
+                    let text = '';
+                    if (t === 0) text = '0';
+                    else {
+                        if (interval >= 1440) {
+                             const days = t / 1440;
+                             text = `${Number.isInteger(days) ? days : days.toFixed(1)}${currentLang==='fr'?'j':'d'}`;
+                        } else if (interval >= 60) {
+                            const h = Math.floor(t/60);
+                            const m = t % 60;
+                            text = m === 0 ? `${h}h` : `${h}h${m}`;
+                        } else {
+                            text = `${t}m`;
+                        }
+                    }
+                    
+                    if (leftPct > 95) {
+                        label.classList.remove('-translate-x-1/2');
+                        label.classList.add('-translate-x-full');
+                    } else if (leftPct < 5) {
+                        label.classList.remove('-translate-x-1/2');
+                    }
+
+                    label.innerText = text;
+                    rulerContainer.appendChild(label);
+                }
+            }
+
             if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
         }
 
@@ -811,152 +1334,98 @@
             const total = data[0] + data[1];
             const percent = total > 0 ? Math.round((data[0] / total) * 100) : 0;
             document.getElementById(valId).innerText = percent + '%';
-
             charts[id] = new Chart(document.getElementById('chart' + id.charAt(0).toUpperCase() + id.slice(1)), {
                 type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: ['#4f46e5', '#f1f5f9'],
-                        borderWidth: 0,
-                        hoverOffset: 0
-                    }]
-                },
-                options: {
-                    cutout: '75%',
-                    plugins: { legend: { display: false }, tooltip: { enabled: true } },
-                    maintainAspectRatio: false
-                }
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4f46e5', '#f1f5f9'], borderWidth: 0, hoverOffset: 0 }] },
+                options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, maintainAspectRatio: false }
             });
         }
 
         function refreshCharts() {
             const data = getTotals();
-            const t = translations[currentLang]; // shorthand
-
+            const t = translations[currentLang];
             if (charts.types) charts.types.destroy();
             charts.types = new Chart(document.getElementById('chartLearningTypes'), {
                 type: 'radar',
-                data: {
-                    labels: Object.keys(data.typeTime).map(key => t[`type_${key}`]),
-                    datasets: [{
-                        label: t.chart_time_allocation,
-                        data: Object.values(data.typeTime),
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                        borderColor: '#4f46e5',
-                        pointBackgroundColor: Object.values(TYPE_COLORS),
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } },
-                    plugins: { legend: { display: false } }
-                }
+                data: { labels: Object.keys(data.typeTime).map(key => t[`type_${key}`]), datasets: [{ label: t.chart_time_allocation, data: Object.values(data.typeTime), backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: '#4f46e5', pointBackgroundColor: Object.values(TYPE_COLORS), borderWidth: 2 }] },
+                options: { scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } }, plugins: { legend: { display: false } } }
             });
-
             createDonutChart('trainer', [data.contextCounts.trainer.present, data.contextCounts.trainer.absent], [t.chart_present, t.chart_not_present], 'valTrainer');
             createDonutChart('location', [data.contextCounts.place.situ, data.contextCounts.place.online], [t.chart_f2f, t.chart_online], 'valLocation');
             createDonutChart('time', [data.contextCounts.time.sync, data.contextCounts.time.async], [t.chart_sync, t.chart_async], 'valTime');
-
             if (charts.social) charts.social.destroy();
             charts.social = new Chart(document.getElementById('chartSocial'), {
                 type: 'bar',
-                data: {
-                    labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole],
-                    datasets: [{
-                        label: 'Minutes',
-                        data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)],
-                        backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'],
-                        borderRadius: 8
-                    }]
-                },
+                data: { labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole], datasets: [{ label: 'Minutes', data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)], backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'], borderRadius: 8 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
-
             if (charts.timeline) charts.timeline.destroy();
             charts.timeline = new Chart(document.getElementById('chartTimeline'), {
                 type: 'bar',
-                data: {
-                    labels: data.timelineData.map(d => d.title),
-                    datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }]
-                },
+                data: { labels: data.timelineData.map(d => d.title), datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Mins' } } } }
             });
-
-            // Pedagogical Timeline (Gantt-like)
             if (charts.typeTimeline) charts.typeTimeline.destroy();
-            // Order labels to match typical pedagogical flow or logic? Let's keep them fixed or translated
-            const typeLabels = ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]);
-            
             charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
                 type: 'bar',
-                data: {
-                    labels: typeLabels,
-                    datasets: [{
-                        label: 'Timeline',
-                        data: data.typeTimelinePoints,
-                        backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]),
-                        borderWidth: 0,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } }
-                    },
-                    scales: {
-                        x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } },
-                        y: { grid: { color: '#f3f4f6' } }
-                    }
-                }
+                data: { labels: ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]), datasets: [{ label: 'Timeline', data: data.typeTimelinePoints, backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]), borderWidth: 0, barPercentage: 0.6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
             });
         }
 
         function exportMarkdown() {
             const data = getTotals();
             const t = translations[currentLang];
-            let md = `${t.md_title}\n\n${t.md_class_size} ${document.getElementById('global-class-size').value}\n${t.md_total_duration} ${document.getElementById('total-duration').innerText}\n\n`;
+            let md = `# ${t.md_title}\n\n`;
+            md += `## metadata\n`;
+            md += `- **${t.label_course_name}:** ${document.getElementById('param-name').value}\n`;
+            md += `- **${t.label_topic}:** ${document.getElementById('param-topic').value}\n`;
+            md += `- **${t.label_mode}:** ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
+            md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
+            md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-designed-unit').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **Design Language:** ${currentLang.toUpperCase()}\n`;
+            md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             
+            md += `## key_info\n`;
+            md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
+            md += `### ${t.label_outcomes}\n`;
+            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => md += `- ${el.innerText}\n`);
+            md += `\n### ${t.label_description}\n${document.getElementById('param-description').value}\n\n`;
+
+            md += `## pedagogical_structure\n\n`;
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
-                const title = activity.querySelector('.activity-title').value || t.md_untitled_activity;
-                md += `## ${title}\n\n`;
+                const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                md += `### ACTIVITY ${aIdx + 1}: ${activityTitle.toUpperCase()}\n\n`;
                 activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
-                    const stepTitle = step.querySelector('input[placeholder="Title for this card..."]').value || t.md_untitled_step;
-                    
-                    // Get Group Info
+                    const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
                     let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
-                    
-                    // Content fields
-                    const tasks = step.querySelectorAll('textarea')[0].value || "N/A";
-                    const notes = step.querySelectorAll('textarea')[1].value || "";
-                    
-                    // Translated Type Label
+                    const tasks = step.querySelector('.step-input-tasks').value || "N/A";
+                    const notes = step.querySelector('.step-input-notes').value || "N/A";
                     const typeKey = step.querySelector('.learning-type-select').value;
-                    const typeLabel = t[`type_${typeKey}`].toUpperCase();
-
-                    // Translated Context
-                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText; // Use innerText as it's already translated in DOM
+                    const typeLabel = t[`type_${typeKey}`];
+                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
                     const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
                     const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
-
-                    md += `### ${sIdx + 1}. ${stepTitle} (${typeLabel})\n`;
-                    md += `- **${t.label_duration}:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
-                    md += `- **${t.label_grouping}:** ${groupInfo}\n`;
-                    md += `- **Context:** ${trainerText}, ${placeText}, ${timeText}\n`;
-                    md += `\n${t.md_tasks}\n${tasks}\n`;
-                    if(notes) md += `\n${t.md_notes}\n${notes}\n`;
-                    md += `\n---\n`;
+                    md += `#### STEP ${aIdx + 1}.${sIdx + 1}: ${stepTitle}\n`;
+                    md += `- **TYPE:** ${typeLabel}\n`;
+                    md += `- **DURATION:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
+                    md += `- **SOCIAL_ORG:** ${groupInfo}\n`;
+                    md += `- **MODALITY:** ${trainerText}, ${placeText}, ${timeText}\n`;
+                    md += `\n**LEARNER_TASKS:**\n${tasks}\n\n`;
+                    md += `**PEDAGOGICAL_NOTES:**\n${notes}\n\n`;
                 });
+                md += `\n---\n\n`;
             });
             const blob = new Blob([md], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'learning-design.md'; a.click(); URL.revokeObjectURL(url);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design-profile.md';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         window.onload = () => { addActivity(); };
