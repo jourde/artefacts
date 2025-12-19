@@ -150,7 +150,7 @@
                 <!-- Project Group -->
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">Project</span>
-                    <div class="flex bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
                         <button onclick="saveProject()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_save_project">
                             <span class="material-icons-round text-xl">save</span>
                             <span class="text-sm font-medium hidden md:inline" data-i18n="btn_save">Save</span>
@@ -485,6 +485,8 @@
         <!-- Footer -->
         <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
             <p>François Jourde (2026) - CC BY SA, inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
+            <p class="mt-2" data-i18n="footer_disclaimer">This site does not use tracking or session cookies. No personal data is processed online.</p>
+            <p class="mt-1 italic opacity-75" data-i18n="footer_ai_disclaimer">This application was created mainly using generative AI coding; the code may contain flaws.</p>
         </footer>
     </div>
 
@@ -819,7 +821,9 @@
                 ph_aims: "Enter session aims...",
                 label_outcomes: "Outcomes",
                 ph_add_outcome: "Add an outcome...",
-                text_no_outcomes: "No outcomes are set"
+                text_no_outcomes: "No outcomes are set",
+                footer_disclaimer: "This site does not use tracking or session cookies. No personal data is processed online.",
+                footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws."
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
@@ -869,7 +873,7 @@
                 opt_present: "Présent",
                 opt_absent: "Absent",
                 label_place: "Lieu",
-                opt_insitu: "En présence",
+                opt_insitu: "Présentiel",
                 opt_online: "En ligne",
                 label_time: "Temps",
                 opt_sync: "Synchrone",
@@ -913,8 +917,6 @@
                 ph_course_name: "Entrez le nom...",
                 label_topic: "Sujet",
                 ph_topic: "Entrez le sujet...",
-                label_authors: "Auteur(s)",
-                ph_authors: "Entrez le(s) nom(s) d'auteur(s)...",
                 label_learning_time: "Temps d'Apprentissage (Cible)",
                 label_designed_time: "Temps Conçu (Planifié)",
                 label_hours: "h",
@@ -960,7 +962,9 @@
                 help_analysis_title: "3. Tableau de Bord d'Analyse",
                 help_analysis_text: "Passez à l'onglet <strong>Analyse</strong> pour visualiser l'équilibre de votre conception. Vérifiez le diagramme radar \"Équilibre Pédagogique\" et les diagrammes circulaires \"Contexte\" pour vous assurer que votre cours atteint ses objectifs.",
                 help_export_title: "4. Enregistrer & Exporter",
-                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation."
+                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation.",
+                footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
+                footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs."
             }
         };
 
@@ -1023,6 +1027,76 @@
             } else {
                 content.classList.add('open');
                 icon.classList.add('open');
+            }
+        }
+
+        function toggleAllActivities() {
+            const bodies = document.querySelectorAll('.activity-body');
+            const icons = document.querySelectorAll('.activity-group .rotate-icon');
+            const mainBtnIcon = document.getElementById('icon-toggle-all-main');
+            const mainBtnText = document.getElementById('text-toggle-all-main');
+            const headerBtnIcon = document.getElementById('icon-toggle-all');
+            
+            let anyOpen = false;
+            bodies.forEach(b => {
+                if (!b.classList.contains('collapsed')) anyOpen = true;
+            });
+
+            bodies.forEach(b => {
+                if (anyOpen) {
+                    b.classList.add('collapsed');
+                } else {
+                    b.classList.remove('collapsed');
+                }
+            });
+
+            icons.forEach(icon => {
+                if (anyOpen) {
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            // Update main button state
+            const iconText = anyOpen ? 'unfold_more' : 'unfold_less';
+            const labelKey = anyOpen ? 'btn_expand_all' : 'btn_collapse_all';
+            
+            if(mainBtnIcon) mainBtnIcon.innerText = iconText;
+            if(mainBtnText) {
+                mainBtnText.innerText = translations[currentLang][labelKey];
+                mainBtnText.setAttribute('data-i18n', labelKey);
+            }
+            if(headerBtnIcon) headerBtnIcon.innerText = iconText;
+        }
+
+        // Foldable Activity
+        function toggleActivity(btn) {
+            const activityGroup = btn.closest('.activity-group');
+            const body = activityGroup.querySelector('.activity-body');
+            const icon = btn.querySelector('.rotate-icon');
+
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Foldable Step
+        function toggleStep(btn) {
+            const stepCard = btn.closest('.step-card');
+            const body = stepCard.querySelector('.step-body');
+            const icon = btn.querySelector('.rotate-icon');
+
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
             }
         }
 
