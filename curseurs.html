@@ -1,336 +1,465 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration Enseignement à Distance</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #e8e8e8; padding: 20px; min-height: 100vh; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    h1 { font-size: 22px; color: #222; margin-bottom: 12px; }
-    .intro { font-size: 15px; color: #444; margin-bottom: 24px; }
-    .main-content { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
-    .left-column { flex: 1; min-width: 400px; }
-    .right-column { width: 320px; }
-    
-    .btn-box { margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-box button { padding: 10px 16px; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; background: #5a3d4a; }
-    .btn-box button:hover { background: #4a2d3a; }
-    .btn-box button.btn-info { background: #4a6a7a; }
-    .btn-box button.btn-info:hover { background: #3a5a6a; }
-    
-    .order-selector { margin-bottom: 16px; }
-    
-    .manual-order { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
-    .manual-order p { font-size: 13px; color: #666; margin-bottom: 10px; }
-    .sortable-list { list-style: none; padding: 0; margin: 0; }
-    .sortable-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px; background: #f5f5f5; border-radius: 6px; cursor: grab; border: 1px solid #ddd; font-size: 14px; color: #333; }
-    .sortable-item:hover { background: #eee; }
-    .sortable-item.dragging { opacity: 0.5; background: #ddd; }
-    .sortable-item .drag-handle { color: #999; font-size: 16px; }
-    .apply-order-btn { margin-top: 12px; padding: 10px 20px; background: #5a3d4a; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
-    .apply-order-btn:hover { background: #4a2d3a; }
-    .hidden { display: none; }
-    
-    .alerts-list-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; }
-    .alerts-list-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
-    .alerts-list-panel ul { list-style: none; padding: 0; margin: 0; }
-    .alerts-list-panel li { font-size: 12px; color: #555; padding: 8px 10px; margin-bottom: 6px; background: #f9f9f9; border-radius: 4px; border-left: 3px solid #ffc107; }
-    
-    .matrix-panel { margin-top: 10px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 16px; overflow-x: auto; }
-    .matrix-panel h3 { font-size: 14px; color: #333; margin-bottom: 12px; }
-    .matrix-panel p { font-size: 12px; color: #666; margin-bottom: 12px; }
-    .risk-matrix { border-collapse: collapse; font-size: 11px; }
-    .risk-matrix th, .risk-matrix td { border: 1px solid #ddd; padding: 6px 8px; text-align: center; }
-    .risk-matrix th { background: #f5f5f5; font-weight: bold; color: #444; }
-    .risk-matrix th.row-header { text-align: left; min-width: 100px; }
-    .risk-matrix td { min-width: 80px; }
-    .risk-matrix .risk-none { background: #f9f9f9; color: #999; }
-    .risk-matrix .risk-low { background: #d4edda; color: #155724; }
-    .risk-matrix .risk-medium { background: #fff3cd; color: #856404; }
-    .risk-matrix .risk-high { background: #f8d7da; color: #721c24; }
-    .risk-matrix .diagonal { background: #e9ecef; color: #6c757d; }
-    .matrix-legend { margin-top: 12px; display: flex; gap: 15px; flex-wrap: wrap; font-size: 11px; }
-    .matrix-legend span { display: flex; align-items: center; gap: 5px; }
-    .matrix-legend .dot { width: 14px; height: 14px; border-radius: 3px; }
-    
-    .dimension { border-radius: 10px; padding: 20px; margin-bottom: 14px; color: white; }
-    .dim-dark { background: #5a3d4a; }
-    .dim-light { background: #6b5b7a; }
-    .labels { display: flex; justify-content: space-between; margin-bottom: 14px; }
-    .label-left { width: 45%; }
-    .label-right { width: 45%; text-align: right; }
-    .label-left h3, .label-right h3 { font-weight: bold; font-size: 15px; margin-bottom: 6px; }
-    .label-left p, .label-right p { font-size: 13px; opacity: 0.95; margin: 0; }
-    .slider-box { position: relative; height: 50px; margin-top: 10px; }
-    .slider-track { position: absolute; top: 20px; left: 0; right: 0; height: 10px; background: rgba(255,255,255,0.4); border-radius: 5px; }
-    .slider-cursor { position: absolute; top: 10px; width: 24px; height: 30px; background: #4a8a4a; border-radius: 4px; border: 2px solid #3a7a3a; }
-    .slider-range { position: absolute; top: 10px; left: 0; width: 100%; height: 30px; opacity: 0; cursor: pointer; margin: 0; }
-    
-    .about-box { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd; font-size: 12px; color: #555; line-height: 1.6; }
-    .about-box h3 { font-size: 14px; color: #333; margin-bottom: 10px; }
-    .about-box p { margin-bottom: 6px; }
-    
-    .alerts { margin-top: 0; }
-    .alert { background: #fff3cd; border: 1px solid #ffc107; border-left: 4px solid #ffc107; border-radius: 6px; padding: 12px 16px; margin-bottom: 10px; font-size: 12px; color: #856404; display: flex; align-items: flex-start; gap: 10px; }
-    .alert-icon { font-size: 16px; }
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Enseignement à Distance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Sortable Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
 
-    
-    @media (max-width: 800px) {
-      .main-content { flex-direction: column; }
-      .left-column { min-width: 100%; }
-      .right-column { width: 100%; }
-    }
-  </style>
+        /* Slider Custom Styling to match theme */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #4f46e5; /* Indigo-600 */
+            cursor: grab;
+            margin-top: -10px; 
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+            border: 2px solid white;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e2e8f0; /* Slate-200 */
+            border-radius: 9999px;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        /* Sortable ghost styles */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f1f5f9;
+            border: 2px dashed #94a3b8;
+        }
+        
+        .panel-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .panel-content.open {
+            max-height: 2000px;
+            opacity: 1;
+        }
+        
+        .rotate-icon { transition: transform 0.3s ease; }
+        .rotate-icon.open { transform: rotate(180deg); }
+
+        .risk-matrix th, .risk-matrix td { border: 1px solid #e2e8f0; }
+        .risk-matrix .risk-none { background-color: #f8fafc; color: #94a3b8; }
+        .risk-matrix .risk-low { background-color: #dcfce7; color: #166534; }    /* Green-100 / Green-800 */
+        .risk-matrix .risk-medium { background-color: #fef9c3; color: #854d0e; } /* Yellow-100 / Yellow-800 */
+        .risk-matrix .risk-high { background-color: #fee2e2; color: #991b1b; }   /* Red-100 / Red-800 */
+        .risk-matrix .diagonal { background-color: #f1f5f9; color: #cbd5e1; }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <h1>Quelle configuration pour votre enseignement à distance ?</h1>
-    <p class="intro">Déplacez chaque curseur vert pour définir votre configuration.</p>
+<body class="p-4 md:p-8">
 
-    <div class="main-content">
-      <div class="left-column">
-        <div class="btn-box">
-          <button id="btnReset">Réinitialiser</button>
-          <button id="orderBtn">Modifier l'ordre</button>
-          <button id="btnAlerts" class="btn-info">Répertoire des alertes</button>
-          <button id="btnMatrix" class="btn-info">Matrice de risques</button>
-        </div>
-        
-        <div class="order-selector">
-          <div id="manualOrderPanel" class="manual-order hidden">
-            <p>Glissez-déposez pour réorganiser :</p>
-            <ul class="sortable-list" id="sortableList">
-              <li class="sortable-item" data-id="0" draggable="true"><span class="drag-handle">☰</span> Présence / Distance</li>
-              <li class="sortable-item" data-id="1" draggable="true"><span class="drag-handle">☰</span> Petit groupe / Grand groupe</li>
-              <li class="sortable-item" data-id="2" draggable="true"><span class="drag-handle">☰</span> Asynchrone / Synchrone</li>
-              <li class="sortable-item" data-id="3" draggable="true"><span class="drag-handle">☰</span> Individuel / Collaboratif</li>
-              <li class="sortable-item" data-id="4" draggable="true"><span class="drag-handle">☰</span> Appropriation / Production</li>
-              <li class="sortable-item" data-id="5" draggable="true"><span class="drag-handle">☰</span> Avec / Sans accompagnement</li>
-            </ul>
-            <button class="apply-order-btn" id="applyOrderBtn">Appliquer cet ordre</button>
-          </div>
-          
-          <div id="alertsListPanel" class="alerts-list-panel hidden">
-            <h3>Liste des alertes possibles :</h3>
-            <ul>
-              <li><strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.</li>
-              <li><strong>Collaboratif + Asynchrone :</strong> la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.</li>
-              <li><strong>Production + Sans accompagnement :</strong> les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.</li>
-              <li><strong>Configuration très exigeante :</strong> cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es.</li>
-              <li><strong>Synchrone + Production + Collaboratif :</strong> cette combinaison demande une coordination importante en temps réel.</li>
-              <li><strong>Grand groupe + Accompagnement fort :</strong> l'accompagnement individualisé devient difficile avec un grand nombre de participants.</li>
-              <li><strong>Distance + Synchrone :</strong> les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.</li>
-              <li><strong>Distance + Grand groupe + Sans accompagnement :</strong> les étudiant·es peuvent facilement se sentir isolés et perdus.</li>
-              <li><strong>Distance + Collaboratif :</strong> la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.</li>
-              <li><strong>Grand groupe + Collaboratif :</strong> organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.</li>
-              <li><strong>Grand groupe + Production :</strong> accompagner la production de ressources par un grand groupe est exigeant.</li>
-              <li><strong>Présence + Asynchrone :</strong> cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.</li>
-            </ul>
-          </div>
-          
-          <div id="matrixPanel" class="matrix-panel hidden">
-            <h3>Matrice des risques de combinaison</h3>
-            <p>Cette matrice montre le niveau de risque lorsque deux dimensions sont positionnées vers leurs pôles extrêmes.</p>
-            <table class="risk-matrix" id="riskMatrix"></table>
-            <div class="matrix-legend">
-              <span><span class="dot" style="background:#d4edda;"></span> Faible risque</span>
-              <span><span class="dot" style="background:#fff3cd;"></span> Risque modéré</span>
-              <span><span class="dot" style="background:#f8d7da;"></span> Risque élevé</span>
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
+            <div class="mb-2 xl:mb-0">
+                <h1 class="text-3xl font-bold text-slate-900">Configuration Enseignement à Distance</h1>
+                <p class="text-slate-500">Définissez et analysez vos choix pédagogiques</p>
             </div>
-          </div>
-        </div>
-        
-        <div id="slidersContainer"></div>
-        
-        <div class="about-box">
-          <h3>À propos de cet outil</h3>
-          <p>Cette interface interactive permet aux enseignant·es de configurer leur dispositif d'enseignement à distance en positionnant des curseurs sur 6 dimensions pédagogiques. L'outil détecte automatiquement les combinaisons potentiellement problématiques et affiche des alertes avec des conseils pédagogiques.</p>
-          <p><strong>Inspiré de :</strong> Docq, F., Vellut, D., Verpoorten, I., Raucent, B., & Wouters, P. (2023). <em>Enseigner à distance: 5 balises pour vous lancer</em>. Presses universitaires de Louvain UCL. <a href="https://pul.uclouvain.be/book/?gcoi=29303100535600" target="_blank">https://pul.uclouvain.be/book/?gcoi=29303100535600</a></p>
-          <p><strong>Auteurs :</strong> François Jourde et Jacques Dubois</p>
-          <p><strong>Licence :</strong> <span class="cc">CC BY-SA</span> Creative Commons Attribution - Partage dans les Mêmes Conditions</p>
-        </div>
-      </div>
+            
+            <div class="flex flex-wrap gap-4 items-end">
+                <!-- Toolbar -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Outils</span>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
+                        <button onclick="togglePanel('matrixPanel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" title="Voir la matrice des risques">
+                            <span class="material-icons-round text-xl">grid_on</span>
+                            <span class="text-sm font-medium hidden md:inline">Matrice</span>
+                        </button>
+                        <button onclick="togglePanel('orderPanel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" title="Réorganiser les curseurs">
+                            <span class="material-icons-round text-xl">sort</span>
+                            <span class="text-sm font-medium hidden md:inline">Ordre</span>
+                        </button>
+                         <button onclick="togglePanel('helpPanel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" title="Répertoire des alertes">
+                            <span class="material-icons-round text-xl">list_alt</span>
+                            <span class="text-sm font-medium hidden md:inline">Alertes</span>
+                        </button>
+                        <div class="w-px bg-slate-200 my-1 mx-1"></div>
+                        <button onclick="resetAll()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" title="Réinitialiser">
+                            <span class="material-icons-round text-xl">restart_alt</span>
+                            <span class="text-sm font-medium hidden md:inline">Réinitialiser</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-      <div class="right-column">
-        <div class="alerts" id="alertsContainer"></div>
-      </div>
+        <!-- Foldable: Reorder Panel -->
+        <div id="orderPanel" class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden panel-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="material-icons-round text-slate-400">sort</span>
+                        Réorganiser les dimensions
+                    </h3>
+                    <button onclick="togglePanel('orderPanel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
+                </div>
+                <p class="text-sm text-slate-500 mb-4">Glissez-déposez les éléments ci-dessous pour changer l'ordre d'affichage des curseurs.</p>
+                <ul id="sortableList" class="space-y-2 max-w-2xl">
+                    <!-- List items generated by JS -->
+                </ul>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="applyOrder()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors">
+                        Appliquer cet ordre
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Foldable: Risk Matrix -->
+        <div id="matrixPanel" class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden panel-content">
+             <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="material-icons-round text-slate-400">grid_on</span>
+                        Matrice des risques de combinaison
+                    </h3>
+                    <button onclick="togglePanel('matrixPanel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
+                </div>
+                <p class="text-sm text-slate-500 mb-6">Cette matrice montre le niveau de risque pédagogique lorsque deux dimensions sont positionnées vers leurs pôles extrêmes.</p>
+                
+                <div class="overflow-x-auto">
+                    <table class="risk-matrix w-full text-xs text-center border-collapse rounded-lg overflow-hidden" id="riskMatrix">
+                        <!-- Generated by JS -->
+                    </table>
+                </div>
+                
+                <div class="flex gap-6 mt-4 text-xs font-medium text-slate-600">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-200 border border-green-300"></span> Faible risque</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-100 border border-yellow-200"></span> Risque modéré</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-100 border border-red-200"></span> Risque élevé</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Foldable: Alerts Directory -->
+        <div id="helpPanel" class="mb-6 bg-blue-50 rounded-xl shadow-sm border border-blue-100 overflow-hidden panel-content">
+            <div class="p-6">
+                 <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-2">
+                        <span class="material-icons-round text-indigo-400">list_alt</span>
+                        Répertoire des alertes
+                    </h3>
+                    <button onclick="togglePanel('helpPanel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
+                </div>
+                <div id="alertsListContent" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
+                    <!-- Static list of potential alerts for reference -->
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Synchrone + Sans accompagnement :</strong> sessions difficiles à gérer sans régulation.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Collaboratif + Asynchrone :</strong> nécessite structure forte et outils adaptés.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Production + Sans accompagnement :</strong> risque de manque de guidage et feedback.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Synchrone + Production + Collaboratif :</strong> coordination très lourde en temps réel.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Grand groupe + Accompagnement fort :</strong> difficilement tenable à l'échelle.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Distance + Synchrone :</strong> dépendance technique et attention limitée.</div>
+                    <div class="bg-white p-3 rounded border border-blue-100"><strong>Distance + Grand groupe + Sans accompagnement :</strong> risque élevé d'isolement/abandon.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Main Column: Sliders -->
+            <div class="lg:col-span-2 space-y-6" id="slidersContainer">
+                <!-- Sliders injected here -->
+            </div>
+
+            <!-- Right Column: Live Alerts & Info -->
+            <div class="space-y-6 sticky top-6">
+                
+                <!-- Live Alerts Panel -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="material-icons-round text-amber-500">warning_amber</span>
+                        Analyse en direct
+                    </h3>
+                    <div id="alertsContainer" class="space-y-3">
+                        <!-- Alerts injected here -->
+                        <div class="text-sm text-slate-400 italic text-center py-4">Aucune alerte pour cette configuration.</div>
+                    </div>
+                </div>
+
+                <!-- Footer / Credits -->
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs text-slate-500 leading-relaxed">
+                    <p class="font-bold text-slate-700 mb-2">À propos</p>
+                    <p class="mb-2">Cet outil permet de configurer votre dispositif selon 6 dimensions. Il détecte automatiquement les incohérences.</p>
+                    <p class="mb-2">Inspiré de : <em>Enseigner à distance: 5 balises pour vous lancer</em> (Docq et al., 2023, Presses universitaires de Louvain).</p>
+                    <p class="mt-2 italic border-t border-slate-200 pt-2">
+                        <span class="material-icons-round text-xs align-middle mr-1">security</span>
+                        Traitement local : toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.
+                    </p>
+                    <p class="mt-2 text-[10px] uppercase font-bold text-slate-400">CC BY-SA • François Jourde & Jacques Dubois (2026)</p>
+                </div>
+
+            </div>
+        </div>
     </div>
 
+    <!-- Templates embedded in JS for simplicity -->
 
-  </div>
+    <script>
+        // --- Data & State ---
+        var dimensions = [
+            { id: 0, leftTitle: "PRÉSENCE", rightTitle: "DISTANCE", leftDesc: "Institutionnalisation d'un temps/lieu de formation.", rightDesc: "Souplesse temporelle, géographique et pédagogique.", value: 50 },
+            { id: 1, leftTitle: "PETIT GROUPE", rightTitle: "GRAND GROUPE", leftDesc: "Effectif réduit permettant un suivi proche.", rightDesc: "Effectif important impactant l'accompagnement.", value: 50 },
+            { id: 2, leftTitle: "ASYNCHRONE", rightTitle: "SYNCHRONE", leftDesc: "Activités réalisées en temps différé (flexibilité).", rightDesc: "Interactions en temps réel (rendez-vous virtuels).", value: 50 },
+            { id: 3, leftTitle: "INDIVIDUEL", rightTitle: "COLLABORATIF", leftDesc: "Activités et travaux personnels.", rightDesc: "Activités de groupe et coopération.", value: 50 },
+            { id: 4, leftTitle: "APPROPRIATION", rightTitle: "PRODUCTION", leftDesc: "Consommation et compréhension de ressources.", rightDesc: "Création de nouvelles ressources par l'étudiant.", value: 50 },
+            { id: 5, leftTitle: "AVEC ACCOMPAGNEMENT", rightTitle: "SANS ACCOMPAGNEMENT", leftDesc: "Interaction forte enseignant/étudiant.", rightDesc: "Autonomie complète de l'étudiant.", value: 50 }
+        ];
 
-  <script>
-    var dimensions = [
-      { id: 0, leftTitle: "PRÉSENCE", rightTitle: "DISTANCE", leftDesc: "Le dispositif institutionnalise un temps de formation.", rightDesc: "Le dispositif permet une souplesse temporelle, géographique et pédagogique.", value: 50 },
-      { id: 1, leftTitle: "PETIT GROUPE", rightTitle: "GRAND GROUPE", leftDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.", rightDesc: "Le nombre de participants influence les choix pédagogiques et les modalités d'accompagnement.", value: 50 },
-      { id: 2, leftTitle: "ASYNCHRONE", rightTitle: "SYNCHRONE", leftDesc: "Le dispositif offre la flexibilité d'activités réalisées en temps différé.", rightDesc: "Le dispositif s'appuie sur des rendez-vous virtuels pour des interactions en temps réel.", value: 50 },
-      { id: 3, leftTitle: "INDIVIDUEL", rightTitle: "COLLABORATIF", leftDesc: "Le dispositif privilégie des activités et travaux individuels.", rightDesc: "Le dispositif stimule des activités et travaux de groupe.", value: 50 },
-      { id: 4, leftTitle: "APPROPRIATION", rightTitle: "PRODUCTION", leftDesc: "L'enseignant·e propose les ressources d'apprentissage que les étudiant·es s'approprient.", rightDesc: "Les étudiant·es cherchent ou produisent les ressources nécessaires à leurs apprentissages.", value: 50 },
-      { id: 5, leftTitle: "AVEC ACCOMPAGNEMENT", rightTitle: "SANS ACCOMPAGNEMENT", leftDesc: "L'enseignant·e interagit avec les étudiant·es pour soutenir leurs apprentissages.", rightDesc: "Les étudiant·es gèrent leurs apprentissages en autonomie.", value: 50 }
-    ];
-    
-    var riskDefinitions = [
-      [0, 2, "high_high", 2], [0, 3, "high_high", 2], [0, 5, "high_high", 3], [0, 2, "low_low", 2],
-      [1, 3, "high_high", 2], [1, 4, "high_high", 2], [1, 5, "high_low", 2], [2, 3, "low_high", 2],
-      [2, 5, "high_high", 3], [3, 5, "high_high", 2], [4, 5, "high_high", 3]
-    ];
-    
-    var dimNames = ["Distance", "Grd groupe", "Synchrone", "Collaboratif", "Production", "Sans acc."];
-    
-    function getVal(i) { return dimensions[i].value; }
-    
-    function renderSliders(order) {
-      var container = document.getElementById("slidersContainer");
-      var html = "";
-      var indices = order.split(",");
-      for (var i = 0; i < indices.length; i++) {
-        var idx = parseInt(indices[i]);
-        var dim = dimensions[idx];
-        var colorClass = (i % 2 === 0) ? "dim-dark" : "dim-light";
-        html += '<div class="dimension ' + colorClass + '"><div class="labels"><div class="label-left"><h3>' + dim.leftTitle + '</h3><p>' + dim.leftDesc + '</p></div><div class="label-right"><h3>' + dim.rightTitle + '</h3><p>' + dim.rightDesc + '</p></div></div><div class="slider-box"><div class="slider-track"></div><div class="slider-cursor" id="cursor' + dim.id + '"></div><input type="range" min="0" max="100" value="' + dim.value + '" class="slider-range" id="slider' + dim.id + '" data-id="' + dim.id + '"></div></div>';
-      }
-      container.innerHTML = html;
-      for (var i = 0; i < 6; i++) {
-        (function(index) {
-          var slider = document.getElementById("slider" + index);
-          if (slider) {
-            slider.oninput = function() {
-              dimensions[parseInt(this.getAttribute("data-id"))].value = parseInt(this.value);
-              updateAll();
-            };
-          }
-        })(i);
-      }
-      updateAll();
-    }
-    
-    function checkAlerts() {
-      var p = getVal(0), n = getVal(1), t = getVal(2), c = getVal(3), r = getVal(4), a = getVal(5);
-      var alerts = [];
-      if (t > 65 && a > 65) alerts.push("Synchrone + Sans accompagnement : les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
-      if (c > 65 && t < 35) alerts.push("Collaboratif + Asynchrone : la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
-      if (r > 65 && a > 65) alerts.push("Production + Sans accompagnement : les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
-      if (t > 65 && c > 65 && r > 65 && a > 65) alerts.push("Configuration très exigeante : cette combinaison demande beaucoup d'autonomie et de compétences aux étudiant·es.");
-      if (t > 65 && r > 65 && c > 65 && a <= 65) alerts.push("Synchrone + Production + Collaboratif : cette combinaison demande une coordination importante en temps réel.");
-      if (n > 65 && a < 35) alerts.push("Grand groupe + Accompagnement fort : l'accompagnement individualisé devient difficile avec un grand nombre de participants.");
-      if (p > 65 && t > 65) alerts.push("Distance + Synchrone : les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.");
-      if (p > 65 && n > 65 && a > 65) alerts.push("Distance + Grand groupe + Sans accompagnement : les étudiant·es peuvent facilement se sentir isolés et perdus.");
-      if (p > 65 && c > 65) alerts.push("Distance + Collaboratif : la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.");
-      if (n > 65 && c > 65) alerts.push("Grand groupe + Collaboratif : organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.");
-      if (n > 65 && r > 65) alerts.push("Grand groupe + Production : accompagner la production de ressources par un grand groupe est exigeant.");
-      if (p < 35 && t < 35) alerts.push("Présence + Asynchrone : cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
-      var container = document.getElementById("alertsContainer");
-      container.innerHTML = alerts.length === 0 ? "" : alerts.map(function(a) { return '<div class="alert"><span class="alert-icon">⚠️</span><span>' + a + '</span></div>'; }).join("");
-    }
-    
-    function getRiskLevel(d1, d2) {
-      var v1 = getVal(d1), v2 = getVal(d2);
-      for (var i = 0; i < riskDefinitions.length; i++) {
-        var rd = riskDefinitions[i];
-        if ((rd[0] === d1 && rd[1] === d2) || (rd[0] === d2 && rd[1] === d1)) {
-          var c = rd[2], l = rd[3], m = false;
-          if (c === "high_high" && v1 > 65 && v2 > 65) m = true;
-          if (c === "low_low" && v1 < 35 && v2 < 35) m = true;
-          if (c === "high_low" && v1 > 65 && v2 < 35) m = true;
-          if (c === "low_high" && v1 < 35 && v2 > 65) m = true;
-          if (m) return l;
+        var riskDefinitions = [
+            [0, 2, "high_high", 2], [0, 3, "high_high", 2], [0, 5, "high_high", 3], [0, 2, "low_low", 2],
+            [1, 3, "high_high", 2], [1, 4, "high_high", 2], [1, 5, "high_low", 2], [2, 3, "low_high", 2],
+            [2, 5, "high_high", 3], [3, 5, "high_high", 2], [4, 5, "high_high", 3]
+        ];
+
+        var dimNames = ["Distance", "Grd groupe", "Synchrone", "Collaboratif", "Production", "Sans acc."];
+        var currentOrder = [0, 1, 2, 3, 4, 5];
+
+        // --- Core Functions ---
+
+        function getVal(id) { 
+            return dimensions.find(d => d.id === id).value; 
         }
-      }
-      return 0;
-    }
-    
-    function renderMatrix() {
-      var html = "<tr><th></th>";
-      for (var i = 0; i < 6; i++) html += "<th>" + dimNames[i] + "</th>";
-      html += "</tr>";
-      for (var row = 0; row < 6; row++) {
-        html += "<tr><th class='row-header'>" + dimNames[row] + "</th>";
-        for (var col = 0; col < 6; col++) {
-          if (row === col) { html += "<td class='diagonal'>—</td>"; }
-          else {
-            var risk = getRiskLevel(row, col);
-            var cls = "risk-none", txt = "—";
-            if (risk === 1) { cls = "risk-low"; txt = "Faible"; }
-            if (risk === 2) { cls = "risk-medium"; txt = "Modéré"; }
-            if (risk === 3) { cls = "risk-high"; txt = "Élevé"; }
-            html += "<td class='" + cls + "'>" + txt + "</td>";
-          }
+
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+            } else {
+                // Close others if needed, or keep multiple open. Let's keep multiple.
+                panel.classList.add('open');
+                if(panelId === 'matrixPanel') renderMatrix();
+                if(panelId === 'orderPanel') renderSortableList();
+            }
         }
-        html += "</tr>";
-      }
-      document.getElementById("riskMatrix").innerHTML = html;
-    }
-    
-    function updateAll() {
-      for (var i = 0; i < 6; i++) {
-        var cursor = document.getElementById("cursor" + i);
-        if (cursor) cursor.style.left = "calc(" + dimensions[i].value + "% - 12px)";
-      }
-      checkAlerts();
-      if (document.getElementById("matrixPanel").className.indexOf("hidden") === -1) renderMatrix();
-    }
-    
-    function resetAll() {
-      for (var i = 0; i < 6; i++) {
-        dimensions[i].value = 50;
-        var s = document.getElementById("slider" + i);
-        if (s) s.value = 50;
-      }
-      updateAll();
-    }
-    
-    document.getElementById("btnAlerts").onclick = function() {
-      var p = document.getElementById("alertsListPanel"), m = document.getElementById("matrixPanel"), o = document.getElementById("manualOrderPanel");
-      m.className = "matrix-panel hidden"; o.className = "manual-order hidden";
-      p.className = p.className.indexOf("hidden") > -1 ? "alerts-list-panel" : "alerts-list-panel hidden";
-    };
-    
-    document.getElementById("btnMatrix").onclick = function() {
-      var p = document.getElementById("matrixPanel"), a = document.getElementById("alertsListPanel"), o = document.getElementById("manualOrderPanel");
-      a.className = "alerts-list-panel hidden"; o.className = "manual-order hidden";
-      if (p.className.indexOf("hidden") > -1) { p.className = "matrix-panel"; renderMatrix(); }
-      else { p.className = "matrix-panel hidden"; }
-    };
-    
-    document.getElementById("orderBtn").onclick = function() {
-      var p = document.getElementById("manualOrderPanel"), a = document.getElementById("alertsListPanel"), m = document.getElementById("matrixPanel");
-      a.className = "alerts-list-panel hidden"; m.className = "matrix-panel hidden";
-      p.className = p.className.indexOf("hidden") > -1 ? "manual-order" : "manual-order hidden";
-    };
-    
-    var draggedItem = null;
-    var sortableList = document.getElementById("sortableList");
-    sortableList.addEventListener("dragstart", function(e) { if (e.target.classList.contains("sortable-item")) { draggedItem = e.target; e.target.classList.add("dragging"); } });
-    sortableList.addEventListener("dragend", function(e) { if (e.target.classList.contains("sortable-item")) { e.target.classList.remove("dragging"); draggedItem = null; } });
-    sortableList.addEventListener("dragover", function(e) {
-      e.preventDefault();
-      var after = getDragAfterElement(sortableList, e.clientY);
-      if (draggedItem) { if (after == null) sortableList.appendChild(draggedItem); else sortableList.insertBefore(draggedItem, after); }
-    });
-    
-    function getDragAfterElement(container, y) {
-      var els = Array.prototype.slice.call(container.querySelectorAll(".sortable-item:not(.dragging)"));
-      var result = null, closest = Number.NEGATIVE_INFINITY;
-      for (var i = 0; i < els.length; i++) {
-        var box = els[i].getBoundingClientRect();
-        var offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest) { closest = offset; result = els[i]; }
-      }
-      return result;
-    }
-    
-    document.getElementById("applyOrderBtn").onclick = function() {
-      var items = sortableList.querySelectorAll(".sortable-item");
-      var order = [];
-      for (var i = 0; i < items.length; i++) order.push(items[i].getAttribute("data-id"));
-      renderSliders(order.join(","));
-    };
-    
-    document.getElementById("btnReset").onclick = resetAll;
-    renderSliders("0,1,2,3,4,5");
-  </script>
+
+        function renderSliders() {
+            var container = document.getElementById("slidersContainer");
+            var html = "";
+            
+            currentOrder.forEach(idx => {
+                var dim = dimensions[idx];
+                html += `
+                <div id="slider-card-${dim.id}" class="slider-card bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all hover:shadow-md">
+                    <div class="flex justify-between items-end mb-4">
+                        <div class="w-5/12 text-left">
+                            <h3 class="text-sm font-bold text-slate-800 mb-1">${dim.leftTitle}</h3>
+                            <p class="text-xs text-slate-500 leading-snug">${dim.leftDesc}</p>
+                        </div>
+                        
+                        <div class="w-2/12 flex justify-center pb-2">
+                             <button onclick="updateVal(${dim.id}, 50); updateInput(${dim.id}, 50)" class="text-slate-300 hover:text-indigo-500 transition-colors p-1" title="Recentrer">
+                                <span class="material-icons-round text-lg">restart_alt</span>
+                            </button>
+                        </div>
+
+                        <div class="w-5/12 text-right">
+                            <h3 class="text-sm font-bold text-slate-800 mb-1">${dim.rightTitle}</h3>
+                            <p class="text-xs text-slate-500 leading-snug">${dim.rightDesc}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative h-10 flex items-center">
+                        <!-- Track Background Visuals -->
+                        <div class="absolute w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="w-1/2 h-full bg-slate-200/50"></div>
+                        </div>
+                        <!-- Input -->
+                        <input type="range" min="0" max="100" value="${dim.value}" id="range-${dim.id}"
+                            class="w-full relative z-10 appearance-none bg-transparent" 
+                            oninput="updateVal(${dim.id}, this.value)">
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateVal(id, val) {
+            var dim = dimensions.find(d => d.id === id);
+            dim.value = parseInt(val);
+            checkAlerts();
+            if(document.getElementById('matrixPanel').classList.contains('open')) renderMatrix();
+        }
+
+        // Helper to update visual input position when using the reset button
+        function updateInput(id, val) {
+            const input = document.getElementById(`range-${id}`);
+            if(input) input.value = val;
+        }
+
+        function checkAlerts() {
+            var p = getVal(0), n = getVal(1), t = getVal(2), c = getVal(3), r = getVal(4), a = getVal(5);
+            var alerts = [];
+            var conflictSet = new Set();
+            
+            function add(condition, msg, dims) {
+                if(condition) {
+                    alerts.push(msg);
+                    dims.forEach(d => conflictSet.add(d));
+                }
+            }
+            
+            // Alert Logic
+            add(t > 65 && a > 65, "<strong>Synchrone + Sans accompagnement :</strong> Les sessions live nécessitent une régulation active.", [2, 5]);
+            add(c > 65 && t < 35, "<strong>Collaboratif + Asynchrone :</strong> Nécessite une structuration très forte pour coordonner le groupe.", [3, 2]);
+            add(r > 65 && a > 65, "<strong>Production + Sans accompagnement :</strong> Risque de blocage sans feedback sur les productions.", [4, 5]);
+            add(t > 65 && c > 65 && r > 65 && a > 65, "<strong>Configuration extrême :</strong> Exige une très grande autonomie des étudiants.", [2, 3, 4, 5]);
+            add(t > 65 && r > 65 && c > 65 && a <= 65, "<strong>Synchrone + Prod + Collab :</strong> Coordination en temps réel très complexe à animer.", [2, 4, 3]);
+            add(n > 65 && a < 35, "<strong>Grand groupe + Accompagnement fort :</strong> Difficilement tenable sans une grande équipe pédagogique.", [1, 5]);
+            add(p > 65 && t > 65, "<strong>Distance + Synchrone :</strong> Attention à la qualité technique et la fatigue Zoom.", [0, 2]);
+            add(p > 65 && n > 65 && a > 65, "<strong>Distance + Grand gpe + Sans acc :</strong> Risque maximal d'isolement et d'abandon (MOOC style).", [0, 1, 5]);
+            add(p > 65 && c > 65, "<strong>Distance + Collaboratif :</strong> Nécessite des outils collaboratifs performants.", [0, 3]);
+            add(n > 65 && c > 65, "<strong>Grand groupe + Collaboratif :</strong> Logistique lourde (sous-groupes, suivi).", [1, 3]);
+            add(n > 65 && r > 65, "<strong>Grand groupe + Production :</strong> La correction/feedback de productions nombreuses est chronophage.", [1, 4]);
+            add(p < 35 && t < 35, "<strong>Présence + Asynchrone :</strong> Peu cohérent. Profitez de la présence pour l'interaction synchrone.", [0, 2]);
+
+            // Render Alerts
+            var container = document.getElementById("alertsContainer");
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="text-sm text-slate-400 italic text-center py-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">Aucune alerte détectée pour cette configuration.</div>';
+            } else {
+                container.innerHTML = alerts.map(txt => `
+                    <div class="flex items-start gap-3 bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg text-sm text-amber-900 shadow-sm">
+                        <span class="material-icons-round text-amber-500 text-lg mt-0.5">warning</span>
+                        <div class="leading-relaxed">${txt}</div>
+                    </div>
+                `).join("");
+            }
+
+            // Update Visual Cues
+            dimensions.forEach(dim => {
+                const card = document.getElementById(`slider-card-${dim.id}`);
+                if (card) {
+                    if (conflictSet.has(dim.id)) {
+                        card.classList.remove('border-slate-200', 'bg-white');
+                        card.classList.add('border-amber-400', 'bg-amber-50');
+                    } else {
+                        card.classList.add('border-slate-200', 'bg-white');
+                        card.classList.remove('border-amber-400', 'bg-amber-50');
+                    }
+                }
+            });
+        }
+
+        function getRiskLevel(d1, d2) {
+            var v1 = getVal(d1), v2 = getVal(d2);
+            for (var i = 0; i < riskDefinitions.length; i++) {
+                var rd = riskDefinitions[i];
+                if ((rd[0] === d1 && rd[1] === d2) || (rd[0] === d2 && rd[1] === d1)) {
+                    var c = rd[2], l = rd[3], m = false;
+                    if (c === "high_high" && v1 > 65 && v2 > 65) m = true;
+                    if (c === "low_low" && v1 < 35 && v2 < 35) m = true;
+                    if (c === "high_low" && v1 > 65 && v2 < 35) m = true;
+                    if (c === "low_high" && v1 < 35 && v2 > 65) m = true;
+                    if (m) return l;
+                }
+            }
+            return 0;
+        }
+
+        function renderMatrix() {
+            var html = "<thead><tr><th class='bg-slate-50 p-2 border-slate-200'></th>";
+            for (var i = 0; i < 6; i++) html += "<th class='bg-slate-50 p-2 font-bold text-slate-600 border-slate-200'>" + dimNames[i] + "</th>";
+            html += "</tr></thead><tbody>";
+            
+            for (var row = 0; row < 6; row++) {
+                html += "<tr><th class='bg-slate-50 p-2 text-left font-bold text-slate-600 border-slate-200 min-w-[80px]'>" + dimNames[row] + "</th>";
+                for (var col = 0; col < 6; col++) {
+                    if (row === col) { 
+                        html += "<td class='diagonal p-2'></td>"; 
+                    } else {
+                        var risk = getRiskLevel(row, col);
+                        var cls = "risk-none", txt = "—";
+                        if (risk === 1) { cls = "risk-low"; txt = "Faible"; }
+                        if (risk === 2) { cls = "risk-medium"; txt = "Modéré"; }
+                        if (risk === 3) { cls = "risk-high"; txt = "Élevé"; }
+                        html += "<td class='" + cls + " p-2 font-medium'>" + txt + "</td>";
+                    }
+                }
+                html += "</tr>";
+            }
+            html += "</tbody>";
+            document.getElementById("riskMatrix").innerHTML = html;
+        }
+
+        // --- Sortable Logic ---
+        function renderSortableList() {
+            var list = document.getElementById("sortableList");
+            list.innerHTML = "";
+            currentOrder.forEach(idx => {
+                var dim = dimensions[idx];
+                var li = document.createElement("li");
+                li.className = "flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200 cursor-grab active:cursor-grabbing sortable-item";
+                li.setAttribute("data-id", dim.id);
+                li.innerHTML = `
+                    <span class="material-icons-round text-slate-300">drag_indicator</span>
+                    <span class="font-medium text-slate-700 text-sm">${dim.leftTitle} <span class="text-slate-400 mx-2">↔</span> ${dim.rightTitle}</span>
+                `;
+                list.appendChild(li);
+            });
+
+            new Sortable(list, {
+                animation: 150,
+                ghostClass: 'sortable-ghost'
+            });
+        }
+
+        function applyOrder() {
+            var listItems = document.querySelectorAll("#sortableList li");
+            var newOrder = [];
+            listItems.forEach(item => {
+                newOrder.push(parseInt(item.getAttribute("data-id")));
+            });
+            currentOrder = newOrder;
+            renderSliders();
+            togglePanel('orderPanel'); // Close panel
+        }
+
+        function resetAll() {
+            if(confirm('Réinitialiser tous les curseurs à 50% ?')) {
+                dimensions.forEach(d => {
+                    d.value = 50;
+                    updateInput(d.id, 50);
+                });
+                renderSliders();
+                checkAlerts();
+                if(document.getElementById('matrixPanel').classList.contains('open')) renderMatrix();
+            }
+        }
+
+        // --- Init ---
+        renderSliders();
+        checkAlerts();
+    </script>
 </body>
 </html>
