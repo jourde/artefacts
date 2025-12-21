@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canevas Persona : L'Enseignant en Guyane</title>
+    <!-- Import des Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Import de html2pdf.js pour l'export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg-page: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #475569;
+            --border: #e2e8f0;
+            
+            /* Couleurs spécifiques Guyane */
+            --guyane-color: #059669; /* Un vert émeraude */
+            --guyane-bg: #ecfdf5;
+            --guyane-border: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header & Controls */
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--secondary);
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Toggle Button Area */
+        .controls {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid var(--border);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .switch-label {
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        /* The Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--guyane-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Actions Buttons */
+        .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+
+        .btn-reset {
+            background: #ef4444;
+            color: white;
+            border: 1px solid #ef4444;
+        }
+        .btn-reset:hover {
+            background: #dc2626;
+        }
+
+        /* Grid Layout */
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            page-break-inside: avoid; /* Prevent breaking inside cards when printing */
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.5rem 0;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Material Icons in Titles */
+        .card h2 .material-icons {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-sub);
+        }
+
+        input[type="text"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            margin-top: 4px;
+        }
+
+        /* Context Specific Styling */
+        .guyane-context {
+            display: none; /* Hidden by default */
+            background-color: var(--guyane-bg);
+            border-left: 4px solid var(--guyane-border);
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 0 6px 6px 0;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .guyane-label {
+            color: var(--guyane-color);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+            display: block;
+            font-weight: 700;
+        }
+
+        body.show-context .guyane-context {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Modal / Popup Styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 2rem;
+            border: 1px solid #888;
+            border-radius: 12px;
+            width: 90%; 
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+        }
+
+        .modal-content p {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        
+        .modal-footer {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+
+    </style>
+</head>
+<body id="contentToPrint">
+
+    <header>
+        <h1>Canevas de Persona pour le personnel d'éducation</h1>
+        <div class="subtitle">Concevoir des formations adaptées à la réalité terrain.</div>
+        
+        <!-- Added data-html2canvas-ignore to hide during PDF generation -->
+        <div class="controls" data-html2canvas-ignore="true">
+            <label class="switch-label">
+                <span>Vue Standard</span>
+                <label class="switch">
+                    <input type="checkbox" id="contextToggle">
+                    <span class="slider"></span>
+                </label>
+                <span style="color: var(--guyane-color);">Contexte Guyane</span>
+            </label>
+        </div>
+
+        <!-- Added data-html2canvas-ignore to hide during PDF generation -->
+        <div class="actions" data-html2canvas-ignore="true">
+            <button class="btn btn-outline" onclick="saveData()">
+                <span class="material-icons" style="font-size: 18px;">save</span> Sauvegarder
+            </button>
+            <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                <span class="material-icons" style="font-size: 18px;">upload_file</span> Charger
+            </button>
+            <button class="btn btn-outline" onclick="exportPDF()">
+                <span class="material-icons" style="font-size: 18px;">picture_as_pdf</span> PDF
+            </button>
+            <button class="btn btn-outline" onclick="exportMarkdown()">
+                <span class="material-icons" style="font-size: 18px;">integration_instructions</span> Markdown
+            </button>
+            <button class="btn btn-outline" onclick="loadExample()">Charger l'exemple "Sarah"</button>
+            <button class="btn btn-outline" onclick="openInfoModal()">
+                <span class="material-icons" style="font-size: 18px;">info</span> Info
+            </button>
+            <button class="btn btn-reset" onclick="resetForm()">Réinitialiser</button>
+            
+            <!-- Hidden Input for loading files -->
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="loadData(this)">
+        </div>
+    </header>
+
+    <div class="container">
+        <form id="personaForm" class="canvas-grid">
+
+            <!-- 1. IDENTITÉ -->
+            <div class="card">
+                <h2><span class="material-icons">badge</span> Identité</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Prénom</label>
+                    <input type="text" placeholder="Ex: Julie" id="name">
+                </div>
+                <div class="form-group">
+                    <label>Niveau d'enseignement</label>
+                    <select id="level">
+                        <option value="">Sélectionner...</option>
+                        <option value="Maternelle">Maternelle</option>
+                        <option value="Élémentaire">Élémentaire</option>
+                        <option value="Collège">Collège</option>
+                        <option value="Lycée">Lycée / Lycée Pro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Discipline (si 2nd degré)</label>
+                    <input type="text" placeholder="Ex: Histoire-Géo, Maths..." id="discipline">
+                </div>
+                
+                <div class="form-group">
+                    <label>Statut</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="radio" name="status" value="Titulaire"> Titulaire</label>
+                        <label class="checkbox-item"><input type="radio" name="status" value="Contractuel"> Contractuel</label>
+                        <label class="checkbox-item"><input type="radio" name="status" value="Stagiaire"> Stagiaire (ESPE/INSPE)</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="form-group">
+                        <label>Origine & Mobilité</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="radio" name="origin" value="Muté"> Muté depuis Métropole/DOM</label>
+                            <label class="checkbox-item"><input type="radio" name="origin" value="Local"> Recrutement local / Originaire</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ancienneté sur le territoire</label>
+                        <select id="seniority">
+                            <option value="">Sélectionner...</option>
+                            <option value="Arrivant">Arrive tout juste (< 1 an)</option>
+                            <option value="Installé">1 à 3 ans</option>
+                            <option value="Ancien">Plus de 3 ans / Natif</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CONTEXTE D'EXERCICE -->
+            <div class="card">
+                <h2><span class="material-icons">place</span> Lieu & Classe</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Type d'établissement</label>
+                    <input type="text" placeholder="Ex: École de quartier..." id="schoolType">
+                </div>
+                
+                <div class="form-group">
+                    <label>Profil général de la classe</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="heterogeneity"> Hétérogénéité scolaire</label>
+                        <label class="checkbox-item"><input type="checkbox" id="climate"> Gestion de classe difficile</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="form-group">
+                        <label>Localisation & Isolement</label>
+                        <select id="location">
+                            <option value="">Sélectionner...</option>
+                            <option value="Urbain">Zone Urbaine / Littoral (Cayenne, Kourou...)</option>
+                            <option value="Fleuve">Commune Isolée / Fleuve (Accès avion/pirogue)</option>
+                            <option value="Site">Site Isolé (Hameau reculé)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Réalités Terrain</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item"><input type="checkbox" id="allophone"> Élèves allophones / Plurilinguisme fort</label>
+                            <label class="checkbox-item"><input type="checkbox" id="absenteeism"> Absentéisme (Saisons, pirogue)</label>
+                            <label class="checkbox-item"><input type="checkbox" id="heat"> Climatisation HS / Chaleur extrême</label>
+                            <label class="checkbox-item"><input type="checkbox" id="power"> Coupures électricité / Net HS</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. COMPÉTENCES NUMÉRIQUES -->
+            <div class="card">
+                <h2><span class="material-icons">devices</span> Numérique</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Outils maîtrisés</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="office"> Bureautique (Word/PPT)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="institution"> Outils Institutionnels (ENT, Pronote)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="smartphone"> Smartphone only</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="systemD"> Système D (Ressources hors-ligne, partage de connexion)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="fracture"> Fracture numérique (Matériel obsolète)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. MOTIVATIONS -->
+            <div class="card">
+                <h2><span class="material-icons">psychology</span> Motivations</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Pourquoi se former ?</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="classManagement"> Gestion de classe / Autorité</label>
+                        <label class="checkbox-item"><input type="checkbox" id="security"> Sécurisation Pro / Concours</label>
+                        <label class="checkbox-item"><input type="checkbox" id="time"> Gain de temps (Ressources prêtes)</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="fls"> Urgence FLS (Français Langue de Scolarisation)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="culture"> Adaptation Culturelle (Codes locaux)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="isolation"> Rompre l'isolement géographique</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. FREINS -->
+            <div class="card">
+                <h2><span class="material-icons">warning</span> Freins</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Obstacles à la formation</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="workload"> Charge de travail</label>
+                        <label class="checkbox-item"><input type="checkbox" id="useless"> Sentiment d'inutilité (Théorie vs Pratique)</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="internet"> Connexion domicile instable/inexistante</label>
+                        <label class="checkbox-item"><input type="checkbox" id="fatigue"> Fatigue climatique (Chaleur/Humidité)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="turnover"> Turnover ("Je repars bientôt")</label>
+                        <label class="checkbox-item"><input type="checkbox" id="jetlag"> Décalage horaire (si formateur métropole)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. PRÉFÉRENCES (FORMAT) -->
+            <div class="card">
+                <h2><span class="material-icons">headphones</span> Format</h2>
+                
+                <!-- Base -->
+                <div class="form-group">
+                    <label>Formats préférés</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="micro"> Micro-learning (5-10 min)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="mobile"> Mobile Learning</label>
+                    </div>
+                </div>
+
+                <!-- Context Guyane -->
+                <div class="guyane-context">
+                    <span class="guyane-label">Spécifique Guyane</span>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="offline"> Mode "Hors-ligne" (Téléchargement)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="whatsapp"> WhatsApp (Faible débit / Informalité)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="peer"> Pair-à-pair local (Témoignages crédibles)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. SCÉNARIO TYPE (Full Width) -->
+            <div class="card full-width">
+                <h2><span class="material-icons">edit_note</span> Scénario / Journée Type</h2>
+                <div class="form-group">
+                    <label>Racontez sa journée pour identifier les créneaux disponibles et les contraintes techniques.</label>
+                    <textarea id="scenario" placeholder="Ex: Finit la classe à 13h à cause de la chaleur. Pas de réseau le soir..."></textarea>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <footer>
+        <p>Outil de conception pédagogique basé sur les réalités de l'Académie de Guyane.</p>
+    </footer>
+
+    <!-- Modal Info (Ignored in PDF) -->
+    <div id="infoModal" class="modal" data-html2canvas-ignore="true">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeInfoModal()">&times;</span>
+            <h2>À propos</h2>
+            <p>Cet outil permet de modéliser les besoins, motivations et contraintes des personnels d'éducation afin de concevoir des formations adaptées.</p>
+            <p><strong>Traitement local :</strong> toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.</p>
+            <div class="modal-footer">
+                F. Jourde & J. Dubois (2026) • CC BY-SA
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const toggle = document.getElementById('contextToggle');
+        const body = document.body;
+        const modal = document.getElementById('infoModal');
+
+        // Toggle logic
+        toggle.addEventListener('change', function() {
+            if(this.checked) {
+                body.classList.add('show-context');
+            } else {
+                body.classList.remove('show-context');
+            }
+        });
+
+        // Save Functionality
+        function saveData() {
+            const data = {
+                contextToggle: toggle.checked,
+                fields: {}
+            };
+
+            // Capture standard inputs with IDs
+            document.querySelectorAll('[id]').forEach(el => {
+                if(el.id === 'contextToggle') return; // Handled separately
+                if(el.id === 'fileInput') return; // Skip hidden input
+
+                if(el.type === 'checkbox') {
+                    data.fields[el.id] = el.checked;
+                } else if (el.value !== undefined) {
+                    data.fields[el.id] = el.value;
+                }
+            });
+
+            // Capture Radio Buttons (by Name)
+            const radioNames = new Set();
+            document.querySelectorAll('input[type="radio"]').forEach(el => radioNames.add(el.name));
+            radioNames.forEach(name => {
+                const checked = document.querySelector(`input[name="${name}"]:checked`);
+                if(checked) {
+                    data.fields['radio:' + name] = checked.value;
+                }
+            });
+
+            // Create JSON File
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            
+            // Trigger Download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "persona_guyane.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Load Functionality
+        function loadData(input) {
+            const file = input.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    restoreForm(data);
+                } catch(err) {
+                    alert("Erreur lors de la lecture du fichier : " + err);
+                }
+                // Reset input so same file can be selected again if needed
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function restoreForm(data) {
+            // Restore Toggle
+            toggle.checked = !!data.contextToggle;
+            if(toggle.checked) body.classList.add('show-context');
+            else body.classList.remove('show-context');
+
+            // Restore Fields
+            for (const [key, value] of Object.entries(data.fields)) {
+                if(key.startsWith('radio:')) {
+                    const name = key.split(':')[1];
+                    const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+                    if(radio) radio.checked = true;
+                } else {
+                    const el = document.getElementById(key);
+                    if(el) {
+                        if(el.type === 'checkbox') el.checked = value;
+                        else el.value = value;
+                    }
+                }
+            }
+        }
+
+        // PDF Export Functionality
+        function exportPDF() {
+            // Retrieve name for filename
+            const nameValue = document.getElementById('name').value;
+            const safeName = nameValue ? nameValue.replace(/[^a-z0-9]/gi, '_') : 'persona';
+            
+            const element = document.body;
+            const opt = {
+                margin:       10, // mm
+                filename:     `Canevas_${safeName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate PDF
+            // The data-html2canvas-ignore attributes in HTML will prevent buttons/controls from appearing
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Markdown Export Functionality
+        function exportMarkdown() {
+            const name = document.getElementById('name').value || 'Persona';
+            let md = `# Profil Persona : ${name}\n`;
+            md += `> Contexte : Éducation nationale / Académie de Guyane\n`;
+            md += `> Date : ${new Date().toLocaleDateString()}\n\n`;
+
+            const isGuyane = document.getElementById('contextToggle').checked;
+
+            // Helper to process a specific DOM element (form-group or checkbox-group)
+            const processElement = (el) => {
+                let text = '';
+                
+                if (el.classList.contains('form-group')) {
+                    const labelEl = el.querySelector('label');
+                    const label = labelEl ? labelEl.innerText.replace(':','').trim() : 'Champ';
+                    
+                    // Text/Select/Textarea
+                    const simpleInput = el.querySelector('input[type="text"], select, textarea');
+                    if (simpleInput) {
+                        const val = simpleInput.value.trim();
+                        if (val && val !== 'Sélectionner...') {
+                            text += `- **${label}** : ${val}\n`;
+                        }
+                    }
+
+                    // Radio/Checkbox inside form-group
+                    const inputs = el.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+                    if (inputs.length > 0) {
+                        if (inputs[0].type === 'radio') {
+                            const checked = el.querySelector('input:checked');
+                            if (checked) {
+                                text += `- **${label}** : ${checked.parentElement.innerText.trim()}\n`;
+                            }
+                        } else {
+                            // Checkboxes
+                            const checked = el.querySelectorAll('input:checked');
+                            if (checked.length > 0) {
+                                text += `- **${label}** :\n`;
+                                checked.forEach(c => {
+                                    text += `  - ${c.parentElement.innerText.trim()}\n`;
+                                });
+                            }
+                        }
+                    }
+                } else if (el.classList.contains('checkbox-group')) {
+                    // Standalone checkbox group (no label wrapper)
+                    const checked = el.querySelectorAll('input:checked');
+                    checked.forEach(c => {
+                        text += `- ${c.parentElement.innerText.trim()}\n`;
+                    });
+                }
+                return text;
+            };
+
+            document.querySelectorAll('.card').forEach(card => {
+                // Title cleaning
+                let title = card.querySelector('h2').innerText;
+                // Remove icon text (ligature)
+                const icon = card.querySelector('h2 .material-icons');
+                if(icon) title = title.replace(icon.innerText, '');
+                title = title.trim();
+
+                let sectionContent = '';
+
+                // Iterate children
+                Array.from(card.children).forEach(child => {
+                    if (child.tagName === 'H2') return;
+
+                    if (child.classList.contains('guyane-context')) {
+                        if (isGuyane) {
+                            let contextContent = '';
+                            Array.from(child.children).forEach(ctxChild => {
+                                contextContent += processElement(ctxChild);
+                            });
+                            if (contextContent) {
+                                sectionContent += `\n> **Contexte Guyane**\n${contextContent}`;
+                            }
+                        }
+                    } else {
+                        sectionContent += processElement(child);
+                    }
+                });
+
+                if (sectionContent.trim()) {
+                    md += `## ${title}\n${sectionContent}\n`;
+                }
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Persona_${name.replace(/\s+/g, '_')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Load Example Logic (Sarah)
+        function loadExample() {
+            // Activer le mode Guyane pour voir les champs remplis
+            toggle.checked = true;
+            body.classList.add('show-context');
+
+            // Identité
+            document.getElementById('name').value = "Sarah";
+            document.getElementById('level').value = "Élémentaire"; // CP = Elem
+            document.querySelector('input[name="status"][value="Contractuel"]').checked = true;
+            document.querySelector('input[name="origin"][value="Local"]').checked = true; // Assumption based on context or "Recrutement local" logic
+            
+            // Contexte
+            document.getElementById('schoolType').value = "École de Camopi (Oyapock)";
+            document.getElementById('location').value = "Fleuve";
+            document.getElementById('allophone').checked = true;
+            document.getElementById('power').checked = true; // Implies weak tech context
+            
+            // Motivations
+            document.getElementById('fls').checked = true; // "Méthodes lecture classiques ne fonctionnent pas"
+            document.getElementById('classManagement').checked = false;
+
+            // Freins
+            document.getElementById('internet').checked = true; // "Internet satellite lent"
+
+            // Format
+            document.getElementById('mobile').checked = true;
+            document.getElementById('offline').checked = true; // "PDF légers, podcasts téléchargeables"
+
+            // Scénario
+            document.getElementById('scenario').value = "Sarah, 24 ans. Enseigne le CP à Camopi. Ses élèves parlent Wayampi ou Teko. Elle est désespérée par les méthodes inadaptées. Internet est trop lent pour le streaming. Elle a besoin de fiches PDF légères et d'audio pour se former au FLS.";
+        }
+
+        function resetForm() {
+            document.getElementById('personaForm').reset();
+            toggle.checked = false;
+            body.classList.remove('show-context');
+        }
+
+        // Modal Logic
+        function openInfoModal() {
+            modal.style.display = "block";
+        }
+
+        function closeInfoModal() {
+            modal.style.display = "none";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
