@@ -277,7 +277,7 @@
         .card h2 {
             font-size: 1.1rem;
             color: var(--primary-dark);
-            margin: 0 0 0.5rem 0;
+            margin: 0 0 0.2rem 0; /* Reduced margin */
             border-bottom: 2px solid #f1f5f9;
             padding-bottom: 0.5rem;
             text-transform: uppercase;
@@ -285,6 +285,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .card-desc {
+            color: var(--secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-style: italic;
         }
 
         /* Material Icons in Titles */
@@ -545,6 +552,7 @@
             <!-- 1. IDENTITÉ -->
             <div class="card">
                 <h2><span class="material-icons">badge</span> Identité</h2>
+                <div class="card-desc">Profil administratif et personnel.</div>
                 
                 <!-- Base -->
                 <div class="form-group">
@@ -601,6 +609,7 @@
             <!-- 2. CONTEXTE D'EXERCICE -->
             <div class="card">
                 <h2><span class="material-icons">place</span> Lieu & Classe</h2>
+                <div class="card-desc">Environnement et conditions d'exercice.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large (textarea) -->
                 <div class="form-group">
@@ -662,6 +671,7 @@
             <!-- 3. COMPÉTENCES NUMÉRIQUES -->
             <div class="card">
                 <h2><span class="material-icons">devices</span> Numérique</h2>
+                <div class="card-desc">Équipement et compétences technologiques.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
@@ -706,6 +716,7 @@
             <!-- 4. MOTIVATIONS -->
             <div class="card">
                 <h2><span class="material-icons">psychology</span> Motivations</h2>
+                <div class="card-desc">Besoins et attentes vis-à-vis de la formation.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
@@ -749,6 +760,7 @@
             <!-- 5. FREINS -->
             <div class="card">
                 <h2><span class="material-icons">warning</span> Freins</h2>
+                <div class="card-desc">Obstacles potentiels à l'apprentissage.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
@@ -792,6 +804,7 @@
             <!-- 6. PRÉFÉRENCES (FORMAT) -->
             <div class="card">
                 <h2><span class="material-icons">headphones</span> Format</h2>
+                <div class="card-desc">Modalités pédagogiques préférées.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large -->
                 <div class="form-group">
@@ -834,6 +847,7 @@
             <!-- 7. SCÉNARIO TYPE (Full Width) -->
             <div class="card full-width">
                 <h2><span class="material-icons">edit_note</span> Scénario / Journée Type</h2>
+                <div class="card-desc">Déroulé d'une journée type et disponibilités.</div>
                 <div class="form-group">
                     <label>Racontez sa journée pour identifier les créneaux disponibles et les contraintes techniques.</label>
                     <textarea id="scenario" placeholder="Ex: Finit la classe à 13h à cause de la chaleur. Pas de réseau le soir..."></textarea>
@@ -1077,6 +1091,7 @@
                 Array.from(card.children).forEach(child => {
                     if (child.tagName === 'H2') return;
                     if (child.tagName === 'BUTTON') return; // Skip toggle buttons
+                    if (child.classList.contains('card-desc')) return; // Skip description
 
                     if (child.classList.contains('guyane-context')) {
                         if (isGuyane) {
@@ -1186,6 +1201,7 @@
                 Array.from(card.children).forEach(child => {
                     if (child.tagName === 'H2') return;
                     if (child.tagName === 'BUTTON') return; // Skip toggle buttons
+                    if (child.classList.contains('card-desc')) return; // Skip description
 
                     if (child.classList.contains('guyane-context')) {
                         if (isGuyane) {
@@ -1231,13 +1247,12 @@
 
             // Identité
             document.getElementById('name').value = "Sarah";
-            document.getElementById('level').value = "Élémentaire"; // CP = Elem
-            
-            // Updated to Select
+            document.getElementById('level').value = "Élémentaire";
+            document.getElementById('discipline').value = ""; 
             document.getElementById('status').value = "Contractuel";
-            
-            document.querySelector('input[name="origin"][value="Local"]').checked = true; // Assumption based on context or "Recrutement local" logic
-            
+            document.querySelector('input[name="origin"][value="Local"]').checked = true;
+            document.getElementById('seniority').value = "Arrivant";
+
             // Contexte
             document.getElementById('contextDetails').value = "Classe de CP surchargée (28 élèves).";
             document.getElementById('schoolType').value = "École de Camopi (Oyapock)";
