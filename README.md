@@ -8,6 +8,6 @@
 ### Curseurs
   - https://jourde.github.io/artefacts/curseurs.html
 ### Persona
-  - ...
+  - https://jourde.github.io/artefacts/persona-guyane.html
 ### Learning Designer
   - https://jourde.github.io/artefacts/learning-designer.html
