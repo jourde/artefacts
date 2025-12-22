@@ -169,6 +169,7 @@
                                     <option value="markdown" data-i18n="opt_md">Markdown (GenAI)</option>
                                     <option value="pdf" data-i18n="opt_pdf">PDF</option>
                                     <option value="richtext" data-i18n="opt_rtf">Rich Text</option>
+                                    <option value="rtf" data-i18n="opt_real_rtf">Text (.rtf)</option>
                                 </select>
                                 <span class="material-icons-round text-slate-400 pointer-events-none absolute right-2 text-lg">expand_more</span>
                             </div>
@@ -756,6 +757,7 @@
                 opt_md: "Markdown (GenAI)",
                 opt_pdf: "PDF (Print)",
                 opt_rtf: "Rich Text (HTML)",
+                opt_real_rtf: "Text (.rtf)",
                 title_export_term: "Export translation table (EN/FR)",
                 info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
                 label_total_time: "Timeline",
@@ -922,6 +924,7 @@
                 opt_md: "Markdown (IA)",
                 opt_pdf: "PDF (Imprimer)",
                 opt_rtf: "Texte Riche (HTML)",
+                opt_real_rtf: "Texte (.rtf)",
                 title_export_term: "Exporter le tableau de traduction (EN/FR)",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Chronologie",
@@ -2164,6 +2167,8 @@
                 window.print();
             } else if (value === 'richtext') {
                 exportRichText();
+            } else if (value === 'rtf') {
+                exportRTF();
             }
         }
 
@@ -2279,6 +2284,121 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = 'learning-design-profile.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportRTF() {
+            // Helper to escape RTF special chars and handle unicode
+            const escapeRTF = (text) => {
+                if (!text) return "";
+                // 1. Escape basic RTF chars: \, {, }
+                let s = text.replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
+                // 2. Handle newlines
+                s = s.replace(/\n/g, '\\par ');
+                // 3. Handle Unicode (simple approach)
+                return s.replace(/[^\x00-\x7F]/g, c => `\\u${c.charCodeAt(0)}?`);
+            };
+
+            const t = translations[currentLang];
+            
+            // Header: Basic RTF header, Font Table (Segoe UI), Color Table
+            let rtf = `{\\rtf1\\ansi\\deff0\\nouicompat{\\fonttbl{\\f0\\fnil\\fcharset0 Segoe UI;}{\\f1\\fnil\\fcharset0 Segoe UI;}}
+{\\colortbl ;\\red79\\green70\\blue229;\\red107\\green114\\blue128;}
+\\viewkind4\\uc1 
+\\pard\\sa200\\sl276\\slmult1\\f0\\fs32\\b ${escapeRTF(t.rtf_title)}\\par
+\\pard\\sa200\\sl276\\slmult1\\fs24\\b0\\par
+`;
+
+            // Metadata
+            rtf += `\\b\\fs28 ${escapeRTF("Metadata")}\\b0\\fs24\\par\n`;
+            const meta = [
+                [t.label_course_name, document.getElementById('param-name').value],
+                [t.label_topic, document.getElementById('param-topic').value],
+                [t.label_authors, document.getElementById('param-authors').value],
+                [t.label_mode, document.getElementById('param-mode').selectedOptions[0]?.innerText || ''],
+                [t.label_class_size, document.getElementById('global-class-size').value],
+                [t.label_total_time, document.getElementById('total-duration').innerText],
+                [t.label_learning_time, `${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}`]
+            ];
+            
+            meta.forEach(item => {
+                rtf += `\\b ${escapeRTF(item[0])}:\\b0  ${escapeRTF(item[1])}\\par\n`;
+            });
+            rtf += `\\par\n`;
+
+            // Key Info
+            rtf += `\\b\\fs28 ${escapeRTF("Key Info")}\\b0\\fs24\\par\n`;
+            rtf += `\\b ${escapeRTF(t.label_aims)}\\b0\\par\n`;
+            rtf += `${escapeRTF(document.getElementById('param-aims').value)}\\par\\par\n`;
+            
+            rtf += `\\b ${escapeRTF(t.label_outcomes)}\\b0\\par\n`;
+            // Outcomes list
+            document.querySelectorAll('#outcomes-list li').forEach(li => {
+                const text = li.querySelector('.outcome-text').innerText;
+                const level = li.querySelector('.outcome-bloom-level').value;
+                const sub = li.querySelector('.outcome-bloom-sub').value;
+                let bloomText = "";
+                if(level) {
+                    bloomText += `[${t[`bloom_${level}`] || level.toUpperCase()}`;
+                    if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
+                    bloomText += "] ";
+                }
+                rtf += `\\bullet  ${escapeRTF(bloomText + text)}\\par\n`;
+            });
+            rtf += `\\par\n`;
+            
+            rtf += `\\b ${escapeRTF(t.label_description)}\\b0\\par\n`;
+            rtf += `${escapeRTF(document.getElementById('param-description').value)}\\par\\par\n`;
+
+            // Structure
+            rtf += `\\b\\fs28 ${escapeRTF("Pedagogical Structure")}\\b0\\fs24\\par\n`;
+            
+            document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
+                const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                const activityDesc = activity.querySelector('.activity-description').value;
+                
+                rtf += `\\par\\pard\\sa200\\sl276\\slmult1\\b\\f1\\fs26 ${escapeRTF(t.md_untitled_activity.replace('Untitled Activity', 'Activity') + " " + (aIdx + 1) + ": " + activityTitle)}\\b0\\f0\\fs24\\par\n`;
+                
+                if (activityDesc) {
+                    rtf += `\\i ${escapeRTF(activityDesc)}\\i0\\par\\par\n`;
+                }
+
+                activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
+                    const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
+                    const typeKey = step.querySelector('.learning-type-select').value;
+                    const typeLabel = t[`type_${typeKey}`];
+                    const duration = `${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}`;
+                    const groupMode = step.querySelector('.step-group-mode').value;
+                    let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
+                    const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
+                    const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
+                    const tasks = step.querySelector('.step-input-tasks').value || "";
+                    const notes = step.querySelector('.step-input-notes').value || "";
+
+                    rtf += `\\pard\\li720\\sa200\\sl276\\slmult1\\b ${sIdx + 1}. ${escapeRTF(stepTitle)} (${escapeRTF(typeLabel)})\\b0\\par\n`;
+                    rtf += `\\pard\\li720\\sa100\\sl276\\slmult1\\cf2\\fs22 Duration: ${escapeRTF(duration)} | Group: ${escapeRTF(groupInfo)} | Mode: ${escapeRTF(trainerText)}, ${escapeRTF(placeText)}, ${escapeRTF(timeText)}\\cf0\\fs24\\par\n`;
+                    
+                    if (tasks) {
+                        rtf += `\\pard\\li720\\sa200\\sl276\\slmult1 ${escapeRTF(tasks)}\\par\n`;
+                    }
+                    if (notes) {
+                        rtf += `\\pard\\li720\\sa200\\sl276\\slmult1\\i Note: ${escapeRTF(notes)}\\i0\\par\n`;
+                    }
+                    rtf += `\\par\n`;
+                });
+                
+                rtf += `\\pard\\sa200\\sl276\\slmult1 --------------------------------------------------\\par\n`;
+            });
+
+            rtf += `}`;
+
+            const blob = new Blob([rtf], { type: 'application/rtf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design-profile.rtf';
             a.click();
             URL.revokeObjectURL(url);
         }
