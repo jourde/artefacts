@@ -1,5 +1,5 @@
 **Publication et partage d'essais en vibe coding // Publication and sharing of experiments in vibe coding.**
-- [vibe coding (FR)]([url](https://fr.wikipedia.org/wiki/Vibe_coding))// [vibe coding(ENB)]([url](https://en.wikipedia.org/wiki/Vibe_coding))
+- [vibe coding (FR)](https://fr.wikipedia.org/wiki/Vibe_coding) // [vibe coding(ENB)](https://en.wikipedia.org/wiki/Vibe_coding)
 - Explorez les fichiers du répertoire // Explore the files in the directory
 - Utilisez les liens ci-dessous pour visualiser les artefacts // Use the links below to view the artefacts.
 
