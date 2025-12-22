@@ -160,10 +160,20 @@
                             <span class="text-sm font-medium hidden md:inline" data-i18n="btn_load">Load</span>
                         </button>
                         <div class="w-px bg-slate-200 my-1 mx-1"></div>
-                        <button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="info_export_genai">
-                            <span class="material-icons-round text-xl">download</span>
-                            <span class="text-sm font-medium hidden md:inline" data-i18n="btn_export">Export for GenAI</span>
-                        </button>
+                        
+                        <!-- New Export Dropdown -->
+                        <div class="relative group">
+                            <div class="flex items-center">
+                                <select onchange="handleExport(this)" class="appearance-none bg-transparent hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 pl-3 pr-8 py-2 rounded-md transition-colors outline-none cursor-pointer text-sm font-medium h-[36px]" data-i18n-title="title_export_dropdown">
+                                    <option value="" disabled selected data-i18n="btn_export_dropdown">Export...</option>
+                                    <option value="markdown" data-i18n="opt_md">Markdown (GenAI)</option>
+                                    <option value="pdf" data-i18n="opt_pdf">PDF</option>
+                                    <option value="richtext" data-i18n="opt_rtf">Rich Text</option>
+                                </select>
+                                <span class="material-icons-round text-slate-400 pointer-events-none absolute right-2 text-lg">expand_more</span>
+                            </div>
+                        </div>
+
                         <button onclick="exportTerminology()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-md transition-colors flex items-center gap-2" data-i18n-title="title_export_term">
                             <span class="material-icons-round text-xl">translate</span>
                         </button>
@@ -238,7 +248,7 @@
                     </div>
                     <div>
                         <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_export_title">4. Save & Export</h3>
-                        <p class="mb-2" data-i18n="help_export_text"><strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.</p>
+                        <p class="mb-2" data-i18n="help_export_text"><strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.</p>
                     </div>
                 </div>
             </div>
@@ -249,7 +259,7 @@
             <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print" data-i18n-title="title_toggle_panel">
                 <div class="flex items-center gap-2">
                     <span class="material-icons-round text-slate-500">tune</span>
-                    <span class="font-bold text-slate-700 uppercase text-sm tracking-wide" data-i18n="panel_key_parameters">Key Parameters</span>
+                    <span class="font-bold text-slate-700 uppercase text-sm tracking-wide" data-i18n="panel_key_parameters">Parameters</span>
                 </div>
                 <span id="key-params-panel-icon" class="material-icons-round text-slate-400 rotate-icon">expand_more</span>
             </button>
@@ -514,15 +524,23 @@
     <!-- Templates -->
     <template id="activity-template">
         <div class="activity-group relative">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 px-2 gap-4">
-                <div class="flex-1 flex items-center gap-4">
-                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8 cursor-grab">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-4 px-2 gap-4">
+                <div class="flex-1 flex items-start gap-4">
+                    <div class="drag-handle-activity drag-handle text-slate-300 hover:text-slate-500 no-print flex items-center justify-center w-8 h-8 cursor-grab mt-1">
                         <span class="material-icons-round text-2xl">drag_indicator</span>
                     </div>
                     <div class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 activity-index shrink-0">1</div>
-                    <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                    <div class="flex-1 w-full">
+                        <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
+                        
+                        <!-- Activity-specific Timeline Bar -->
+                        <div class="flex items-center gap-3 mt-1 pr-2">
+                            <div class="activity-type-bar flex-1 h-2.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden flex"></div>
+                            <span class="activity-total-time text-[10px] font-bold text-slate-400 w-12 text-right font-mono">0m</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 no-print">
+                <div class="flex items-center gap-3 no-print mt-1">
                     <button onclick="toggleActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Toggle Activity" data-i18n-title="title_toggle_panel">
                         <span class="material-icons-round text-2xl rotate-icon">expand_more</span>
                     </button>
@@ -731,7 +749,12 @@
                 grp_view: "View",
                 grp_actions: "Actions",
                 grp_help: "Help",
-                btn_export: "Export for GenAI",
+                // Export Translations
+                btn_export_dropdown: "Export As...",
+                title_export_dropdown: "Choose export format",
+                opt_md: "Markdown (GenAI)",
+                opt_pdf: "PDF (Print)",
+                opt_rtf: "Rich Text (HTML)",
                 title_export_term: "Export translation table (EN/FR)",
                 info_export_genai: "The export format is the learning design in Markdown for easy processing by a generative AI chatbot.",
                 label_total_time: "Timeline",
@@ -804,6 +827,7 @@
                 md_format_groups: "Groups of",
                 md_tasks: "Student Tasks & Instructions",
                 md_notes: "Pedagogical Notes",
+                rtf_title: "Learning Experience Design Profile",
                 title_duplicate_activity: "Duplicate this activity",
                 title_delete_activity: "Delete this activity",
                 title_duplicate_step: "Duplicate this step",
@@ -831,8 +855,8 @@
                 help_analysis_title: "3. Analysis Dashboard",
                 help_analysis_text: "Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the \"Pedagogical Balance\" radar chart and the \"Context\" pie charts to ensure your course meets its goals.",
                 help_export_title: "4. Save & Export",
-                help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate a structured Markdown file optimized for Generative AI (RAG) or documentation.",
-                panel_key_parameters: "Key Parameters",
+                help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.",
+                panel_key_parameters: "Parameters",
                 label_course_name: "Course Name",
                 ph_course_name: "Enter course name...",
                 label_topic: "Topic",
@@ -890,7 +914,12 @@
                 grp_view: "Vue",
                 grp_actions: "Actions",
                 grp_help: "Aide",
-                btn_export: "Exporter pour GenAI",
+                // Export Translations FR
+                btn_export_dropdown: "Exporter...",
+                title_export_dropdown: "Choisir le format d'export",
+                opt_md: "Markdown (IA)",
+                opt_pdf: "PDF (Imprimer)",
+                opt_rtf: "Texte Riche (HTML)",
                 title_export_term: "Exporter le tableau de traduction (EN/FR)",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Chronologie",
@@ -963,8 +992,9 @@
                 md_format_groups: "Groupes de",
                 md_tasks: "Tâches et instructions des apprenants",
                 md_notes: "Notes pédagogiques",
+                rtf_title: "Profil de Design d'Expérience d'Apprentissage",
                 title_duplicate: "Dupliquer",
-                panel_key_parameters: "Paramètres Clés",
+                panel_key_parameters: "Paramètres",
                 label_course_name: "Nom du Cours",
                 ph_course_name: "Entrez le nom...",
                 label_topic: "Sujet",
@@ -1014,7 +1044,7 @@
                 help_analysis_title: "3. Tableau de Bord d'Analyse",
                 help_analysis_text: "Passez à l'onglet <strong>Analyse</strong> pour visualiser l'équilibre de votre conception. Vérifiez le diagramme radar \"Équilibre Pédagogique\" et les diagrammes circulaires \"Contexte\" pour vous assurer que votre cours atteint ses objectifs.",
                 help_export_title: "4. Enregistrer & Exporter",
-                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation.",
+                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez des fichiers aux formats Markdown (IA), PDF ou Texte Riche.",
                 footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
                 footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs.",
                 bloom_placeholder: "Bloom...",
@@ -1955,36 +1985,54 @@
                     if (activity.duration > 0) {
                         const actWidthPct = (activity.duration / totals.totalSecs) * 100;
                         const actEl = document.createElement('div');
-                        // Simplified timeline: just the activity block
-                        actEl.className = 'h-full border-r border-white last:border-0 relative group box-border bg-indigo-300 hover:bg-indigo-400 transition-colors';
+                        // Simplified timeline: just the activity block with centering for inner text
+                        actEl.className = 'h-full border-r border-white last:border-0 relative group box-border bg-indigo-300 hover:bg-indigo-400 transition-colors flex items-center justify-center';
                         actEl.style.width = `${actWidthPct}%`;
                         
                         // Tooltip for the Activity
                         const durationMins = Math.round(activity.duration / 60);
                         actEl.title = `${activity.title} (${durationMins} ${translations[currentLang].unit_mins})`;
 
-                        // Insert block duration text
-                        const labelEl = document.createElement('div');
-                        labelEl.className = 'absolute inset-0 flex items-center justify-center text-[10px] font-bold text-indigo-900 pointer-events-none select-none truncate px-1 opacity-75 group-hover:opacity-100';
-                        
-                        let durationText = `${durationMins}m`;
+                        // Prepare duration string
+                        let durationStr = `${durationMins}m`;
                         if (durationMins >= 60) {
                              const h = Math.floor(durationMins / 60);
                              const m = durationMins % 60;
-                             durationText = m === 0 ? `${h}h` : `${h}h${m}`;
+                             durationStr = m === 0 ? `${h}h` : `${h}h${m}`;
                         }
-                        labelEl.innerText = durationText;
-                        
-                        // Only add label if the block is wide enough to reasonably contain text
-                        if (actWidthPct > 3) {
-                            actEl.appendChild(labelEl);
+
+                        // Inner Block Label (Duration)
+                        const innerLabel = document.createElement('div');
+                        innerLabel.className = 'text-[10px] font-bold text-indigo-900 pointer-events-none select-none truncate px-1 opacity-50 group-hover:opacity-100 transition-opacity';
+                        innerLabel.innerText = durationStr;
+                        if (actWidthPct > 4) { // Only show if block is wide enough
+                            actEl.appendChild(innerLabel);
                         }
 
                         barContainer.appendChild(actEl);
 
-                        const labelContainerEl = document.createElement('div');
-                        labelContainerEl.style.width = `${actWidthPct}%`;
-                        labelContainerEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
+                        // Bottom Label (Title + Duration)
+                        const labelEl = document.createElement('div');
+                        labelEl.style.width = `${actWidthPct}%`;
+                        labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
+                        
+                        if (actWidthPct > 5) {
+                            labelEl.innerText = `${activity.title} (${durationStr})`;
+                            labelEl.title = `${activity.title} (${durationStr})`;
+                        } else {
+                            labelEl.innerText = '.';
+                            labelEl.classList.add('text-transparent');
+                        }
+                        labelContainer.appendChild(labelEl);
+                    }
+                });
+
+                // Populate Ruler
+                const totalMins = totals.totalSecs / 60;
+                let interval = 0;
+                const roughStep = totalMins / 8;
+                const magnitudes = [1, 5, 10, 15, 30, 60, 120, 240, 480, 720, 1440, 2880, 10080];
+                interval = magnitudes.reduce((prev, curr) => Math.abs(curr - roughStep) < Math.abs(prev - roughStep) ? curr : prev);
                 if (totalMins / interval > 15) interval *= 2;
 
                 for (let t = 0; t <= totalMins; t += interval) {
@@ -2017,6 +2065,45 @@
                     rulerContainer.appendChild(label);
                 }
             }
+
+            // Update Individual Activity Timeline Bars
+            const activityGroups = document.querySelectorAll('.activity-group');
+            totals.detailedTimeline.forEach((actData, index) => {
+                if (index < activityGroups.length) {
+                    const group = activityGroups[index];
+                    const bar = group.querySelector('.activity-type-bar');
+                    const label = group.querySelector('.activity-total-time');
+                    
+                    if (bar && label) {
+                        bar.innerHTML = '';
+                        // Update label
+                        const mins = Math.round(actData.duration / 60);
+                        let durationText = `${mins}m`;
+                        if (mins >= 60) {
+                             const h = Math.floor(mins / 60);
+                             const m = mins % 60;
+                             durationText = m === 0 ? `${h}h` : `${h}h${m}`;
+                        }
+                        label.innerText = durationText;
+
+                        // Update bar
+                        if (actData.duration > 0) {
+                            actData.steps.forEach(step => {
+                                if (step.duration > 0) {
+                                    const pct = (step.duration / actData.duration) * 100;
+                                    const el = document.createElement('div');
+                                    el.style.width = `${pct}%`;
+                                    el.style.backgroundColor = TYPE_COLORS[step.type];
+                                    el.className = 'h-full hover:brightness-90 transition-all border-r border-white/20 last:border-0';
+                                    el.title = `${step.title}: ${Math.round(step.duration/60)}m (${step.learningTypeLabel})`;
+                                    bar.appendChild(el);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
             if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
         }
 
@@ -2062,6 +2149,135 @@
                 data: { labels: ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]), datasets: [{ label: 'Timeline', data: data.typeTimelinePoints, backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]), borderWidth: 0, barPercentage: 0.6 }] },
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: t.chart_axis_time_mins }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
             });
+        }
+
+        function handleExport(select) {
+            const value = select.value;
+            select.value = ""; // Reset dropdown
+            
+            if (value === 'markdown') {
+                exportMarkdown();
+            } else if (value === 'pdf') {
+                window.print();
+            } else if (value === 'richtext') {
+                exportRichText();
+            }
+        }
+
+        function exportRichText() {
+            const t = translations[currentLang];
+            let html = `
+            <!DOCTYPE html>
+            <html lang="${currentLang}">
+            <head>
+                <meta charset="UTF-8">
+                <title>${t.rtf_title}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+                    h1 { color: #4338ca; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+                    h2 { color: #4f46e5; margin-top: 30px; border-left: 4px solid #4f46e5; padding-left: 10px; }
+                    h3 { color: #6b7280; margin-top: 20px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 0.05em; }
+                    h4 { color: #374151; margin-top: 15px; margin-bottom: 5px; }
+                    ul { list-style-type: none; padding-left: 0; }
+                    li { margin-bottom: 5px; }
+                    .meta-item { margin-bottom: 5px; }
+                    .meta-label { font-weight: bold; color: #555; }
+                    .activity-block { margin-bottom: 40px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; background-color: #f8fafc; }
+                    .step-block { margin-left: 20px; margin-bottom: 20px; padding: 15px; background-color: white; border-left: 4px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                    .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: white; margin-right: 5px; }
+                    .task-box { background-color: #f1f5f9; padding: 10px; border-radius: 4px; margin-top: 10px; font-style: italic; }
+                    /* Type Colors */
+                    .type-acquisition { border-color: #a1f5ed; } .bg-acquisition { background-color: #7dded6; color: #0f766e; }
+                    .type-collaboration { border-color: #ffd966; } .bg-collaboration { background-color: #f0c953; color: #854d0e; }
+                    .type-discussion { border-color: #7aaeea; } .bg-discussion { background-color: #6a9bd6; color: #1e40af; }
+                    .type-investigation { border-color: #f8807f; } .bg-investigation { background-color: #e06e6d; color: #991b1b; }
+                    .type-practice { border-color: #bb98dc; } .bg-practice { background-color: #a582c6; color: #6b21a8; }
+                    .type-production { border-color: #bdea75; } .bg-production { background-color: #a6d15e; color: #3f6212; }
+                </style>
+            </head>
+            <body>
+                <h1>${t.rtf_title}</h1>
+                
+                <h2>Metadata</h2>
+                <div class="meta-item"><span class="meta-label">${t.label_course_name}:</span> ${document.getElementById('param-name').value}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_topic}:</span> ${document.getElementById('param-topic').value}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_authors}:</span> ${document.getElementById('param-authors').value}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_mode}:</span> ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_class_size}:</span> ${document.getElementById('global-class-size').value}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${document.getElementById('total-duration').innerText}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_learning_time}:</span> ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}</div>
+                
+                <h2>Key Info</h2>
+                <h3>${t.label_aims}</h3>
+                <p>${document.getElementById('param-aims').value.replace(/\n/g, '<br>')}</p>
+                
+                <h3>${t.label_outcomes}</h3>
+                <ul>`;
+                
+            document.querySelectorAll('#outcomes-list li').forEach(li => {
+                const text = li.querySelector('.outcome-text').innerText;
+                const level = li.querySelector('.outcome-bloom-level').value;
+                const sub = li.querySelector('.outcome-bloom-sub').value;
+                let bloomText = "";
+                if(level) {
+                    bloomText += `<strong>[${t[`bloom_${level}`] || level.toUpperCase()}`;
+                    if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
+                    bloomText += "]</strong> ";
+                }
+                html += `<li>${bloomText}${text}</li>`;
+            });
+
+            html += `</ul>
+                <h3>${t.label_description}</h3>
+                <p>${document.getElementById('param-description').value.replace(/\n/g, '<br>')}</p>
+                
+                <h2>Pedagogical Structure</h2>`;
+
+            document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
+                const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                const activityDesc = activity.querySelector('.activity-description').value;
+                
+                html += `<div class="activity-block">
+                    <h3 style="color: #1e293b; font-size: 1.2em; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">${t.md_untitled_activity.replace('Untitled Activity', 'Activity')} ${aIdx + 1}: ${activityTitle}</h3>
+                    ${activityDesc ? `<p><em>${activityDesc}</em></p>` : ''}`;
+
+                activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
+                    const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
+                    const groupMode = step.querySelector('.step-group-mode').value;
+                    let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    const tasks = step.querySelector('.step-input-tasks').value || "";
+                    const notes = step.querySelector('.step-input-notes').value || "";
+                    const typeKey = step.querySelector('.learning-type-select').value;
+                    const typeLabel = t[`type_${typeKey}`];
+                    const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
+                    const placeText = step.querySelector('.place-select').selectedOptions[0].innerText;
+                    const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
+                    const duration = `${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}`;
+
+                    html += `<div class="step-block type-${typeKey}">
+                        <h4>${sIdx + 1}. ${stepTitle} <span class="tag bg-${typeKey}" style="float: right;">${typeLabel}</span></h4>
+                        <div style="font-size: 0.9em; color: #64748b; margin-bottom: 10px;">
+                            <strong>Duration:</strong> ${duration} | 
+                            <strong>Group:</strong> ${groupInfo} | 
+                            <strong>Mode:</strong> ${trainerText}, ${placeText}, ${timeText}
+                        </div>
+                        ${tasks ? `<div class="task-box"><strong>${t.label_tasks}:</strong><br>${tasks.replace(/\n/g, '<br>')}</div>` : ''}
+                        ${notes ? `<div style="margin-top: 10px; font-size: 0.9em; color: #475569;"><strong>${t.label_notes}:</strong> ${notes.replace(/\n/g, '<br>')}</div>` : ''}
+                    </div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            html += `</body></html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design-profile.html';
+            a.click();
+            URL.revokeObjectURL(url);
         }
 
         function exportMarkdown() {
