@@ -307,7 +307,7 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_learning_time">Learning Time (Target)</label>
                         <div class="flex gap-2">
-                            <input type="number" id="param-learning-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="param-learning-val" oninput="updateStats()" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                             <select id="param-learning-unit" onchange="updateStats()" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <option value="mins" data-i18n="unit_mins">Mins</option>
                                 <option value="hours" data-i18n="unit_hours">Hours</option>
@@ -370,26 +370,37 @@
 
         <!-- Global Stats Display -->
         <div class="mb-4 no-print flex flex-col md:flex-row gap-4">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center overflow-hidden">
-                <div class="flex justify-between items-center w-full mb-3">
-                    <div class="flex items-center gap-3">
-                        <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_total_time">Timeline</span>
-                        <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 shadow-sm">
-                            <span id="total-duration" class="text-sm font-bold text-indigo-700">0 mins</span>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-3 gap-4">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <!-- Target Time -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_learning_time">Learning Time (Target)</span>
+                            <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 shadow-sm">
+                                <span id="header-target-time" class="text-sm font-bold text-slate-600">0 Mins</span>
+                            </div>
+                        </div>
+                        
+                        <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
+
+                        <!-- Designed Time -->
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_designed_time">Designed Time (Planned)</span>
+                            <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 shadow-sm">
+                                <span id="total-duration" class="text-sm font-bold text-indigo-700">0 mins</span>
+                            </div>
                         </div>
                     </div>
+
                     <div class="text-right">
                         <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
                     </div>
                 </div>
                 
-                <!-- Scrollable Wrapper for Timeline -->
-                <div class="overflow-x-auto pb-2">
-                    <div class="flex flex-col gap-1 min-w-[2000px]">
-                        <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
-                        <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
-                        <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
-                    </div>
+                <div class="w-full flex flex-col gap-1">
+                    <div id="modules-visual-bar" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
+                    <div id="modules-visual-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
+                    <div id="modules-visual-ruler" class="w-full h-5 relative mt-1 select-none pointer-events-none"></div>
                 </div>
 
             </div>
@@ -1970,6 +1981,10 @@
             // Sync UI text display
             document.getElementById('param-designed-unit-display').innerText = learningUnitText;
             
+            // Update Header Target Time
+            const targetVal = document.getElementById('param-learning-val').value || 0;
+            document.getElementById('header-target-time').innerText = `${targetVal} ${learningUnitText}`;
+
             const designedInput = document.getElementById('param-designed-val');
             let divisor = 60;
             if (learningUnit === 'hours') divisor = 3600;
