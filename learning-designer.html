@@ -402,14 +402,14 @@
                     
                     <!-- Track 1: Activities -->
                     <div class="flex flex-col gap-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Structure (Activities)</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="label_timeline_structure">Structure (Activities)</span>
                         <div id="timeline-activities" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                         <div id="timeline-activities-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
                     </div>
 
                     <!-- Track 2: Learning Types -->
                     <div class="flex flex-col gap-1">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pedagogy (Learning Types)</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="label_timeline_pedagogy">Pedagogy (Learning Types)</span>
                         <div id="timeline-steps" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
@@ -793,6 +793,8 @@
                 label_total_time: "Timeline",
                 status_calculating: "Auto-calculating...",
                 label_class_size: "Cohort Size",
+                label_timeline_structure: "Structure (Activities)",
+                label_timeline_pedagogy: "Pedagogy (Learning Types)",
                 empty_title: "No activities designed yet",
                 empty_subtitle: "Start by creating your first Activity container.",
                 btn_create_activity: "Create Activity",
@@ -960,6 +962,8 @@
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
+                label_timeline_structure: "Structure (Activités)",
+                label_timeline_pedagogy: "Pédagogie (Types d'apprentissage)",
                 empty_title: "Aucune activité conçue",
                 empty_subtitle: "Commencez par créer votre première activité.",
                 btn_create_activity: "Créer une Activité",
@@ -1030,8 +1034,8 @@
                 rtf_title: "Profil de Design d'Expérience d'Apprentissage",
                 title_duplicate: "Dupliquer",
                 panel_key_parameters: "Paramètres",
-                label_course_name: "Nom du Cours",
-                ph_course_name: "Entrez le nom...",
+                label_course_name: "Nom de la formation",
+                ph_course_name: "Entrez le nom de la formation...",
                 label_topic: "Sujet",
                 ph_topic: "Entrez le sujet...",
                 label_learning_time: "Temps d'Apprentissage (Cible)",
@@ -2314,8 +2318,13 @@
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
                 const activityDesc = activity.querySelector('.activity-description').value;
                 
+                // Fix for Activity Label
+                let actPrefix = t.md_untitled_activity;
+                if(currentLang === 'en') actPrefix = actPrefix.replace('Untitled ', '');
+                else if(currentLang === 'fr') actPrefix = actPrefix.replace(' sans titre', '');
+
                 html += `<div class="activity-block">
-                    <h3 style="color: #1e293b; font-size: 1.2em; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">${t.md_untitled_activity.replace('Untitled Activity', 'Activity')} ${aIdx + 1}: ${activityTitle}</h3>
+                    <h3 style="color: #1e293b; font-size: 1.2em; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">${actPrefix} ${aIdx + 1}: ${activityTitle}</h3>
                     ${activityDesc ? `<p><em>${activityDesc}</em></p>` : ''}`;
 
                 activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
@@ -2413,7 +2422,8 @@
                     if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
                     bloomText += "] ";
                 }
-                rtf += `\\bullet  ${escapeRTF(bloomText + text)}\\par\n`;
+                // Use correct Unicode Bullet Point for RTF (\u8226?)
+                rtf += `\\u8226?  ${escapeRTF(bloomText + text)}\\par\n`;
             });
             rtf += `\\par\n`;
             
@@ -2427,7 +2437,12 @@
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
                 const activityDesc = activity.querySelector('.activity-description').value;
                 
-                rtf += `\\par\\pard\\sa200\\sl276\\slmult1\\b\\f1\\fs26 ${escapeRTF(t.md_untitled_activity.replace('Untitled Activity', 'Activity') + " " + (aIdx + 1) + ": " + activityTitle)}\\b0\\f0\\fs24\\par\n`;
+                // Fix for Activity Label in RTF
+                let actPrefix = t.md_untitled_activity;
+                if(currentLang === 'en') actPrefix = actPrefix.replace('Untitled ', '');
+                else if(currentLang === 'fr') actPrefix = actPrefix.replace(' sans titre', '');
+
+                rtf += `\\par\\pard\\sa200\\sl276\\slmult1\\b\\f1\\fs26 ${escapeRTF(actPrefix + " " + (aIdx + 1) + ": " + activityTitle)}\\b0\\f0\\fs24\\par\n`;
                 
                 if (activityDesc) {
                     rtf += `\\i ${escapeRTF(activityDesc)}\\i0\\par\\par\n`;
