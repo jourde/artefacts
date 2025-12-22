@@ -553,6 +553,9 @@
         </div>
     </div>
 
+    <!-- Custom Tooltip (Pop-up) -->
+    <div id="global-tooltip" class="fixed z-[100] hidden bg-slate-800 text-white text-xs font-medium rounded-lg px-3 py-2 pointer-events-none shadow-2xl border border-slate-700 max-w-[250px] whitespace-normal leading-tight"></div>
+
     <!-- Templates -->
     <template id="activity-template">
         <div class="activity-group relative">
@@ -752,9 +755,40 @@
         const emptyState = document.getElementById('empty-state');
         const activityTemplate = document.getElementById('activity-template');
         const stepTemplate = document.getElementById('step-template');
+        const tooltipEl = document.getElementById('global-tooltip');
 
         let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, social: null };
         let currentLang = 'en';
+
+        // Tooltip Helpers
+        function showTooltip(e, text) {
+            tooltipEl.innerHTML = text;
+            tooltipEl.classList.remove('hidden');
+            updateTooltipPos(e);
+        }
+
+        function hideTooltip() {
+            tooltipEl.classList.add('hidden');
+        }
+
+        function updateTooltipPos(e) {
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            // Simple boundary check to prevent going off screen
+            const rect = tooltipEl.getBoundingClientRect();
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            
+            let finalX = x;
+            let finalY = y;
+
+            if (x + rect.width > winW) finalX = e.clientX - rect.width - 10;
+            if (y + rect.height > winH) finalY = e.clientY - rect.height - 10;
+
+            tooltipEl.style.left = `${finalX}px`;
+            tooltipEl.style.top = `${finalY}px`;
+        }
 
         // Bloom's Data Structure
         const BLOOM_TAXONOMY = {
@@ -2038,11 +2072,18 @@
                         // Alternating colors (Slate)
                         const bgClass = index % 2 === 0 ? 'bg-slate-400' : 'bg-slate-500';
 
-                        actEl.className = `h-full border-r border-white last:border-0 relative group box-border ${bgClass} hover:bg-indigo-500 transition-colors flex items-center justify-center`;
+                        actEl.className = `h-full border-r border-white last:border-0 relative group box-border ${bgClass} hover:bg-indigo-500 transition-colors flex items-center justify-center cursor-pointer`;
                         actEl.style.width = `${actWidthPct}%`;
                         
                         const durationMins = Math.round(activity.duration / 60);
-                        actEl.title = `${activity.title} (${durationMins} ${translations[currentLang].unit_mins})`;
+                        
+                        // Tooltip Content for Activity
+                        const tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span>`;
+                        
+                        // Attach Custom Tooltip Events
+                        actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                        actEl.onmousemove = (e) => updateTooltipPos(e);
+                        actEl.onmouseleave = () => hideTooltip();
 
                         // Duration text logic
                         let durationStr = `${durationMins}m`;
@@ -2069,7 +2110,8 @@
                         
                         if (actWidthPct > 5) {
                             labelEl.innerText = `${activity.title}`;
-                            labelEl.title = `${activity.title}`;
+                            // Also add native title to label just in case, or leave blank if using custom tooltip logic elsewhere
+                            labelEl.title = activity.title; 
                         } else {
                             labelEl.innerText = '.';
                             labelEl.classList.add('text-transparent');
@@ -2090,11 +2132,16 @@
                                 // Color based on pedagogical type
                                 stepEl.style.backgroundColor = TYPE_COLORS[step.type];
                                 stepEl.style.width = `${stepWidthPct}%`;
-                                stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group';
+                                stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer';
                                 
-                                // Tooltip
+                                // Tooltip Content for Step
                                 const sDur = Math.round(step.duration / 60);
-                                stepEl.title = `${step.title}: ${sDur}m (${step.learningTypeLabel})`;
+                                const tooltipText = `<strong>${step.title}</strong><br><span class="opacity-80">${step.learningTypeLabel}</span><br><span class="text-slate-300">${sDur}m</span>`;
+
+                                // Attach Custom Tooltip Events
+                                stepEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                                stepEl.onmousemove = (e) => updateTooltipPos(e);
+                                stepEl.onmouseleave = () => hideTooltip();
 
                                 containerSteps.appendChild(stepEl);
                             }
