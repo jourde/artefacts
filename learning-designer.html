@@ -323,7 +323,7 @@
 
                     <!-- 9. Outcomes (Dynamic List) -->
                     <div class="md:col-span-2 lg:col-span-3">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Outcomes</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Learning Outcomes</label>
                         <div class="flex gap-2 mb-2 no-print flex-col sm:flex-row">
                             <div class="flex gap-2">
                                 <select id="new-bloom-level" onchange="updateHeaderBloomSub()" class="text-[11px] font-bold text-slate-600 border border-slate-200 rounded-lg py-2 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-28">
@@ -350,7 +350,7 @@
 
                     <!-- 10. Description -->
                     <div class="md:col-span-2 lg:col-span-3">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_description">Description</label>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_description">General Description</label>
                         <textarea id="param-description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="Detailed description..." data-i18n-placeholder="ph_description"></textarea>
                     </div>
                 </div>
@@ -361,9 +361,11 @@
         <div class="mb-4 no-print flex flex-col md:flex-row gap-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
                 <div class="flex justify-between items-center w-full mb-3">
-                    <div>
-                        <span class="text-slate-500 text-sm font-medium uppercase tracking-wider" data-i18n="label_total_time">Total Calculated Time and Distribution of Learning Types</span>
-                        <span id="total-duration" class="ml-2 text-2xl font-bold text-indigo-600">0 mins</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_total_time">Total Calculated Time and Distribution of Learning Types</span>
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 shadow-sm">
+                            <span id="total-duration" class="text-sm font-bold text-indigo-700">0 mins</span>
+                        </div>
                     </div>
                     <div class="text-right">
                         <span class="text-slate-400 text-xs italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
@@ -500,11 +502,11 @@
     <!-- Custom Modal for Confirmation -->
     <div id="custom-confirm-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full">
-            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+            <h3 class="text-lg font-bold text-slate-800 mb-2" data-i18n="modal_confirm_title">Confirm Action</h3>
             <p id="custom-confirm-msg" class="text-slate-600 mb-6">Are you sure?</p>
             <div class="flex justify-end gap-3">
-                <button id="custom-confirm-no" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">Cancel</button>
-                <button id="custom-confirm-yes" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-colors">Delete</button>
+                <button id="custom-confirm-no" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors" data-i18n="btn_cancel">Cancel</button>
+                <button id="custom-confirm-yes" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-colors" data-i18n="btn_delete">Delete</button>
             </div>
         </div>
     </div>
@@ -822,8 +824,8 @@
                 title_create_activity: "Create your first activity",
                 title_help: "Help & Information",
                 help_title: "How to use Learning Designer",
-                help_structure_title: "1. Parameters & Structure",
-                help_structure_text: "Define <strong>Key Parameters</strong> and <strong>Outcomes</strong> (with Bloom's Taxonomy). Build your course with <strong>Activities</strong> and <strong>Steps</strong>. Reorder using handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_structure_title: "1. Design Structure",
+                help_structure_text: "Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Learning Types",
                 help_types_intro: "Select a pedagogical type for each step:",
                 help_analysis_title: "3. Analysis Dashboard",
@@ -841,7 +843,7 @@
                 label_designed_time: "Designed Time (Planned)",
                 label_hours: "h",
                 label_minutes: "m",
-                label_description: "Description",
+                label_description: "General Description",
                 ph_description: "Detailed description...",
                 label_mode: "Mode of delivery",
                 opt_mode_placeholder: "Select a mode…",
@@ -852,7 +854,7 @@
                 opt_mode_other: "Other",
                 label_aims: "Aims",
                 ph_aims: "Enter session aims...",
-                label_outcomes: "Outcomes",
+                label_outcomes: "Learning Outcomes",
                 ph_add_outcome: "Add an outcome...",
                 text_no_outcomes: "No outcomes are set",
                 footer_disclaimer: "This site does not use tracking or session cookies. No personal data is processed online.",
@@ -864,8 +866,15 @@
                 bloom_apply: "Apply",
                 bloom_analyze: "Analyze",
                 bloom_evaluate: "Evaluate",
-                bloom_create: "Create"
-                // Individual verb translations removed to allow direct display of new extensive list
+                bloom_create: "Create",
+                // Modal and Chart labels
+                modal_confirm_title: "Confirm Action",
+                confirm_delete_activity: "Delete this entire activity?",
+                btn_cancel: "Cancel",
+                btn_delete: "Delete",
+                chart_label_minutes: "Minutes",
+                chart_axis_time_mins: "Time (minutes)",
+                chart_axis_mins: "Mins"
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
@@ -964,7 +973,7 @@
                 label_designed_time: "Temps Conçu (Planifié)",
                 label_hours: "h",
                 label_minutes: "m",
-                label_description: "Description",
+                label_description: "Description générale",
                 ph_description: "Description détaillée...",
                 label_mode: "Modalité",
                 opt_mode_placeholder: "Sélectionnez une modalité...",
@@ -975,7 +984,7 @@
                 opt_mode_other: "Autre",
                 label_aims: "Objectifs",
                 ph_aims: "Entrez les objectifs...",
-                label_outcomes: "Résultats",
+                label_outcomes: "Résultats d'apprentissage",
                 ph_add_outcome: "Ajouter un résultat...",
                 text_no_outcomes: "Aucun résultat défini",
                 title_fold_all: "Tout replier / Tout déplier",
@@ -998,8 +1007,8 @@
                 title_create_activity: "Créer votre première activité",
                 title_help: "Aide & Information",
                 help_title: "Comment utiliser le Concepteur Pédagogique",
-                help_structure_title: "1. Paramètres & Structure",
-                help_structure_text: "Définissez les <strong>Paramètres Clés</strong> et <strong>Résultats</strong> (Taxonomie de Bloom). Créez le cours avec des <strong>Activités</strong> et <strong>Étapes</strong>. Réorganisez avec <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_structure_title: "1. Structure du Design",
+                help_structure_text: "Construisez votre cours en ajoutant des <strong>Activités</strong> (modules/sujets) et en les remplissant d'<strong>Étapes</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Types d'Apprentissage",
                 help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
                 help_analysis_title: "3. Tableau de Bord d'Analyse",
@@ -1015,7 +1024,176 @@
                 bloom_apply: "Appliquer",
                 bloom_analyze: "Analyser",
                 bloom_evaluate: "Évaluer",
-                bloom_create: "Créer"
+                bloom_create: "Créer",
+                bloom_sub_recognizing: "Reconnaître",
+                bloom_sub_recalling: "Se rappeler",
+                bloom_sub_interpreting: "Interpréter",
+                bloom_sub_exemplifying: "Illustrer",
+                bloom_sub_classifying: "Classer",
+                bloom_sub_summarizing: "Résumer",
+                bloom_sub_inferring: "Inférer",
+                bloom_sub_comparing: "Comparer",
+                bloom_sub_explaining: "Expliquer",
+                bloom_sub_executing: "Exécuter",
+                bloom_sub_implementing: "Implémenter",
+                bloom_sub_differentiating: "Différencier",
+                bloom_sub_organizing: "Organiser",
+                bloom_sub_attributing: "Attribuer",
+                bloom_sub_checking: "Vérifier",
+                bloom_sub_critiquing: "Critiquer",
+                bloom_sub_generating: "Générer",
+                bloom_sub_planning: "Planifier",
+                bloom_sub_producing: "Produire",
+                // Modal and Chart labels
+                modal_confirm_title: "Confirmer l'action",
+                confirm_delete_activity: "Supprimer toute l'activité ?",
+                btn_cancel: "Annuler",
+                btn_delete: "Supprimer",
+                chart_label_minutes: "Minutes",
+                chart_axis_time_mins: "Temps (minutes)",
+                chart_axis_mins: "Min",
+                // Additional Bloom Translations
+                bloom_sub_cite: "Citer",
+                bloom_sub_define: "Définir",
+                bloom_sub_describe: "Décrire",
+                bloom_sub_identify: "Identifier",
+                bloom_sub_label: "Étiqueter",
+                bloom_sub_list: "Lister",
+                bloom_sub_match: "Apparier",
+                bloom_sub_name: "Nommer",
+                bloom_sub_outline: "Esquisser",
+                bloom_sub_quote: "Citer",
+                bloom_sub_recall: "Se rappeler",
+                bloom_sub_report: "Rapporter",
+                bloom_sub_reproduce: "Reproduire",
+                bloom_sub_retrieve: "Récupérer",
+                bloom_sub_show: "Montrer",
+                bloom_sub_state: "Énoncer",
+                bloom_sub_tabulate: "Tabuler",
+                bloom_sub_tell: "Dire",
+                bloom_sub_abstract: "Abstraire",
+                bloom_sub_arrange: "Arranger",
+                bloom_sub_articulate: "Articuler",
+                bloom_sub_associate: "Associer",
+                bloom_sub_categorize: "Catégoriser",
+                bloom_sub_clarify: "Clarifier",
+                bloom_sub_classify: "Classer",
+                bloom_sub_compare: "Comparer",
+                bloom_sub_compute: "Calculer",
+                bloom_sub_conclude: "Conclure",
+                bloom_sub_contrast: "Contraster",
+                bloom_sub_defend: "Défendre",
+                bloom_sub_diagram: "Diagrammer",
+                bloom_sub_differentiate: "Différencier",
+                bloom_sub_discuss: "Discuter",
+                bloom_sub_distinguish: "Distinguer",
+                bloom_sub_estimate: "Estimer",
+                bloom_sub_exemplify: "Exemplifier",
+                bloom_sub_explain: "Expliquer",
+                bloom_sub_extend: "Étendre",
+                bloom_sub_extrapolate: "Extrapoler",
+                bloom_sub_generalize: "Généraliser",
+                "bloom_sub_give examples of": "Donner des exemples",
+                bloom_sub_illustrate: "Illustrer",
+                bloom_sub_infer: "Inférer",
+                bloom_sub_interpolate: "Interpoler",
+                bloom_sub_interpret: "Interpréter",
+                bloom_sub_paraphrase: "Paraphraser",
+                bloom_sub_predict: "Prédire",
+                bloom_sub_rearrange: "Réarranger",
+                bloom_sub_reorder: "Réordonner",
+                bloom_sub_rephrase: "Reformuler",
+                bloom_sub_represent: "Représenter",
+                bloom_sub_restate: "Réitérer",
+                bloom_sub_summarize: "Résumer",
+                bloom_sub_transform: "Transformer",
+                bloom_sub_translate: "Traduire",
+                bloom_sub_apply: "Appliquer",
+                bloom_sub_calculate: "Calculer",
+                "bloom_sub_carry out": "Effectuer",
+                bloom_sub_complete: "Compléter",
+                bloom_sub_demonstrate: "Démontrer",
+                bloom_sub_dramatize: "Théâtraliser",
+                bloom_sub_employ: "Employer",
+                bloom_sub_examine: "Examiner",
+                bloom_sub_execute: "Exécuter",
+                bloom_sub_experiment: "Expérimenter",
+                bloom_sub_implement: "Implémenter",
+                bloom_sub_manipulate: "Manipuler",
+                bloom_sub_modify: "Modifier",
+                bloom_sub_operate: "Opérer",
+                bloom_sub_organize: "Organiser",
+                bloom_sub_solve: "Résoudre",
+                bloom_sub_transfer: "Transférer",
+                bloom_sub_use: "Utiliser",
+                bloom_sub_analyze: "Analyser",
+                "bloom_sub_break down": "Décomposer",
+                bloom_sub_connect: "Connecter",
+                bloom_sub_deconstruct: "Déconstruire",
+                bloom_sub_detect: "Détecter",
+                bloom_sub_discriminate: "Discriminer",
+                bloom_sub_divide: "Diviser",
+                bloom_sub_integrate: "Intégrer",
+                bloom_sub_inventory: "Inventorier",
+                bloom_sub_order: "Ordonner",
+                bloom_sub_relate: "Relier",
+                bloom_sub_separate: "Séparer",
+                bloom_sub_structure: "Structurer",
+                bloom_sub_appraise: "Apprécier",
+                bloom_sub_apprise: "Informer",
+                bloom_sub_argue: "Argumenter",
+                bloom_sub_assess: "Évaluer",
+                bloom_sub_consider: "Considérer",
+                bloom_sub_convince: "Convaincre",
+                bloom_sub_criticize: "Critiquer",
+                bloom_sub_critique: "Critiquer",
+                bloom_sub_decide: "Décider",
+                bloom_sub_determine: "Déterminer",
+                bloom_sub_evaluate: "Évaluer",
+                bloom_sub_grade: "Noter",
+                bloom_sub_judge: "Juger",
+                bloom_sub_justify: "Justifier",
+                bloom_sub_measure: "Mesurer",
+                bloom_sub_rank: "Classer",
+                bloom_sub_rate: "Évaluer",
+                bloom_sub_recommend: "Recommander",
+                bloom_sub_review: "Revoir",
+                bloom_sub_score: "Scorer",
+                bloom_sub_select: "Sélectionner",
+                bloom_sub_standardize: "Standardiser",
+                bloom_sub_support: "Soutenir",
+                bloom_sub_test: "Tester",
+                bloom_sub_validate: "Valider",
+                bloom_sub_assemble: "Assembler",
+                bloom_sub_build: "Bâtir",
+                bloom_sub_collect: "Collecter",
+                bloom_sub_combine: "Combiner",
+                bloom_sub_compile: "Compiler",
+                bloom_sub_compose: "Composer",
+                bloom_sub_constitute: "Constituer",
+                bloom_sub_construct: "Construire",
+                bloom_sub_create: "Créer",
+                bloom_sub_design: "Concevoir",
+                bloom_sub_develop: "Développer",
+                bloom_sub_devise: "Imaginer",
+                bloom_sub_formulate: "Formuler",
+                bloom_sub_generate: "Générer",
+                bloom_sub_hypothesize: "Hypothétiser",
+                bloom_sub_invent: "Inventer",
+                bloom_sub_make: "Faire",
+                bloom_sub_manage: "Gérer",
+                bloom_sub_perform: "Performer",
+                bloom_sub_plan: "Planifier",
+                bloom_sub_prepare: "Préparer",
+                bloom_sub_produce: "Produire",
+                bloom_sub_propose: "Proposer",
+                bloom_sub_reconstruct: "Reconstruire",
+                bloom_sub_reorganize: "Réorganiser",
+                bloom_sub_revise: "Réviser",
+                bloom_sub_rewrite: "Réécrire",
+                bloom_sub_specify: "Spécifier",
+                bloom_sub_synthesize: "Synthétiser",
+                bloom_sub_write: "Écrire"
             }
         };
 
@@ -1040,6 +1218,14 @@
         new Sortable(document.getElementById('analysis-dashboard'), {
             animation: 150,
             handle: '.drag-handle-analysis',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag'
+        });
+        
+        // Initialize Sortable for Outcomes
+        new Sortable(document.getElementById('outcomes-list'), {
+            animation: 150,
+            handle: '.drag-handle-outcome',
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag'
         });
@@ -1222,10 +1408,15 @@
             const t = translations[currentLang];
             
             const li = document.createElement('li');
-            li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group gap-2 flex-wrap sm:flex-nowrap";
+            li.className = "flex items-start sm:items-center justify-between bg-slate-50 px-2 py-2 rounded-md border border-slate-100 group gap-2";
             li.setAttribute("data-i18n-title", "title_remove_outcome");
             li.title = t.title_remove_outcome;
             
+            // Drag Handle
+            const dragHandle = document.createElement('div');
+            dragHandle.className = "drag-handle-outcome drag-handle text-slate-300 hover:text-slate-500 cursor-grab mt-1 sm:mt-0";
+            dragHandle.innerHTML = '<span class="material-icons-round text-lg">drag_indicator</span>';
+
             // Create Selects
             const levelSelect = document.createElement('select');
             levelSelect.className = "outcome-bloom-level text-[10px] uppercase font-bold text-slate-500 border border-slate-200 rounded py-1 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-24";
@@ -1237,7 +1428,7 @@
             renderBloomSubOptions(subSelect, level, sub); // Initialize sub options based on level
 
             const span = document.createElement('span');
-            span.className = "text-sm text-slate-700 outcome-text flex-1 min-w-[200px]";
+            span.className = "text-sm text-slate-700 outcome-text flex-1 min-w-[150px] break-words";
             span.innerText = text;
 
             const btn = document.createElement('button');
@@ -1245,13 +1436,19 @@
             btn.className = "text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100";
             btn.innerHTML = '<span class="material-icons-round text-base">close</span>';
 
+            const contentContainer = document.createElement('div');
+            contentContainer.className = "flex flex-col sm:flex-row gap-2 flex-1 items-start sm:items-center w-full";
+
             const selectContainer = document.createElement('div');
-            selectContainer.className = "flex gap-1";
+            selectContainer.className = "flex gap-1 shrink-0";
             selectContainer.appendChild(levelSelect);
             selectContainer.appendChild(subSelect);
 
-            li.appendChild(selectContainer);
-            li.appendChild(span);
+            contentContainer.appendChild(selectContainer);
+            contentContainer.appendChild(span);
+
+            li.appendChild(dragHandle);
+            li.appendChild(contentContainer);
             li.appendChild(btn);
             
             list.appendChild(li);
@@ -1614,7 +1811,9 @@
             const yesBtn = document.getElementById('custom-confirm-yes');
             const noBtn = document.getElementById('custom-confirm-no');
 
-            msg.innerText = "Delete this entire activity?";
+            // Use translation key for the message
+            msg.innerText = translations[currentLang].confirm_delete_activity;
+            
             modal.classList.remove('hidden');
 
             // Remove old listeners to avoid stacking (cloning the node is a simple way to clear listeners)
@@ -1756,7 +1955,8 @@
                     if (activity.duration > 0) {
                         const actWidthPct = (activity.duration / totals.totalSecs) * 100;
                         const actEl = document.createElement('div');
-                        actEl.className = 'flex h-full border-r border-white last:border-0 relative group';
+                        // CHANGED: Thicker dark border to distinguish Activities/Modules
+                        actEl.className = 'flex h-full border-r-2 border-slate-700 last:border-0 relative group box-border';
                         actEl.style.width = `${actWidthPct}%`;
                         
                         activity.steps.forEach(step => {
@@ -1765,7 +1965,8 @@
                                 const stepEl = document.createElement('div');
                                 stepEl.style.width = `${stepWidthPct}%`;
                                 stepEl.style.backgroundColor = TYPE_COLORS[step.type];
-                                stepEl.className = 'h-full hover:opacity-80 transition-opacity relative';
+                                // CHANGED: Added subtle white separator between steps
+                                stepEl.className = 'h-full hover:opacity-80 transition-opacity relative border-r border-white/50 last:border-0';
                                 const durationMins = Math.round(step.duration/60);
                                 stepEl.title = `${activity.title}\n• ${step.title} (${step.learningTypeLabel})\n• ${durationMins} ${translations[currentLang].unit_mins}`;
                                 actEl.appendChild(stepEl);
@@ -1855,20 +2056,20 @@
             if (charts.social) charts.social.destroy();
             charts.social = new Chart(document.getElementById('chartSocial'), {
                 type: 'bar',
-                data: { labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole], datasets: [{ label: 'Minutes', data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)], backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'], borderRadius: 8 }] },
+                data: { labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole], datasets: [{ label: t.chart_label_minutes, data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)], backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'], borderRadius: 8 }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
             if (charts.timeline) charts.timeline.destroy();
             charts.timeline = new Chart(document.getElementById('chartTimeline'), {
                 type: 'bar',
-                data: { labels: data.timelineData.map(d => d.title), datasets: [{ label: 'Minutes', data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Mins' } } } }
+                data: { labels: data.timelineData.map(d => d.title), datasets: [{ label: t.chart_label_minutes, data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: t.chart_axis_mins } } } }
             });
             if (charts.typeTimeline) charts.typeTimeline.destroy();
             charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
                 type: 'bar',
                 data: { labels: ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]), datasets: [{ label: 'Timeline', data: data.typeTimelinePoints, backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]), borderWidth: 0, barPercentage: 0.6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: 'Time (minutes)' }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: t.chart_axis_time_mins }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
             });
         }
 
