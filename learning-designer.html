@@ -297,7 +297,7 @@
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_learning_time">Learning Time (Target)</label>
                         <div class="flex gap-2">
                             <input type="number" id="param-learning-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <select id="param-learning-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <select id="param-learning-unit" onchange="updateStats()" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
                                 <option value="mins" data-i18n="unit_mins">Mins</option>
                                 <option value="hours" data-i18n="unit_hours">Hours</option>
                                 <option value="days" data-i18n="unit_days">Days</option>
@@ -309,14 +309,9 @@
                     <!-- 7. Designed Time -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_designed_time">Designed Time (Planned)</label>
-                         <div class="flex gap-2">
+                         <div class="flex gap-2 items-center">
                             <input type="number" id="param-designed-val" placeholder="0" min="0" class="w-2/3 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <select id="param-designed-unit" class="w-1/3 px-1 py-2 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                <option value="mins" data-i18n="unit_mins">Mins</option>
-                                <option value="hours" data-i18n="unit_hours">Hours</option>
-                                <option value="days" data-i18n="unit_days">Days</option>
-                                <option value="weeks" data-i18n="unit_weeks">Weeks</option>
-                            </select>
+                            <span id="param-designed-unit-display" class="w-1/3 text-sm text-slate-600 font-bold px-1">mins</span>
                         </div>
                     </div>
 
@@ -329,11 +324,23 @@
                     <!-- 9. Outcomes (Dynamic List) -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Outcomes</label>
-                        <div class="flex gap-2 mb-2 no-print">
-                            <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
-                            <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center" data-i18n-title="title_add_outcome">
-                                <span class="material-icons-round">add</span>
-                            </button>
+                        <div class="flex gap-2 mb-2 no-print flex-col sm:flex-row">
+                            <div class="flex gap-2">
+                                <select id="new-bloom-level" onchange="updateHeaderBloomSub()" class="text-[11px] font-bold text-slate-600 border border-slate-200 rounded-lg py-2 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-28">
+                                    <option value="" disabled selected data-i18n="bloom_placeholder">Bloom...</option>
+                                    <!-- Populated by JS -->
+                                </select>
+                                <select id="new-bloom-sub" class="text-[11px] text-slate-600 border border-slate-200 rounded-lg py-2 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-28 hidden">
+                                    <option value="" disabled selected data-i18n="bloom_sub_placeholder">Sub-cat...</option>
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div class="flex flex-1 gap-2">
+                                <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
+                                <button onclick="addOutcome()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-lg font-bold hover:bg-indigo-200 transition-colors flex items-center justify-center" data-i18n-title="title_add_outcome">
+                                    <span class="material-icons-round">add</span>
+                                </button>
+                            </div>
                         </div>
                         <ul id="outcomes-list" class="space-y-1">
                             <!-- Outcomes go here -->
@@ -489,6 +496,18 @@
             <p class="mt-1 italic opacity-75" data-i18n="footer_ai_disclaimer">This application was created mainly using generative AI coding; the code may contain flaws.</p>
         </footer>
     </div>
+    
+    <!-- Custom Modal for Confirmation -->
+    <div id="custom-confirm-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full">
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+            <p id="custom-confirm-msg" class="text-slate-600 mb-6">Are you sure?</p>
+            <div class="flex justify-end gap-3">
+                <button id="custom-confirm-no" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-medium transition-colors">Cancel</button>
+                <button id="custom-confirm-yes" class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-medium transition-colors">Delete</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Templates -->
     <template id="activity-template">
@@ -517,6 +536,9 @@
             </div>
             
             <div class="activity-body panel-content open">
+                <div class="mb-4 ml-12 pr-2">
+                    <textarea rows="2" placeholder="Activity Description..." data-i18n-placeholder="ph_activity_desc" class="activity-description w-full px-3 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none bg-slate-50"></textarea>
+                </div>
                 <div class="activity-steps-container activity-container ml-5 pl-8 space-y-4 min-h-[50px]"></div>
                 <div class="mt-4 pt-2 flex justify-center no-print border-t border-slate-100">
                     <button onclick="addStepToActivity(this)" class="text-sm font-semibold text-slate-400 hover:text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 hover:bg-slate-50" data-i18n-title="title_add_step">
@@ -682,6 +704,16 @@
         let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, social: null };
         let currentLang = 'en';
 
+        // Bloom's Data Structure
+        const BLOOM_TAXONOMY = {
+            remember: ["cite", "define", "describe", "identify", "label", "list", "match", "name", "outline", "quote", "recall", "report", "reproduce", "retrieve", "show", "state", "tabulate", "tell"],
+            understand: ["abstract", "arrange", "articulate", "associate", "categorize", "clarify", "classify", "compare", "compute", "conclude", "contrast", "defend", "diagram", "differentiate", "discuss", "distinguish", "estimate", "exemplify", "explain", "extend", "extrapolate", "generalize", "give examples of", "illustrate", "infer", "interpolate", "interpret", "match", "outline", "paraphrase", "predict", "rearrange", "reorder", "rephrase", "represent", "restate", "summarize", "transform", "translate"],
+            apply: ["apply", "calculate", "carry out", "classify", "complete", "compute", "demonstrate", "dramatize", "employ", "examine", "execute", "experiment", "generalize", "illustrate", "implement", "infer", "interpret", "manipulate", "modify", "operate", "organize", "outline", "predict", "solve", "transfer", "translate", "use"],
+            analyze: ["analyze", "arrange", "break down", "categorize", "classify", "compare", "connect", "contrast", "deconstruct", "detect", "diagram", "differentiate", "discriminate", "distinguish", "divide", "explain", "identify", "integrate", "inventory", "order", "organize", "relate", "separate", "structure"],
+            evaluate: ["appraise", "apprise", "argue", "assess", "compare", "conclude", "consider", "contrast", "convince", "criticize", "critique", "decide", "determine", "discriminate", "evaluate", "grade", "judge", "justify", "measure", "rank", "rate", "recommend", "review", "score", "select", "standardize", "support", "test", "validate"],
+            create: ["arrange", "assemble", "build", "collect", "combine", "compile", "compose", "constitute", "construct", "create", "design", "develop", "devise", "formulate", "generate", "hypothesize", "integrate", "invent", "make", "manage", "modify", "organize", "perform", "plan", "prepare", "produce", "propose", "rearrange", "reconstruct", "reorganize", "revise", "rewrite", "specify", "synthesize", "write"]
+        };
+
         const translations = {
             en: {
                 app_title: "Learning Designer",
@@ -716,6 +748,7 @@
                 analysis_overview: "Activity Overview",
                 analysis_timeline_types: "Pedagogical Timeline (Learning Types)",
                 ph_activity_title: "Activity Title (e.g. Module 1: Introduction)",
+                ph_activity_desc: "Activity Description...",
                 label_step_title: "Step Title",
                 ph_step_title: "Title for this card...",
                 label_learning_type: "Learning Type",
@@ -789,8 +822,8 @@
                 title_create_activity: "Create your first activity",
                 title_help: "Help & Information",
                 help_title: "How to use Learning Designer",
-                help_structure_title: "1. Design Structure",
-                help_structure_text: "Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_structure_title: "1. Parameters & Structure",
+                help_structure_text: "Define <strong>Key Parameters</strong> and <strong>Outcomes</strong> (with Bloom's Taxonomy). Build your course with <strong>Activities</strong> and <strong>Steps</strong>. Reorder using handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Learning Types",
                 help_types_intro: "Select a pedagogical type for each step:",
                 help_analysis_title: "3. Analysis Dashboard",
@@ -823,7 +856,16 @@
                 ph_add_outcome: "Add an outcome...",
                 text_no_outcomes: "No outcomes are set",
                 footer_disclaimer: "This site does not use tracking or session cookies. No personal data is processed online.",
-                footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws."
+                footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws.",
+                bloom_placeholder: "Bloom...",
+                bloom_sub_placeholder: "Sub-cat...",
+                bloom_remember: "Remember",
+                bloom_understand: "Understand",
+                bloom_apply: "Apply",
+                bloom_analyze: "Analyze",
+                bloom_evaluate: "Evaluate",
+                bloom_create: "Create"
+                // Individual verb translations removed to allow direct display of new extensive list
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
@@ -858,6 +900,7 @@
                 analysis_overview: "Vue d'ensemble des Activités",
                 analysis_timeline_types: "Chronologie Pédagogique (Types)",
                 ph_activity_title: "Titre de l'activité (ex: Module 1 : Introduction)",
+                ph_activity_desc: "Description de l'activité...",
                 label_step_title: "Titre de l'étape",
                 ph_step_title: "Titre pour cette carte...",
                 label_learning_type: "Type d'apprentissage",
@@ -955,8 +998,8 @@
                 title_create_activity: "Créer votre première activité",
                 title_help: "Aide & Information",
                 help_title: "Comment utiliser le Concepteur Pédagogique",
-                help_structure_title: "1. Structure du Design",
-                help_structure_text: "Construisez votre cours en ajoutant des <strong>Activités</strong> (modules/sujets) et en les remplissant d'<strong>Étapes</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
+                help_structure_title: "1. Paramètres & Structure",
+                help_structure_text: "Définissez les <strong>Paramètres Clés</strong> et <strong>Résultats</strong> (Taxonomie de Bloom). Créez le cours avec des <strong>Activités</strong> et <strong>Étapes</strong>. Réorganisez avec <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Types d'Apprentissage",
                 help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
                 help_analysis_title: "3. Tableau de Bord d'Analyse",
@@ -964,7 +1007,15 @@
                 help_export_title: "4. Enregistrer & Exporter",
                 help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez un fichier Markdown structuré optimisé pour l'IA générative (RAG) ou la documentation.",
                 footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
-                footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs."
+                footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs.",
+                bloom_placeholder: "Bloom...",
+                bloom_sub_placeholder: "Sous-cat...",
+                bloom_remember: "Mémoriser",
+                bloom_understand: "Comprendre",
+                bloom_apply: "Appliquer",
+                bloom_analyze: "Analyser",
+                bloom_evaluate: "Évaluer",
+                bloom_create: "Créer"
             }
         };
 
@@ -1100,27 +1151,116 @@
             }
         }
 
+        // --- Bloom's Logic ---
+
+        function renderBloomOptions(selectElement, selectedValue = "") {
+            const t = translations[currentLang];
+            let options = `<option value="" disabled ${!selectedValue ? 'selected' : ''}>${t.bloom_placeholder}</option>`;
+            
+            Object.keys(BLOOM_TAXONOMY).forEach(level => {
+                options += `<option value="${level}" ${selectedValue === level ? 'selected' : ''}>${t['bloom_' + level]}</option>`;
+            });
+            selectElement.innerHTML = options;
+        }
+
+        function renderBloomSubOptions(subSelectElement, level, selectedValue = "") {
+            const t = translations[currentLang];
+            
+            if (!level || !BLOOM_TAXONOMY[level]) {
+                subSelectElement.innerHTML = `<option value="" disabled selected>${t.bloom_sub_placeholder}</option>`;
+                subSelectElement.classList.add('hidden');
+                return;
+            }
+
+            subSelectElement.classList.remove('hidden');
+            let options = `<option value="" disabled ${!selectedValue ? 'selected' : ''}>${t.bloom_sub_placeholder}</option>`;
+            
+            BLOOM_TAXONOMY[level].forEach(sub => {
+                options += `<option value="${sub}" ${selectedValue === sub ? 'selected' : ''}>${t['bloom_sub_' + sub] || sub}</option>`;
+            });
+            subSelectElement.innerHTML = options;
+        }
+
+        function updateHeaderBloomSub() {
+            const levelSelect = document.getElementById('new-bloom-level');
+            const subSelect = document.getElementById('new-bloom-sub');
+            renderBloomSubOptions(subSelect, levelSelect.value);
+        }
+
+        function updateOutcomeBloom(levelSelect) {
+            const subSelect = levelSelect.nextElementSibling;
+            renderBloomSubOptions(subSelect, levelSelect.value);
+        }
+
         // --- Outcome List Logic ---
-        function addOutcome(text = null) {
+        function addOutcome(data = null) {
+            let text = '';
+            let level = '';
+            let sub = '';
+
             const input = document.getElementById('new-outcome-input');
-            const value = text || input.value.trim();
-            if (!value) return;
+            const headerLevel = document.getElementById('new-bloom-level');
+            const headerSub = document.getElementById('new-bloom-sub');
+
+            if (data) {
+                if (typeof data === 'string') {
+                    text = data;
+                } else {
+                    text = data.text;
+                    level = data.level || '';
+                    sub = data.sub || '';
+                }
+            } else {
+                text = input.value.trim();
+                level = headerLevel.value;
+                sub = headerSub.value;
+            }
+
+            if (!text) return;
 
             const list = document.getElementById('outcomes-list');
+            const t = translations[currentLang];
             
             const li = document.createElement('li');
-            li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group";
+            li.className = "flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md border border-slate-100 group gap-2 flex-wrap sm:flex-nowrap";
             li.setAttribute("data-i18n-title", "title_remove_outcome");
-            li.title = translations[currentLang].title_remove_outcome;
-            li.innerHTML = `
-                <span class="text-sm text-slate-700 outcome-text">${value}</span>
-                <button onclick="this.parentElement.remove(); checkOutcomesEmpty();" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                    <span class="material-icons-round text-base">close</span>
-                </button>
-            `;
+            li.title = t.title_remove_outcome;
+            
+            // Create Selects
+            const levelSelect = document.createElement('select');
+            levelSelect.className = "outcome-bloom-level text-[10px] uppercase font-bold text-slate-500 border border-slate-200 rounded py-1 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-24";
+            levelSelect.onchange = function() { updateOutcomeBloom(this); };
+            renderBloomOptions(levelSelect, level);
+
+            const subSelect = document.createElement('select');
+            subSelect.className = "outcome-bloom-sub text-[10px] text-slate-500 border border-slate-200 rounded py-1 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-24";
+            renderBloomSubOptions(subSelect, level, sub); // Initialize sub options based on level
+
+            const span = document.createElement('span');
+            span.className = "text-sm text-slate-700 outcome-text flex-1 min-w-[200px]";
+            span.innerText = text;
+
+            const btn = document.createElement('button');
+            btn.onclick = function() { this.closest('li').remove(); checkOutcomesEmpty(); };
+            btn.className = "text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100";
+            btn.innerHTML = '<span class="material-icons-round text-base">close</span>';
+
+            const selectContainer = document.createElement('div');
+            selectContainer.className = "flex gap-1";
+            selectContainer.appendChild(levelSelect);
+            selectContainer.appendChild(subSelect);
+
+            li.appendChild(selectContainer);
+            li.appendChild(span);
+            li.appendChild(btn);
+            
             list.appendChild(li);
 
-            if (!text) input.value = ''; 
+            if (!data) {
+                input.value = '';
+                headerLevel.value = "";
+                renderBloomSubOptions(headerSub, ""); // Reset sub
+            }
             checkOutcomesEmpty();
         }
 
@@ -1163,12 +1303,18 @@
         // --- Save / Load Feature Logic ---
 
         function saveProject() {
-            // Collect outcomes
+            // Collect outcomes with their categories
             const outcomes = [];
-            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => outcomes.push(el.innerText));
+            document.querySelectorAll('#outcomes-list li').forEach(li => {
+                outcomes.push({
+                    text: li.querySelector('.outcome-text').innerText,
+                    level: li.querySelector('.outcome-bloom-level').value,
+                    sub: li.querySelector('.outcome-bloom-sub').value
+                });
+            });
 
             const project = {
-                version: "1.5",
+                version: "1.6",
                 language: currentLang,
                 keyParams: {
                     name: document.getElementById('param-name').value,
@@ -1179,7 +1325,7 @@
                     learningTimeVal: document.getElementById('param-learning-val').value,
                     learningTimeUnit: document.getElementById('param-learning-unit').value,
                     designedTimeVal: document.getElementById('param-designed-val').value,
-                    designedTimeUnit: document.getElementById('param-designed-unit').value,
+                    designedTimeUnit: document.getElementById('param-learning-unit').value, // Use learning unit
                     aims: document.getElementById('param-aims').value,
                     outcomes: outcomes,
                     description: document.getElementById('param-description').value
@@ -1190,6 +1336,7 @@
             document.querySelectorAll('.activity-group').forEach(actEl => {
                 const actData = {
                     title: actEl.querySelector('.activity-title').value,
+                    description: actEl.querySelector('.activity-description').value,
                     steps: []
                 };
                 actEl.querySelectorAll('.step-card').forEach(stepEl => {
@@ -1246,13 +1393,14 @@
                         document.getElementById('param-learning-val').value = project.keyParams.learningTimeVal || "";
                         document.getElementById('param-learning-unit').value = project.keyParams.learningTimeUnit || "mins";
                         document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
-                        document.getElementById('param-designed-unit').value = project.keyParams.designedTimeUnit || "mins";
+                        // Designed Time Unit is now synced with Learning Time Unit
                         document.getElementById('param-aims').value = project.keyParams.aims || "";
                         document.getElementById('param-description').value = project.keyParams.description || "";
                         
                         // Restore Outcomes
                         document.getElementById('outcomes-list').innerHTML = '';
                         if (project.keyParams.outcomes && Array.isArray(project.keyParams.outcomes)) {
+                            // Handles both legacy (array of strings) and new (array of objects)
                             project.keyParams.outcomes.forEach(out => addOutcome(out));
                         }
                         checkOutcomesEmpty();
@@ -1271,7 +1419,7 @@
                     updateStats();
                     event.target.value = '';
                 } catch (err) {
-                    alert("Failed to load project file.");
+                    console.error("Failed to load project file.", err);
                 }
             };
             reader.readAsText(file);
@@ -1284,6 +1432,7 @@
             const stepContainer = actEl.querySelector('.activity-steps-container');
             initSortableSteps(stepContainer);
             actEl.querySelector('.activity-title').value = data.title || "";
+            actEl.querySelector('.activity-description').value = data.description || "";
             data.steps.forEach(stepData => {
                 addStepToActivityFromData(actEl.querySelector('button'), stepData);
             });
@@ -1319,6 +1468,19 @@
             currentLang = currentLang === 'en' ? 'fr' : 'en';
             document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'FR' : 'EN';
             applyTranslations();
+            // Re-render bloom options in header to update language
+            renderBloomOptions(document.getElementById('new-bloom-level'), document.getElementById('new-bloom-level').value);
+            renderBloomSubOptions(document.getElementById('new-bloom-sub'), document.getElementById('new-bloom-level').value, document.getElementById('new-bloom-sub').value);
+            // Re-render bloom options in list
+            document.querySelectorAll('#outcomes-list li').forEach(li => {
+                const levelSelect = li.querySelector('.outcome-bloom-level');
+                const subSelect = li.querySelector('.outcome-bloom-sub');
+                const currentLevel = levelSelect.value;
+                const currentSub = subSelect.value;
+                renderBloomOptions(levelSelect, currentLevel);
+                renderBloomSubOptions(subSelect, currentLevel, currentSub);
+            });
+
             refreshCharts();
             updateStats();
         }
@@ -1446,10 +1608,30 @@
         }
 
         function deleteActivity(btn) {
-            if(confirm("Delete this entire activity?")) {
+            // Using custom modal instead of native confirm
+            const modal = document.getElementById('custom-confirm-modal');
+            const msg = document.getElementById('custom-confirm-msg');
+            const yesBtn = document.getElementById('custom-confirm-yes');
+            const noBtn = document.getElementById('custom-confirm-no');
+
+            msg.innerText = "Delete this entire activity?";
+            modal.classList.remove('hidden');
+
+            // Remove old listeners to avoid stacking (cloning the node is a simple way to clear listeners)
+            const newYes = yesBtn.cloneNode(true);
+            const newNo = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYes, yesBtn);
+            noBtn.parentNode.replaceChild(newNo, noBtn);
+
+            newYes.addEventListener('click', () => {
                 btn.closest('.activity-group').remove();
                 updateEmptyState();
-            }
+                modal.classList.add('hidden');
+            });
+
+            newNo.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
         }
 
         function deleteStep(btn) {
@@ -1539,6 +1721,26 @@
             } else if (totals.totalSecs > 0) display = `${Math.round(totals.totalSecs / 60)} ${translations[currentLang].unit_mins}`;
             
             document.getElementById('total-duration').innerText = display;
+
+            // Updated logic for synced time units
+            const learningUnitSelect = document.getElementById('param-learning-unit');
+            const learningUnit = learningUnitSelect.value;
+            const learningUnitText = learningUnitSelect.options[learningUnitSelect.selectedIndex].text;
+            
+            // Sync UI text display
+            document.getElementById('param-designed-unit-display').innerText = learningUnitText;
+            
+            const designedInput = document.getElementById('param-designed-val');
+            let divisor = 60;
+            if (learningUnit === 'hours') divisor = 3600;
+            if (learningUnit === 'days') divisor = 86400;
+            if (learningUnit === 'weeks') divisor = 604800;
+            
+            let designedVal = totals.totalSecs / divisor;
+            if (learningUnit === 'mins') designedVal = Math.round(designedVal);
+            else designedVal = parseFloat(designedVal.toFixed(1)); 
+            
+            designedInput.value = designedVal;
 
             const barContainer = document.getElementById('modules-visual-bar');
             const labelContainer = document.getElementById('modules-visual-labels');
@@ -1682,20 +1884,35 @@
             md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
             md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
-            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-designed-unit').selectedOptions[0]?.innerText || ''}\n`;
+            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
             md += `- **Design Language:** ${currentLang.toUpperCase()}\n`;
             md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             
             md += `## key_info\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
             md += `### ${t.label_outcomes}\n`;
-            document.querySelectorAll('#outcomes-list .outcome-text').forEach(el => md += `- ${el.innerText}\n`);
+            document.querySelectorAll('#outcomes-list li').forEach(li => {
+                const text = li.querySelector('.outcome-text').innerText;
+                const level = li.querySelector('.outcome-bloom-level').value;
+                const sub = li.querySelector('.outcome-bloom-sub').value;
+                
+                let bloomText = "";
+                if(level) {
+                    bloomText += `[${t[`bloom_${level}`] || level.toUpperCase()}`;
+                    if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
+                    bloomText += "] ";
+                }
+                
+                md += `- ${bloomText}${text}\n`;
+            });
             md += `\n### ${t.label_description}\n${document.getElementById('param-description').value}\n\n`;
 
             md += `## pedagogical_structure\n\n`;
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
+                const activityDesc = activity.querySelector('.activity-description').value;
                 md += `### ACTIVITY ${aIdx + 1}: ${activityTitle.toUpperCase()}\n\n`;
+                if(activityDesc) md += `> ${activityDesc}\n\n`;
                 activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
                     const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
@@ -1726,7 +1943,7 @@
             URL.revokeObjectURL(url);
         }
 
-        window.onload = () => { addActivity(); };
+        window.onload = () => { addActivity(); renderBloomOptions(document.getElementById('new-bloom-level')); };
     </script>
 </body>
 </html>
