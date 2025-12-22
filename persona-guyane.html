@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canevas Persona : L'Enseignant en Guyane</title>
     
-    <!-- Performance: Preconnect to font domains -->
+    <!-- Performance: Preconnect to font domains and CDN -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Import des Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -1124,10 +1125,11 @@
                 const h2 = card.querySelector('h2');
                 if (h2) {
                      // Clone to safely manipulate without DOM reflows on the live page
-                    const clone = h2.cloneNode(true); 
-                    const icon = clone.querySelector('.material-icons');
-                    if(icon) icon.remove(); // Remove icon from clone
-                    title = clone.textContent.trim();
+                    // Optimization: Use childNodes filtering instead of cloneNode to improve performance
+                    title = Array.from(h2.childNodes)
+                        .filter(n => n.nodeType === Node.TEXT_NODE)
+                        .map(n => n.textContent.trim())
+                        .join(' ').trim();
                 }
 
                 let sectionContent = '';
@@ -1235,10 +1237,11 @@
                 let title = "";
                 const h2 = card.querySelector('h2');
                 if (h2) {
-                    const clone = h2.cloneNode(true); 
-                    const icon = clone.querySelector('.material-icons');
-                    if(icon) icon.remove();
-                    title = clone.textContent.trim();
+                    // Optimization: Use childNodes filtering instead of cloneNode to improve performance
+                    title = Array.from(h2.childNodes)
+                        .filter(n => n.nodeType === Node.TEXT_NODE)
+                        .map(n => n.textContent.trim())
+                        .join(' ').trim();
                 }
 
                 let sectionContent = '';
