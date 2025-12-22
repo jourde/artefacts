@@ -587,6 +587,11 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label>Années d'expérience</label>
+                    <input type="text" placeholder="Ex: 5 ans, Débutant..." id="experience">
+                </div>
+
                 <!-- Context Guyane -->
                 <div class="guyane-context">
                     <span class="guyane-label">Spécifique Guyane</span>
@@ -861,7 +866,7 @@
     </div>
 
     <footer>
-        <p>Outil de conception pédagogique basé sur les réalités de l'Académie de Guyane.</p>
+        <p>François Jourde & Jacques Dubois (2026) • CC BY-SA</p>
     </footer>
 
     <!-- Modal Help (Ignored in PDF) -->
@@ -1290,6 +1295,7 @@
             document.getElementById('level').value = "Élémentaire";
             document.getElementById('discipline').value = ""; 
             document.getElementById('status').value = "Contractuel";
+            document.getElementById('experience').value = "Débutante (1 an)";
             document.querySelector('input[name="origin"][value="Local"]').checked = true;
             document.getElementById('seniority').value = "Arrivant";
 
