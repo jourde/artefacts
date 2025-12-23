@@ -388,13 +388,16 @@
                         </div>
                     </div>
 
-                    <div class="text-right">
+                    <div class="text-right flex items-center gap-2">
                         <span class="text-slate-400 text-[10px] italic" id="stats-update-info" data-i18n="status_calculating">Auto-calculating...</span>
+                        <button onclick="togglePanel('timeline-panel')" class="text-slate-400 hover:text-indigo-500 transition-colors" data-i18n-title="title_toggle_panel">
+                            <span id="timeline-panel-icon" class="material-icons-round text-base rotate-icon open">expand_more</span>
+                        </button>
                     </div>
                 </div>
                 
                 <!-- Fluid Timeline Container -->
-                <div class="w-full flex flex-col gap-1.5 mt-1">
+                <div id="timeline-panel" class="panel-content open w-full flex flex-col gap-1.5 mt-1">
                     
                     <!-- Track 1: Activities -->
                     <div class="flex flex-col gap-0.5">
@@ -869,7 +872,7 @@
                 footer_ai_disclaimer: "This application was created mainly using generative AI coding; the code may contain flaws.",
                 footer_github: "Code available at <a href=\"https://github.com/jourde/artefacts\" target=\"_blank\" class=\"underline hover:text-slate-500\">https://github.com/jourde/artefacts</a>",
                 bloom_placeholder: "Bloom...",
-                bloom_sub_placeholder: "Sub-cat...",
+                bloom_sub_placeholder: "Sous-cat...",
                 bloom_remember: "Remember",
                 bloom_understand: "Understand",
                 bloom_apply: "Apply",
@@ -1185,6 +1188,15 @@
                 bloom_sub_synthesize: "Synthétiser",
                 bloom_sub_write: "Écrire"
             }
+        };
+
+        const TYPE_COLORS = {
+            acquisition: '#a1f5ed',
+            collaboration: '#ffd966',
+            discussion: '#7aaeea',
+            investigation: '#f8807f',
+            practice: '#bb98dc',
+            production: '#bdea75'
         };
 
         // Initialize Sortables
@@ -1829,15 +1841,8 @@
             const activities = document.querySelectorAll('.activity-group');
             const classSize = parseInt(document.getElementById('global-class-size').value) || 1;
             const typeTime = { acquisition: 0, collaboration: 0, discussion: 0, investigation: 0, practice: 0, production: 0 };
-            const contextCounts = { 
-                trainer: { present: 0, absent: 0 }, 
-                place: { situ: 0, online: 0 }, 
-                time: { sync: 0, async: 0 } 
-            };
-            const socialAllocation = { individual: 0, smallGroup: 0, wholeClass: 0 };
             const timelineData = [];
             const detailedTimeline = [];
-            const typeTimelinePoints = [];
             let totalSecs = 0;
             let currentTimelineSecs = 0;
 
@@ -1852,9 +1857,6 @@
                     const unit = parseFloat(step.querySelector('.duration-unit').value) || 60;
                     const secs = dur * unit;
                     const type = step.querySelector('.learning-type-select').value;
-                    const startMin = currentTimelineSecs / 60;
-                    const endMin = (currentTimelineSecs + secs) / 60;
-                    typeTimelinePoints.push({ x: [startMin, endMin], y: translations[currentLang][`type_${type}`], type: type });
                     
                     const stepTitle = step.querySelector('.step-input-title').value || translations[currentLang].md_untitled_step;
                     activitySteps.push({
@@ -1874,17 +1876,11 @@
                     typeTime[type] += secs;
                     actSecs += secs;
                     totalSecs += secs;
-                    if (stepGroupSize === 1) socialAllocation.individual += secs;
-                    else if (mode === 'class' || stepGroupSize >= classSize * 0.8) socialAllocation.wholeClass += secs;
-                    else socialAllocation.smallGroup += secs;
-                    contextCounts.trainer[step.querySelector('.trainer-select').value] += secs;
-                    contextCounts.place[step.querySelector('.place-select').value] += secs;
-                    contextCounts.time[step.querySelector('.time-select').value] += secs;
                 });
                 timelineData.push({ title, duration: Math.round(actSecs / 60) });
                 detailedTimeline.push({ title: title, duration: actSecs, steps: activitySteps });
             });
-            return { totalSecs, typeTime, contextCounts, timelineData, socialAllocation, typeTimelinePoints, detailedTimeline };
+            return { totalSecs, detailedTimeline };
         }
 
         function updateStats() {
