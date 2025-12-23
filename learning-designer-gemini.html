@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Designer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Drag and Drop Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <!-- Charts Library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -138,7 +133,6 @@
 <body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
         <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-8 gap-6">
             <div class="mb-2 xl:mb-0">
                 <h1 class="text-3xl font-bold text-slate-900" data-i18n="app_title">Learning Designer</h1>
@@ -147,7 +141,6 @@
             
             <div class="flex flex-wrap gap-6 no-print items-end">
                 
-                <!-- Project Group -->
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">Project</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1 shadow-sm h-[46px]">
@@ -161,7 +154,6 @@
                         </button>
                         <div class="w-px bg-slate-200 my-1 mx-1"></div>
                         
-                        <!-- New Export Dropdown -->
                         <div class="relative group">
                             <div class="flex items-center">
                                 <select onchange="handleExport(this)" class="appearance-none bg-transparent hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 pl-3 pr-8 py-2 rounded-md transition-colors outline-none cursor-pointer text-sm font-medium h-[36px]" data-i18n-title="title_export_dropdown">
@@ -182,7 +174,6 @@
                     </div>
                 </div>
 
-                <!-- View Group -->
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">View</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
@@ -194,15 +185,9 @@
                             <span class="material-icons-round text-lg">language</span>
                             <span id="lang-btn-text" class="text-sm font-bold">FR</span>
                         </button>
-                        <div class="w-px h-6 bg-slate-200"></div>
-                        <div class="flex bg-slate-100 p-0.5 rounded-md">
-                            <button onclick="switchTab('designer')" id="tab-designer" class="nav-tab active px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_designer" data-i18n-title="title_tab_designer">Designer</button>
-                            <button onclick="switchTab('analysis')" id="tab-analysis" class="nav-tab px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-i18n="tab_analysis" data-i18n-title="title_tab_analysis">Analysis</button>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Help Group (Isolated) -->
                 <div class="flex flex-col gap-1">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_help">Help</span>
                     <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-2 shadow-sm h-[46px]">
@@ -215,7 +200,6 @@
             </div>
         </header>
 
-        <!-- Foldable Help Panel -->
         <div id="help-panel" class="mb-6 bg-blue-50 rounded-xl shadow-sm border border-blue-100 overflow-hidden panel-content no-print">
             <div class="p-6 text-slate-700">
                 <div class="flex justify-between items-start mb-4">
@@ -226,7 +210,7 @@
                     <button onclick="togglePanel('help-panel')" class="text-slate-400 hover:text-slate-600"><span class="material-icons-round">close</span></button>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
                     <div>
                         <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_structure_title">1. Design Structure</h3>
                         <p class="mb-2" data-i18n="help_structure_text">Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class="inline-block align-middle"><span class="material-icons-round text-base text-slate-400">drag_indicator</span></span>.</p>
@@ -244,18 +228,13 @@
                         </ul>
                     </div>
                     <div>
-                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_analysis_title">3. Analysis Dashboard</h3>
-                        <p data-i18n="help_analysis_text">Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the "Pedagogical Balance" radar chart and the "Context" pie charts to ensure your course meets its goals.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_export_title">4. Save & Export</h3>
+                        <h3 class="font-bold text-indigo-700 mb-2 uppercase text-xs tracking-wider" data-i18n="help_export_title">3. Save & Export</h3>
                         <p class="mb-2" data-i18n="help_export_text"><strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Foldable Key Parameters Panel -->
         <div class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <button onclick="togglePanel('key-params-panel')" class="w-full px-5 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print" data-i18n-title="title_toggle_panel">
                 <div class="flex items-center gap-2">
@@ -266,25 +245,21 @@
             </button>
             <div id="key-params-panel" class="panel-content">
                 <div class="p-5 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- 1. Name -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_course_name">Training Name</label>
                         <input type="text" id="param-name" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter training name..." data-i18n-placeholder="ph_course_name">
                     </div>
                     
-                    <!-- 2. Topic -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_topic">Topic</label>
                         <input type="text" id="param-topic" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter topic..." data-i18n-placeholder="ph_topic">
                     </div>
 
-                    <!-- 3. Author(s) -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_authors">Author(s)</label>
                         <input type="text" id="param-authors" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Enter author name(s)..." data-i18n-placeholder="ph_authors">
                     </div>
 
-                    <!-- 4. Mode of Delivery -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_mode">Mode of delivery</label>
                         <select id="param-mode" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
@@ -297,13 +272,11 @@
                         </select>
                     </div>
 
-                    <!-- 5. Size of class (Cohort Size) -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_class_size">Cohort Size</label>
                         <input type="number" id="global-class-size" oninput="updateStats()" value="30" min="1" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-800">
                     </div>
 
-                    <!-- 6. Learning Time -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_learning_time">Learning Time (Target)</label>
                         <div class="flex gap-2">
@@ -317,7 +290,6 @@
                         </div>
                     </div>
 
-                    <!-- 7. Designed Time -->
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_designed_time">Designed Time (Planned)</label>
                          <div class="flex gap-2 items-center">
@@ -326,25 +298,21 @@
                         </div>
                     </div>
 
-                    <!-- 8. Aims -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_aims">Aims</label>
                         <textarea id="param-aims" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="..." data-i18n-placeholder="ph_aims"></textarea>
                     </div>
 
-                    <!-- 9. Outcomes (Dynamic List) -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_outcomes">Learning Outcomes</label>
                         <div class="flex gap-2 mb-2 no-print flex-col sm:flex-row">
                             <div class="flex gap-2">
                                 <select id="new-bloom-level" onchange="updateHeaderBloomSub()" class="text-[11px] font-bold text-slate-600 border border-slate-200 rounded-lg py-2 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-28">
                                     <option value="" disabled selected data-i18n="bloom_placeholder">Bloom...</option>
-                                    <!-- Populated by JS -->
-                                </select>
+                                    </select>
                                 <select id="new-bloom-sub" class="text-[11px] text-slate-600 border border-slate-200 rounded-lg py-2 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-28 hidden">
                                     <option value="" disabled selected data-i18n="bloom_sub_placeholder">Sub-cat...</option>
-                                    <!-- Populated by JS -->
-                                </select>
+                                    </select>
                             </div>
                             <div class="flex flex-1 gap-2">
                                 <input type="text" id="new-outcome-input" class="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Add an outcome..." data-i18n-placeholder="ph_add_outcome" onkeypress="handleOutcomeEnter(event)">
@@ -354,12 +322,10 @@
                             </div>
                         </div>
                         <ul id="outcomes-list" class="space-y-1">
-                            <!-- Outcomes go here -->
-                        </ul>
+                            </ul>
                         <p id="no-outcomes-text" class="text-sm text-slate-400 italic mt-2" data-i18n="text_no_outcomes">No outcomes are set</p>
                     </div>
 
-                    <!-- 10. Description -->
                     <div class="md:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1" data-i18n="label_description">General Description</label>
                         <textarea id="param-description" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-y" placeholder="Detailed description..." data-i18n-placeholder="ph_description"></textarea>
@@ -368,12 +334,10 @@
             </div>
         </div>
 
-        <!-- Global Stats Display -->
         <div class="mb-4 no-print flex flex-col md:flex-row gap-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full mb-3 gap-4">
                     <div class="flex flex-wrap items-center gap-4">
-                        <!-- Target Time -->
                         <div class="flex items-center gap-2">
                             <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_learning_time">Learning Time (Target)</span>
                             <div class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 shadow-sm">
@@ -383,7 +347,6 @@
                         
                         <div class="hidden sm:block w-px h-6 bg-slate-200"></div>
 
-                        <!-- Designed Time -->
                         <div class="flex items-center gap-2">
                             <span class="text-slate-500 text-xs font-bold uppercase tracking-wider" data-i18n="label_designed_time">Designed Time (Planned)</span>
                             <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1 shadow-sm">
@@ -397,30 +360,25 @@
                     </div>
                 </div>
                 
-                <!-- Fluid Timeline Container -->
                 <div class="w-full flex flex-col gap-4 mt-2">
                     
-                    <!-- Track 1: Activities -->
                     <div class="flex flex-col gap-1">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="label_timeline_structure">Structure (Activities)</span>
                         <div id="timeline-activities" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                         <div id="timeline-activities-labels" class="w-full flex text-[10px] text-slate-500 font-medium"></div>
                     </div>
 
-                    <!-- Track 2: Learning Types -->
                     <div class="flex flex-col gap-1">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="label_timeline_pedagogy">Pedagogy (Learning Types)</span>
                         <div id="timeline-steps" class="w-full h-8 flex rounded-md overflow-hidden bg-slate-100 border border-slate-200 cursor-help"></div>
                     </div>
 
-                    <!-- Shared Ruler -->
                     <div id="timeline-ruler" class="w-full h-5 relative mt-0 select-none pointer-events-none"></div>
                 </div>
 
             </div>
         </div>
         
-        <!-- Main Actions Row (Moved below stats) -->
         <div class="mb-8 no-print flex justify-start">
             <button onclick="addActivity()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:shadow-lg flex items-center gap-2 transition-all transform hover:-translate-y-0.5" data-i18n-title="title_new_activity">
                 <span class="material-icons-round text-2xl">add_circle</span>
@@ -428,9 +386,7 @@
             </button>
         </div>
 
-        <!-- Tab: Designer -->
         <div id="view-designer">
-            <!-- Added Toolbar -->
             <div class="flex justify-end mb-4 no-print">
                 <button onclick="toggleAllActivities()" class="text-slate-500 hover:text-indigo-600 text-sm font-medium flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100" id="btn-toggle-all-main">
                     <span id="icon-toggle-all-main" class="material-icons-round text-xl">unfold_less</span>
@@ -439,10 +395,8 @@
             </div>
             
             <div id="activities-root" class="space-y-12">
-                <!-- Activities will be injected here -->
-            </div>
+                </div>
 
-            <!-- Empty State -->
             <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-300">
                 <h3 class="mt-2 text-lg font-medium text-slate-900" data-i18n="empty_title">No activities designed yet</h3>
                 <p class="mt-1 text-sm text-slate-500" data-i18n="empty_subtitle">Start by creating your first Activity container.</p>
@@ -452,87 +406,6 @@
             </div>
         </div>
 
-        <!-- Tab: Analysis -->
-        <div id="view-analysis" class="hidden">
-            <div id="analysis-dashboard" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Pedagogical Balance -->
-                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
-                        <span class="material-icons-round text-slate-300">pie_chart</span>
-                        <span data-i18n="analysis_balance">Pedagogical Balance</span>
-                    </h3>
-                    <div class="h-64 flex justify-center">
-                        <canvas id="chartLearningTypes"></canvas>
-                    </div>
-                </div>
-
-                <!-- Learning Context -->
-                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
-                    <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 cursor-grab drag-handle-analysis">
-                        <span class="material-icons-round text-slate-300">donut_large</span>
-                        <span data-i18n="analysis_context">Learning Context</span>
-                    </h3>
-                    <div class="grid grid-cols-3 gap-6 h-64 items-start">
-                        <div class="flex flex-col items-center">
-                            <div class="relative w-full aspect-square max-w-[120px]">
-                                <canvas id="chartTrainer"></canvas>
-                                <div id="valTrainer" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_teacher_present">Teacher<br>Present</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <div class="relative w-full aspect-square max-w-[120px]">
-                                <canvas id="chartLocation"></canvas>
-                                <div id="valLocation" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_face_to_face">Face to face</span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <div class="relative w-full aspect-square max-w-[120px]">
-                                <canvas id="chartTime"></canvas>
-                                <div id="valTime" class="absolute inset-0 flex items-center justify-center font-bold text-slate-800">0%</div>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-600 uppercase mt-4 text-center leading-tight" data-i18n="label_synchronous">Synchronous</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Social Organization -->
-                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
-                        <span class="material-icons-round text-slate-300">groups</span>
-                        <span data-i18n="analysis_social">Social Organization</span>
-                    </h3>
-                    <div class="h-64">
-                        <canvas id="chartSocial"></canvas>
-                    </div>
-                </div>
-
-                <!-- Activity Overview -->
-                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-1">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
-                        <span class="material-icons-round text-slate-300">view_timeline</span>
-                        <span data-i18n="analysis_overview">Activity Overview</span>
-                    </h3>
-                    <div class="h-64">
-                        <canvas id="chartTimeline"></canvas>
-                    </div>
-                </div>
-
-                <!-- Pedagogical Timeline -->
-                <div class="analysis-card bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 cursor-grab drag-handle-analysis">
-                        <span class="material-icons-round text-slate-300">timeline</span>
-                        <span data-i18n="analysis_timeline_types">Pedagogical Timeline (Learning Types)</span>
-                    </h3>
-                    <div class="h-64">
-                        <canvas id="chartTypeTimeline"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
         <footer class="mt-12 mb-6 text-center text-xs text-slate-400 no-print">
             <p>François Jourde (2026) - CC BY SA, inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" class="underline hover:text-slate-500">Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education).</p>
             <p class="mt-2" data-i18n="footer_disclaimer">This site does not use tracking or session cookies. No personal data is processed online.</p>
@@ -541,7 +414,6 @@
         </footer>
     </div>
     
-    <!-- Custom Modal for Confirmation -->
     <div id="custom-confirm-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full">
             <h3 class="text-lg font-bold text-slate-800 mb-2" data-i18n="modal_confirm_title">Confirm Action</h3>
@@ -553,10 +425,8 @@
         </div>
     </div>
 
-    <!-- Custom Tooltip (Pop-up) -->
     <div id="global-tooltip" class="fixed z-[100] hidden bg-slate-800 text-white text-xs font-medium rounded-lg px-3 py-2 pointer-events-none shadow-2xl border border-slate-700 max-w-[250px] whitespace-normal leading-tight"></div>
 
-    <!-- Templates -->
     <template id="activity-template">
         <div class="activity-group relative">
             <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-4 px-2 gap-4">
@@ -568,7 +438,6 @@
                     <div class="flex-1 w-full">
                         <input type="text" oninput="updateStats()" placeholder="Activity Title" data-i18n-placeholder="ph_activity_title" class="activity-title text-xl font-bold text-slate-800 bg-transparent border-b-2 border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-1 transition-colors">
                         
-                        <!-- Activity-specific Timeline Bar -->
                         <div class="flex items-center gap-3 mt-1 pr-2">
                             <div class="activity-type-bar flex-1 h-2.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden flex"></div>
                             <span class="activity-total-time text-[10px] font-bold text-slate-400 w-12 text-right font-mono">0m</span>
@@ -579,11 +448,9 @@
                     <button onclick="toggleActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Toggle Activity" data-i18n-title="title_toggle_panel">
                         <span class="material-icons-round text-2xl rotate-icon">expand_more</span>
                     </button>
-                    <!-- Duplicate Button -->
                     <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-2 transition-colors" title="Duplicate Activity" data-i18n-title="title_duplicate_activity">
                         <span class="material-icons-round text-2xl">content_copy</span>
                     </button>
-                    <!-- Delete Button -->
                     <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-2 transition-colors" title="Delete Activity" data-i18n-title="title_delete_activity">
                         <span class="material-icons-round text-2xl">delete_outline</span>
                     </button>
@@ -607,7 +474,6 @@
 
     <template id="step-template">
         <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
-            <!-- Header Row -->
             <div class="flex items-center gap-3 p-3 border-b border-transparent hover:border-slate-100 transition-colors">
                 <div class="drag-handle-step drag-handle flex items-center justify-center text-slate-300 hover:text-slate-500 cursor-grab">
                     <span class="material-icons-round text-xl">drag_indicator</span>
@@ -641,7 +507,6 @@
                 </div>
             </div>
 
-            <!-- Body Row -->
             <div class="step-body panel-content open p-5 pt-0">
                 <div class="flex flex-col lg:flex-row gap-6 mt-4">
                     <div class="lg:w-1/3 space-y-4">
@@ -737,11 +602,9 @@
                 </div>
 
                 <div class="absolute top-2 right-2 flex flex-col gap-1 no-print opacity-0 group-hover:opacity-100 transition-opacity">
-                    <!-- Duplicate Step Button -->
                     <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-1" title="Duplicate Step" data-i18n-title="title_duplicate_step">
                         <span class="material-icons-round text-lg">content_copy</span>
                     </button>
-                    <!-- Delete Step Button -->
                     <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-1" title="Delete Step" data-i18n-title="title_delete_step">
                         <span class="material-icons-round text-lg">close</span>
                     </button>
@@ -757,7 +620,6 @@
         const stepTemplate = document.getElementById('step-template');
         const tooltipEl = document.getElementById('global-tooltip');
 
-        let charts = { types: null, trainer: null, location: null, time: null, timeline: null, typeTimeline: null, social: null };
         let currentLang = 'en';
 
         // Tooltip Helpers
@@ -804,8 +666,6 @@
             en: {
                 app_title: "Learning Designer",
                 app_subtitle: "Pedagogical Design & Analytics",
-                tab_designer: "Designer",
-                tab_analysis: "Analysis",
                 btn_new_activity: "New Activity/Module",
                 btn_export_md: "Export for AI/RAG",
                 btn_print: "Print / PDF",
@@ -833,14 +693,6 @@
                 empty_subtitle: "Start by creating your first Activity container.",
                 btn_create_activity: "Create Activity",
                 btn_add_step: "Add Step",
-                analysis_balance: "Pedagogical Balance",
-                analysis_context: "Learning Context",
-                label_teacher_present: "Teacher<br>Present",
-                label_face_to_face: "Face to face",
-                label_synchronous: "Synchronous",
-                analysis_social: "Social Organization",
-                analysis_overview: "Activity Overview",
-                analysis_timeline_types: "Pedagogical Timeline (Learning Types)",
                 ph_activity_title: "Activity Title (e.g. Module 1: Introduction)",
                 ph_activity_desc: "Activity Description...",
                 label_step_title: "Step Title",
@@ -877,16 +729,6 @@
                 unit_hours: "Hours",
                 unit_days: "Days",
                 unit_weeks: "Weeks",
-                chart_time_allocation: "Time Allocation",
-                chart_social_individual: "Individual",
-                chart_social_small: "Small Group",
-                chart_social_whole: "Whole Class",
-                chart_present: "Present",
-                chart_not_present: "Not present",
-                chart_f2f: "Face to face",
-                chart_online: "Online",
-                chart_sync: "Synchronous",
-                chart_async: "Asynchronous",
                 md_title: "# Learning Experience Design Profile",
                 md_class_size: "Cohort Size",
                 md_total_duration: "Total Estimated Duration",
@@ -904,8 +746,6 @@
                 title_save_project: "Save current project to file",
                 title_load_project: "Load project from file",
                 title_switch_language: "Switch language / Changer la langue",
-                title_tab_designer: "Edit learning design",
-                title_tab_analysis: "View analytics and dashboard",
                 title_new_activity: "Add a new activity module",
                 title_toggle_panel: "Show/Hide parameters",
                 title_fold_all: "Fold/Unfold all activities",
@@ -921,9 +761,7 @@
                 help_structure_text: "Build your course by adding <strong>Activities</strong> (modules/topics) and filling them with <strong>Steps</strong> (specific tasks). Reorder items using the drag handles <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Learning Types",
                 help_types_intro: "Select a pedagogical type for each step:",
-                help_analysis_title: "3. Analysis Dashboard",
-                help_analysis_text: "Switch to the <strong>Analysis</strong> tab to visualize the balance of your design. Check the \"Pedagogical Balance\" radar chart and the \"Context\" pie charts to ensure your course meets its goals.",
-                help_export_title: "4. Save & Export",
+                help_export_title: "3. Save & Export",
                 help_export_text: "<strong>Save/Load:</strong> Keep your work in a .json file.<br><strong>Export:</strong> Generate files in Markdown (GenAI), PDF, or Rich Text formats.",
                 panel_key_parameters: "Parameters",
                 label_course_name: "Training Name",
@@ -965,16 +803,11 @@
                 modal_confirm_title: "Confirm Action",
                 confirm_delete_activity: "Delete this entire activity?",
                 btn_cancel: "Cancel",
-                btn_delete: "Delete",
-                chart_label_minutes: "Minutes",
-                chart_axis_time_mins: "Time (minutes)",
-                chart_axis_mins: "Mins"
+                btn_delete: "Delete"
             },
             fr: {
                 app_title: "Concepteur Pédagogique",
                 app_subtitle: "Design Pédagogique & Analytique",
-                tab_designer: "Design",
-                tab_analysis: "Analyse",
                 btn_new_activity: "Nouvelle Activité/Module",
                 btn_export_md: "Exporter pour IA/RAG",
                 btn_print: "Imprimer / PDF",
@@ -1002,14 +835,6 @@
                 empty_subtitle: "Commencez par créer votre première activité.",
                 btn_create_activity: "Créer une Activité",
                 btn_add_step: "Ajouter Étape",
-                analysis_balance: "Équilibre Pédagogique",
-                analysis_context: "Contexte d'Apprentissage",
-                label_teacher_present: "Enseignant<br>Présent",
-                label_face_to_face: "En présence",
-                label_synchronous: "Synchrone",
-                analysis_social: "Organisation Sociale",
-                analysis_overview: "Vue d'ensemble des Activités",
-                analysis_timeline_types: "Chronologie Pédagogique (Types)",
                 ph_activity_title: "Titre de l'activité (ex: Module 1 : Introduction)",
                 ph_activity_desc: "Description de l'activité...",
                 label_step_title: "Titre de l'étape",
@@ -1046,16 +871,6 @@
                 unit_hours: "Heures",
                 unit_days: "Jours",
                 unit_weeks: "Semaines",
-                chart_time_allocation: "Répartition du temps",
-                chart_social_individual: "Individuel",
-                chart_social_small: "Petit Groupe",
-                chart_social_whole: "Classe Entière",
-                chart_present: "Présent",
-                chart_not_present: "Non présent",
-                chart_f2f: "En présence",
-                chart_online: "En ligne",
-                chart_sync: "Synchrone",
-                chart_async: "Asynchrone",
                 md_title: "# Profil de Design d'Expérience d'Apprentissage",
                 md_class_size: "Taille de la cohorte",
                 md_total_duration: "Durée totale estimée",
@@ -1100,8 +915,6 @@
                 title_save_project: "Enregistrer le projet dans un fichier",
                 title_load_project: "Charger un projet depuis un fichier",
                 title_switch_language: "Changer la langue / Switch language",
-                title_tab_designer: "Éditer le design pédagogique",
-                title_tab_analysis: "Voir les analyses et le tableau de bord",
                 title_new_activity: "Ajouter un nouveau module d'activité",
                 title_toggle_panel: "Afficher/Masquer les paramètres",
                 title_add_outcome: "Ajouter un résultat d'apprentissage",
@@ -1114,9 +927,7 @@
                 help_structure_text: "Construisez votre cours en ajoutant des <strong>Activités</strong> (modules/sujets) et en les remplissant d'<strong>Étapes</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
                 help_types_title: "2. Types d'Apprentissage",
                 help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
-                help_analysis_title: "3. Tableau de Bord d'Analyse",
-                help_analysis_text: "Passez à l'onglet <strong>Analyse</strong> pour visualiser l'équilibre de votre conception. Vérifiez le diagramme radar \"Équilibre Pédagogique\" et les diagrammes circulaires \"Contexte\" pour vous assurer que votre cours atteint ses objectifs.",
-                help_export_title: "4. Enregistrer & Exporter",
+                help_export_title: "3. Enregistrer & Exporter",
                 help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez des fichiers aux formats Markdown (IA), PDF ou Texte Riche.",
                 footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
                 footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs.",
@@ -1153,9 +964,6 @@
                 confirm_delete_activity: "Supprimer toute l'activité ?",
                 btn_cancel: "Annuler",
                 btn_delete: "Supprimer",
-                chart_label_minutes: "Minutes",
-                chart_axis_time_mins: "Temps (minutes)",
-                chart_axis_mins: "Min",
                 // Additional Bloom Translations
                 bloom_sub_cite: "Citer",
                 bloom_sub_define: "Définir",
@@ -1317,13 +1125,6 @@
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
             onEnd: () => { updateEmptyState(); }
-        });
-
-        new Sortable(document.getElementById('analysis-dashboard'), {
-            animation: 150,
-            handle: '.drag-handle-analysis',
-            ghostClass: 'sortable-ghost',
-            dragClass: 'sortable-drag'
         });
         
         // Initialize Sortable for Outcomes
@@ -1782,7 +1583,6 @@
                 renderBloomSubOptions(subSelect, currentLevel, currentSub);
             });
 
-            refreshCharts();
             updateStats();
         }
 
@@ -1799,19 +1599,6 @@
                 const key = el.getAttribute('data-i18n-title');
                 if (translations[currentLang][key]) el.title = translations[currentLang][key];
             });
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            if (tab === 'designer') {
-                document.getElementById('view-designer').classList.remove('hidden');
-                document.getElementById('view-analysis').classList.add('hidden');
-            } else {
-                document.getElementById('view-designer').classList.add('hidden');
-                document.getElementById('view-analysis').classList.remove('hidden');
-                refreshCharts();
-            }
         }
 
         function toggleGroupMode(select) {
@@ -2228,52 +2015,6 @@
                         }
                     }
                 }
-            });
-
-            if (!document.getElementById('view-analysis').classList.contains('hidden')) refreshCharts();
-        }
-
-        function createDonutChart(id, data, labels, valId) {
-            if (charts[id]) charts[id].destroy();
-            const total = data[0] + data[1];
-            const percent = total > 0 ? Math.round((data[0] / total) * 100) : 0;
-            document.getElementById(valId).innerText = percent + '%';
-            charts[id] = new Chart(document.getElementById('chart' + id.charAt(0).toUpperCase() + id.slice(1)), {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#4f46e5', '#f1f5f9'], borderWidth: 0, hoverOffset: 0 }] },
-                options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { enabled: true } }, maintainAspectRatio: false }
-            });
-        }
-
-        function refreshCharts() {
-            const data = getTotals();
-            const t = translations[currentLang];
-            if (charts.types) charts.types.destroy();
-            charts.types = new Chart(document.getElementById('chartLearningTypes'), {
-                type: 'radar',
-                data: { labels: Object.keys(data.typeTime).map(key => t[`type_${key}`]), datasets: [{ label: t.chart_time_allocation, data: Object.values(data.typeTime), backgroundColor: 'rgba(79, 70, 229, 0.2)', borderColor: '#4f46e5', pointBackgroundColor: Object.values(TYPE_COLORS), borderWidth: 2 }] },
-                options: { scales: { r: { angleLines: { display: false }, suggestedMin: 0, ticks: { display: false } } }, plugins: { legend: { display: false } } }
-            });
-            createDonutChart('trainer', [data.contextCounts.trainer.present, data.contextCounts.trainer.absent], [t.chart_present, t.chart_not_present], 'valTrainer');
-            createDonutChart('location', [data.contextCounts.place.situ, data.contextCounts.place.online], [t.chart_f2f, t.chart_online], 'valLocation');
-            createDonutChart('time', [data.contextCounts.time.sync, data.contextCounts.time.async], [t.chart_sync, t.chart_async], 'valTime');
-            if (charts.social) charts.social.destroy();
-            charts.social = new Chart(document.getElementById('chartSocial'), {
-                type: 'bar',
-                data: { labels: [t.chart_social_individual, t.chart_social_small, t.chart_social_whole], datasets: [{ label: t.chart_label_minutes, data: [Math.round(data.socialAllocation.individual / 60), Math.round(data.socialAllocation.smallGroup / 60), Math.round(data.socialAllocation.wholeClass / 60)], backgroundColor: ['#cbd5e1', '#6366f1', '#1e293b'], borderRadius: 8 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-            if (charts.timeline) charts.timeline.destroy();
-            charts.timeline = new Chart(document.getElementById('chartTimeline'), {
-                type: 'bar',
-                data: { labels: data.timelineData.map(d => d.title), datasets: [{ label: t.chart_label_minutes, data: data.timelineData.map(d => d.duration), backgroundColor: '#4f46e5', borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: t.chart_axis_mins } } } }
-            });
-            if (charts.typeTimeline) charts.typeTimeline.destroy();
-            charts.typeTimeline = new Chart(document.getElementById('chartTypeTimeline'), {
-                type: 'bar',
-                data: { labels: ['acquisition', 'investigation', 'practice', 'discussion', 'collaboration', 'production'].map(k => t[`type_${k}`]), datasets: [{ label: 'Timeline', data: data.typeTimelinePoints, backgroundColor: data.typeTimelinePoints.map(p => TYPE_COLORS[p.type]), borderWidth: 0, barPercentage: 0.6 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { const d = context.raw; return `${d.y}: ${Math.round(d.x[0])}m - ${Math.round(d.x[1])}m`; } } } }, scales: { x: { position: 'bottom', title: { display: true, text: t.chart_axis_time_mins }, min: 0, grid: { color: '#f3f4f6' } }, y: { grid: { color: '#f3f4f6' } } } }
             });
         }
 
