@@ -589,12 +589,12 @@
                     <button onclick="toggleActivity(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Afficher/Masquer les paramètres" data-i18n-title="title_toggle_panel">
                         <span class="material-icons-round text-lg rotate-icon">expand_more</span>
                     </button>
-                    <!-- Duplicate Button -->
-                    <button onclick="duplicateActivity(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Dupliquer ce module" data-i18n-title="title_duplicate_activity">
+                    <!-- Duplicate Button (RENAMED) -->
+                    <button onclick="cloneModule(this)" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" title="Dupliquer ce module" data-i18n-title="title_duplicate_activity">
                         <span class="material-icons-round text-lg">content_copy</span>
                     </button>
-                    <!-- Delete Button -->
-                    <button onclick="deleteActivity(this)" class="text-slate-400 hover:text-red-500 p-1 transition-colors" title="Supprimer ce module" data-i18n-title="title_delete_activity">
+                    <!-- Delete Button (RENAMED) -->
+                    <button onclick="trashModule(this)" class="text-slate-400 hover:text-red-500 p-1 transition-colors" title="Supprimer ce module" data-i18n-title="title_delete_activity">
                         <span class="material-icons-round text-lg">delete_outline</span>
                     </button>
                 </div>
@@ -655,10 +655,12 @@
                     <button onclick="toggleStep(this)" class="text-slate-400 hover:text-indigo-500 p-0.5" title="Afficher/Masquer les paramètres" data-i18n-title="title_toggle_panel">
                         <span class="material-icons-round text-base rotate-icon">expand_more</span>
                     </button>
-                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
+                    <!-- Duplicate Step (RENAMED) -->
+                    <button onclick="cloneStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
                         <span class="material-icons-round text-base">content_copy</span>
                     </button>
-                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
+                    <!-- Delete Step (RENAMED) -->
+                    <button onclick="trashStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
                         <span class="material-icons-round text-base">delete_outline</span>
                     </button>
                 </div>
@@ -745,12 +747,12 @@
                 </div>
 
                 <div class="absolute top-1 right-1 flex flex-col gap-0.5 no-print opacity-0 group-hover:opacity-100 transition-opacity">
-                    <!-- Duplicate Step Button -->
-                    <button onclick="duplicateStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
+                    <!-- Duplicate Step (RENAMED) -->
+                    <button onclick="cloneStep(this)" class="text-slate-300 hover:text-indigo-500 p-0.5" title="Dupliquer cette activité" data-i18n-title="title_duplicate_step">
                         <span class="material-icons-round text-base">content_copy</span>
                     </button>
-                    <!-- Delete Step Button -->
-                    <button onclick="deleteStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
+                    <!-- Delete Step (RENAMED) -->
+                    <button onclick="trashStep(this)" class="text-slate-300 hover:text-red-400 p-0.5" title="Supprimer cette activité" data-i18n-title="title_delete_step">
                         <span class="material-icons-round text-base">delete_outline</span>
                     </button>
                 </div>
@@ -1848,18 +1850,25 @@
             srcSelects.forEach((sel, i) => destSelects[i].value = sel.value);
         }
 
-        function duplicateActivity(btn) {
+        // RENAMED TO AVOID CONFLICTS
+        function cloneModule(btn) {
             const original = btn.closest('.activity-group');
             const clone = original.cloneNode(true);
             original.after(clone);
             copyFormValues(original, clone);
+            
+            // Explicitly rebind buttons in the clone to be safe - CRITICAL FIX
+            // Remove any manual rebind logic that depends on titles and let inline handlers work
+            // The cloneNode(true) copies the onclick="cloneModule(this)" correctly.
+            
             const stepContainer = clone.querySelector('.activity-steps-container');
             initSortableSteps(stepContainer);
             updateEmptyState();
             updateStats();
         }
 
-        function duplicateStep(btn) {
+        // RENAMED TO AVOID CONFLICTS
+        function cloneStep(btn) {
             const original = btn.closest('.step-card');
             const clone = original.cloneNode(true);
             original.after(clone);
@@ -1869,22 +1878,24 @@
             updateStats();
         }
 
-        function deleteActivity(btn) {
-            // Using custom modal instead of native confirm
+        // RENAMED AND FIXED MODAL LOGIC
+        function trashModule(btn) {
             const modal = document.getElementById('custom-confirm-modal');
-            const msg = document.getElementById('custom-confirm-msg');
             const yesBtn = document.getElementById('custom-confirm-yes');
             const noBtn = document.getElementById('custom-confirm-no');
+            const msg = document.getElementById('custom-confirm-msg');
 
-            // Use translation key for the message
-            msg.innerText = translations[currentLang].confirm_delete_activity;
+            // --- CRITICAL FIX: Clone buttons to strip ANY existing event listeners ---
+            // This prevents old listeners (including potential duplication logic) from firing
+            const newYes = yesBtn.cloneNode(true);
+            const newNo = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYes, yesBtn);
+            noBtn.parentNode.replaceChild(newNo, noBtn);
             
+            msg.innerText = translations[currentLang].confirm_delete_activity;
             modal.classList.remove('hidden');
 
-            // --- KEY FIX: Use .onclick property instead of addEventListener to prevent stacking ---
-            
-            yesBtn.onclick = function() {
-                // Ensure we are deleting the activity group
+            newYes.onclick = function() {
                 const activityGroup = btn.closest('.activity-group');
                 if(activityGroup) {
                     activityGroup.remove();
@@ -1893,12 +1904,13 @@
                 modal.classList.add('hidden');
             };
 
-            noBtn.onclick = function() {
+            newNo.onclick = function() {
                 modal.classList.add('hidden');
             };
         }
 
-        function deleteStep(btn) {
+        // RENAMED TO AVOID CONFLICTS
+        function trashStep(btn) {
             btn.closest('.step-card').remove();
             updateStats();
         }
