@@ -288,10 +288,10 @@
 <span class="material-icons-round text-slate-600 absolute left-1.5 pointer-events-none text-lg z-10 group-hover:text-indigo-600 transition-colors">download</span>
 <select class="appearance-none bg-transparent hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 pl-7 pr-6 py-1 rounded transition-colors outline-none cursor-pointer text-xs font-medium h-[28px]" data-i18n-title="title_export_dropdown" onchange="handleExport(this)">
 <option data-i18n="btn_export_dropdown" disabled="" selected="" value="">Exporter...</option>
-<option data-i18n="opt_md" value="markdown">Markdown</option>
-<option data-i18n="opt_pdf" value="pdf">PDF</option>
-<option data-i18n="opt_rtf" value="richtext">Rich Text</option>
-<option data-i18n="opt_real_rtf" value="rtf">Text (.rtf)</option>
+<option data-i18n="opt_md" value="markdown">Markdown (IA)</option>
+<option data-i18n="opt_pdf" value="pdf">PDF (Imprimer)</option>
+<option data-i18n="opt_rtf" value="richtext">Texte Riche (HTML)</option>
+<option data-i18n="opt_real_rtf" value="rtf">Texte (.rtf)</option>
 </select>
 <span class="material-icons-round text-slate-400 pointer-events-none absolute right-1 text-sm">expand_more</span>
 </div>
@@ -349,10 +349,9 @@
 <label class="compact-label block" data-i18n="label_mode">Modalité</label>
 <select class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none bg-white" id="param-mode">
 <option data-i18n="opt_mode_placeholder" disabled="" selected="" value="">Sélectionnez une modalité...</option>
-<option data-i18n="opt_mode_online" value="online">Entièrement en ligne</option>
+<option data-i18n="opt_mode_online" value="online">En ligne</option>
 <option data-i18n="opt_mode_blended" value="blended">Hybride</option>
-<option data-i18n="opt_mode_classroom" value="classroom">En classe</option>
-<option data-i18n="opt_mode_location" value="location">Basé sur le lieu</option>
+<option data-i18n="opt_mode_classroom" value="classroom">In situ</option>
 <option data-i18n="opt_mode_other" value="other">Autre</option>
 </select>
 </div>
@@ -693,7 +692,7 @@
 </select>
 <div class="step-group-details hidden flex gap-1">
 <div class="relative flex-1">
-<input class="step-group-count w-full px-2 py-0.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[24px]" data-i18n-placeholder="ph_nb_groups" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" type="number"/>
+<input class="step-group-count w-full px-2 py-0.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[24px]" data-i18n-placeholder="ph_nb_groups" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groupes" type="number"/>
 <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_groups">Grps</span>
 </div>
 <div class="relative flex-1">
@@ -959,13 +958,10 @@
                 app_title: "Concepteur Pédagogique",
                 app_subtitle: "Design Pédagogique & Analytique",
                 btn_new_activity: "Nouveau Module",
-                btn_export_md: "Exporter pour IA/RAG",
-                btn_print: "Imprimer / PDF",
                 btn_save: "Enregistrer",
                 btn_load: "Charger",
                 grp_project: "Projet",
                 grp_view: "Vue",
-                grp_actions: "Actions",
                 grp_help: "Aide",
                 // Export Translations FR
                 btn_export_dropdown: "Exporter...",
@@ -974,8 +970,6 @@
                 opt_pdf: "PDF (Imprimer)",
                 opt_rtf: "Texte Riche (HTML)",
                 opt_real_rtf: "Texte (.rtf)",
-                title_export_term: "Exporter le tableau de traduction",
-                info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Chronologie",
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
@@ -988,10 +982,7 @@
                 btn_add_step: "Ajouter Activité",
                 ph_activity_title: "Titre du module (ex: Module 1 : Introduction)",
                 ph_activity_desc: "Description du module...",
-                label_step_title: "Titre de l'activité",
                 ph_step_title: "Titre pour cette activité...",
-                label_learning_type: "Type d'apprentissage",
-                label_duration: "Durée",
                 label_grouping: "Regroupement",
                 opt_whole_class: "Classe entière",
                 opt_groups: "Groupes",
@@ -1024,34 +1015,28 @@
                 unit_weeks: "Semaines",
                 unit_months: "Mois",
                 md_title: "# Profil de Design d'Expérience d'Apprentissage",
-                md_class_size: "Taille de la cohorte",
-                md_total_duration: "Durée totale estimée",
                 md_untitled_activity: "Module sans titre",
                 md_untitled_step: "Activité sans titre",
                 md_format_whole: "Classe entière",
                 md_format_groups: "Groupes de",
-                md_tasks: "Tâches et instructions des apprenants",
-                md_notes: "Notes pédagogiques",
                 rtf_title: "Profil de Design d'Expérience d'Apprentissage",
-                title_duplicate: "Dupliquer",
                 panel_key_parameters: "Paramètres",
                 panel_timelines_title: "Visualisations des séquences",
                 label_course_name: "Nom de la formation",
                 ph_course_name: "Entrez le nom de la formation...",
                 label_topic: "Sujet",
                 ph_topic: "Entrez le sujet...",
+                label_authors: "Auteur(s)",
+                ph_authors: "Entrez le nom de l'auteur...",
                 label_learning_time: "Temps d'Apprentissage (Cible)",
                 label_designed_time: "Temps Conçu (Planifié)",
-                label_hours: "h",
-                label_minutes: "m",
                 label_description: "Description générale",
                 ph_description: "Description détaillée...",
                 label_mode: "Modalité",
                 opt_mode_placeholder: "Sélectionnez une modalité...",
-                opt_mode_online: "Entièrement en ligne",
+                opt_mode_online: "En ligne",
                 opt_mode_blended: "Hybride",
-                opt_mode_classroom: "En classe",
-                opt_mode_location: "Basé sur le lieu",
+                opt_mode_classroom: "In situ",
                 opt_mode_other: "Autre",
                 label_aims: "Objectifs",
                 ph_aims: "Entrez les objectifs...",
@@ -1075,16 +1060,7 @@ title_new_activity: "Ajouter un nouveau module",
                 title_add_step: "Ajouter une nouvelle activité d'apprentissage",
                 title_create_activity: "Créer votre premier module",
                 title_help: "Aide & Information",
-                help_title: "Comment utiliser le Concepteur Pédagogique",
-                help_structure_title: "1. Structure du Design",
-                help_structure_text: "Construisez votre cours en ajoutant des <strong>Modules</strong> (sujets) et en les remplissant d'<strong>Activités</strong> (tâches spécifiques). Réorganisez les éléments à l'aide des poignées <span class=\"inline-block align-middle\"><span class=\"material-icons-round text-base text-slate-400\">drag_indicator</span></span>.",
-                help_types_title: "2. Types d'Apprentissage",
-                help_types_intro: "Sélectionnez un type pédagogique pour chaque étape :",
-                help_export_title: "3. Enregistrer & Exporter",
-                help_export_text: "<strong>Enregistrer/Charger :</strong> Conservez votre travail dans un fichier .json.<br><strong>Exporter :</strong> Générez des fichiers aux formats Markdown (IA), PDF ou Texte Riche.",
                 footer_disclaimer: "Ce site n'utilise pas de cookies de suivi ou de session. Aucune donnée personnelle n'est traitée en ligne.",
-                footer_ai_disclaimer: "Cette application a été créée principalement à l'aide d'une IA générative ; le code peut contenir des erreurs.",
-                footer_github: "Code disponible sur <a href=\"https://github.com/jourde/artefacts\" target=\"_blank\" class=\"underline hover:text-slate-500\">https://github.com/jourde/artefacts</a>",
                 bloom_placeholder: "Bloom...",
                 bloom_sub_placeholder: "Sous-cat...",
                 bloom_remember: "Mémoriser",
@@ -1645,7 +1621,7 @@ keyParams: {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `learning-design-${new Date().toISOString().slice(0,10)}.json`;
+            a.download = `conception-pedagogique-${new Date().toISOString().slice(0,10)}.json`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -2404,7 +2380,7 @@ keyParams: {
             <body>
                 <h1>${t.rtf_title}</h1>
                 
-                <h2>Metadata</h2>
+                <h2>Métadonnées</h2>
                 <div class="meta-item"><span class="meta-label">${t.label_course_name}:</span> ${document.getElementById('param-name').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_topic}:</span> ${document.getElementById('param-topic').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_authors}:</span> ${document.getElementById('param-authors').value}</div>
@@ -2413,7 +2389,7 @@ keyParams: {
                 <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${document.getElementById('total-duration').innerText}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_learning_time}:</span> ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}</div>
                 
-                <h2>Key Info</h2>
+                <h2>Informations clés</h2>
                 <h3>${t.label_aims}</h3>
                 <p>${document.getElementById('param-aims').value.replace(/\n/g, '<br>')}</p>
                 
@@ -2437,7 +2413,7 @@ keyParams: {
                 <h3>${t.label_description}</h3>
                 <p>${document.getElementById('param-description').value.replace(/\n/g, '<br>')}</p>
                 
-                <h2>Pedagogical Structure</h2>`;
+                <h2>Structure pédagogique</h2>`;
 
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
@@ -2466,9 +2442,9 @@ html += `<div class="activity-block">
                     html += `<div class="step-block type-${typeKey}">
                         <h4>${sIdx + 1}. ${stepTitle} <span class="tag bg-${typeKey}" style="float: right;">${typeLabel}</span></h4>
                         <div style="font-size: 0.9em; color: #64748b; margin-bottom: 10px;">
-                            <strong>Duration:</strong> ${duration} | 
-                            <strong>Group:</strong> ${groupInfo} | 
-                            <strong>Mode:</strong> ${trainerText}, ${placeText}, ${timeText}
+                            <strong>Durée :</strong> ${duration} | 
+                            <strong>Regroupement :</strong> ${groupInfo} | 
+                            <strong>Modalité :</strong> ${trainerText}, ${placeText}, ${timeText}
                         </div>
                         ${tasks ? `<div class="task-box"><strong>${t.label_tasks}:</strong><br>${tasks.replace(/\n/g, '<br>')}</div>` : ''}
                         ${notes ? `<div style="margin-top: 10px; font-size: 0.9em; color: #475569;"><strong>${t.label_notes}:</strong> ${notes.replace(/\n/g, '<br>')}</div>` : ''}
@@ -2485,7 +2461,7 @@ html += `<div class="activity-block">
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'learning-design-profile.html';
+            a.download = 'profil-conception-pedagogique.html';
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -2494,7 +2470,7 @@ html += `<div class="activity-block">
             const data = getTotals();
             const t = translations[currentLang];
             let md = `# ${t.md_title}\n\n`;
-            md += `## metadata\n`;
+            md += `## metadonnees\n`;
             md += `- **${t.label_course_name}:** ${document.getElementById('param-name').value}\n`;
             md += `- **${t.label_topic}:** ${document.getElementById('param-topic').value}\n`;
             md += `- **${t.label_authors}:** ${document.getElementById('param-authors').value}\n`;
@@ -2503,9 +2479,9 @@ html += `<div class="activity-block">
             md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
-md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
+md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             
-            md += `## key_info\n`;
+            md += `## informations_cles\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
             md += `### ${t.label_outcomes}\n`;
             document.querySelectorAll('#outcomes-list li').forEach(li => {
@@ -2524,7 +2500,7 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             });
             md += `\n### ${t.label_description}\n${document.getElementById('param-description').value}\n\n`;
 
-            md += `## pedagogical_structure\n\n`;
+            md += `## structure_pedagogique\n\n`;
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
                 const activityDesc = activity.querySelector('.activity-description').value;
@@ -2536,8 +2512,8 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
                     const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
                     let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
-                    const tasks = step.querySelector('.step-input-tasks').value || "N/A";
-                    const notes = step.querySelector('.step-input-notes').value || "N/A";
+                    const tasks = step.querySelector('.step-input-tasks').value || "Non renseigné";
+                    const notes = step.querySelector('.step-input-notes').value || "Non renseigné";
                     const typeKey = step.querySelector('.learning-type-select').value;
                     const typeLabel = t[`type_${typeKey}`];
                     const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
@@ -2545,13 +2521,13 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
                     const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
                     
                     // Terminology Update: Step -> Activity
-                    md += `#### ACTIVITY ${aIdx + 1}.${sIdx + 1}: ${stepTitle}\n`;
-                    md += `- **TYPE:** ${typeLabel}\n`;
-                    md += `- **DURATION:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
-                    md += `- **SOCIAL_ORG:** ${groupInfo}\n`;
-                    md += `- **MODALITY:** ${trainerText}, ${placeText}, ${timeText}\n`;
-                    md += `\n**LEARNER_TASKS:**\n${tasks}\n\n`;
-                    md += `**PEDAGOGICAL_NOTES:**\n${notes}\n\n`;
+                    md += `#### ACTIVITÉ ${aIdx + 1}.${sIdx + 1}: ${stepTitle}\n`;
+                    md += `- **TYPE :** ${typeLabel}\n`;
+                    md += `- **DURÉE :** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
+                    md += `- **REGROUPEMENT :** ${groupInfo}\n`;
+                    md += `- **MODALITÉ :** ${trainerText}, ${placeText}, ${timeText}\n`;
+                    md += `\n**TÂCHES_DES_APPRENANTS :**\n${tasks}\n\n`;
+                    md += `**NOTES_PÉDAGOGIQUES :**\n${notes}\n\n`;
                 });
                 md += `\n---\n\n`;
             });
@@ -2559,7 +2535,7 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'learning-design-profile.md';
+            a.download = 'profil-conception-pedagogique.md';
             a.click();
             URL.revokeObjectURL(url);
         }
