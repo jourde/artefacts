@@ -20,8 +20,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
             color: #0f172a;
-            font-size: 0.95rem;
-            line-height: 1.45;
+            font-size: 0.92rem;line-height: 1.4;
         }
 
         /* Timeline Visual Cues (Patterns) */
@@ -189,7 +188,6 @@
             select { appearance: none; border: none; padding: 0; background: none; }
             textarea { border: none; padding: 0; }
             #key-params-panel { max-height: none !important; opacity: 1 !important; display: block !important; }
-            #help-panel { display: none; }
             .step-body.collapsed, .activity-body.collapsed { max-height: none !important; opacity: 1 !important; display: block !important; }
         }
     
@@ -201,37 +199,32 @@
         .activity-title { letter-spacing: -0.01em; }
         .activity-container { border-left-color: #cbd5e1; }
 
-
-        /* Density + High Contrast (enabled by default) */
-        body.dense {
-            font-size: 0.92rem;
-            line-height: 1.4;
-        }
-        body.dense header { margin-bottom: 0.5rem !important; }
-        body.dense .activity-group { padding: 0.5rem !important; }
-        body.dense .activity-group > .flex { margin-bottom: 0.5rem !important; gap: 0.5rem !important; }
-        body.dense .step-card > .flex.items-center { padding: 6px 8px !important; gap: 0.5rem !important; }
-        body.dense .step-body.panel-content { padding: 0.5rem !important; padding-top: 0.35rem !important; }
-        body.dense .activity-description { padding: 0.35rem 0.5rem !important; font-size: 0.85rem !important; }
-        body.dense .activity-steps-container { padding-top: 0.25rem; }
-        body.dense input, body.dense select, body.dense textarea { font-size: 0.88rem; }
-        body.dense .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
-        body.dense .compact-label-lg { font-size: 0.74rem; }
-        body.dense #timeline-panel { gap: 0.75rem !important; }
-        body.dense #timeline-panel .timeline-track-pedagogy,
-        body.dense #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem !important; }
+        /* Densité (valeur par défaut) + Haut contraste (optionnel) */
+        header { margin-bottom: 0.5rem ; }
+        .activity-group { padding: 0.5rem ; }
+        .activity-group > .flex { margin-bottom: 0.5rem ; gap: 0.5rem ; }
+        .step-card > .flex.items-center { padding: 6px 8px ; gap: 0.5rem ; }
+        .step-body.panel-content { padding: 0.5rem ; padding-top: 0.35rem ; }
+        .activity-description { padding: 0.35rem 0.5rem ; font-size: 0.85rem ; }
+        .activity-steps-container { padding-top: 0.25rem; }
+        input, select, textarea { font-size: 0.88rem; }
+        .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
+        .compact-label-lg { font-size: 0.74rem; }
+        #timeline-panel { gap: 0.75rem ; }
+        #timeline-panel .timeline-track-pedagogy,
+        #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem ; }
 
         
-        /* Keep timelines legible even in dense mode */
-        body.dense #timeline-panel [data-i18n^="label_timeline_"] { font-size: 0.82rem !important; }
-        body.dense #timeline-panel [data-i18n^="label_"][data-i18n$="grouping"],
-        body.dense #timeline-panel [data-i18n="label_trainer"],
-        body.dense #timeline-panel [data-i18n="label_place"],
-        body.dense #timeline-panel [data-i18n="label_time"] { font-size: 0.95rem !important; }
-        body.dense #timeline-panel [data-i18n^="legend_"] { font-size: 0.82rem !important; }
-        body.dense #timeline-panel #timeline-activities-planned-labels,
-        body.dense #timeline-panel #timeline-activities-labels { font-size: 0.85rem !important; }
-        body.dense #timeline-ruler { font-size: 0.82rem !important; }
+        /* Timelines – lisibilité */
+        #timeline-panel [data-i18n^="label_timeline_"] { font-size: 0.82rem ; }
+        #timeline-panel [data-i18n^="label_"][data-i18n$="grouping"],
+        #timeline-panel [data-i18n="label_trainer"],
+        #timeline-panel [data-i18n="label_place"],
+        #timeline-panel [data-i18n="label_time"] { font-size: 0.95rem ; }
+        #timeline-panel [data-i18n^="legend_"] { font-size: 0.82rem ; }
+        #timeline-panel #timeline-activities-planned-labels,
+        #timeline-panel #timeline-activities-labels { font-size: 0.85rem ; }
+        #timeline-ruler { font-size: 0.82rem ; }
 
         body.hc {
             background-color: #ffffff;
@@ -266,31 +259,27 @@
             outline-color: rgba(37, 99, 235, 0.8);
         }
 
-
-
 /* Timeline panel – UI polish */
 #timeline-panel { gap: 0.75rem; }
 
-#timeline-details { gap: 0.45rem; }
-body.dense #timeline-details { gap: 0.35rem !important; }
+#timeline-details { gap: 0.35rem; }
+
 
 /* Timeline details – tighter stacking (Regroupement / Formateur / Lieu / Temps) */
-#timeline-details .timeline-track { padding: 0.45rem !important; }
-body.dense #timeline-details .timeline-track { padding: 0.40rem !important; }
-
+#timeline-details .timeline-track { padding: 0.40rem; }
 #timeline-panel .timeline-duration-label { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 
 #timeline-panel .timeline-track { transition: box-shadow 0.15s ease; }
 #timeline-panel .timeline-track:hover { box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06); }
-body.dense #timeline-panel { padding: 0.5rem !important; }
-body.dense #timeline-panel #timeline-activities-planned,
-body.dense #timeline-panel #timeline-activities,
-body.dense #timeline-panel #timeline-steps { height: 1.25rem !important; }
-body.dense #timeline-panel #timeline-grouping,
-body.dense #timeline-panel #timeline-trainer,
-body.dense #timeline-panel #timeline-place,
-body.dense #timeline-panel #timeline-time { height: 0.95rem !important; }
-body.dense #timeline-panel #timeline-ruler { height: 2.25rem !important; }
+#timeline-panel { padding: 0.5rem ; }
+#timeline-panel #timeline-activities-planned,
+#timeline-panel #timeline-activities,
+#timeline-panel #timeline-steps { height: 1.25rem ; }
+#timeline-panel #timeline-grouping,
+#timeline-panel #timeline-trainer,
+#timeline-panel #timeline-place,
+#timeline-panel #timeline-time { height: 0.95rem ; }
+#timeline-panel #timeline-ruler { height: 2.25rem ; }
 
 /* Timeline ruler – readability */
 #timeline-ruler { padding: 0.25rem 0.4rem 0.15rem 0.4rem; }
@@ -306,12 +295,12 @@ body.dense #timeline-panel #timeline-ruler { height: 2.25rem !important; }
     border-radius: 0.25rem;
     line-height: 1.1;
 }
-body.dense #timeline-ruler .timeline-ruler-label { font-size: 0.74rem; }
+#timeline-ruler .timeline-ruler-label { font-size: 0.74rem; }
 body.hc #timeline-ruler .timeline-ruler-tick { background-color: #475569; }
 body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; background-color: #ffffff; }
   </style>
  </head>
- <body class="p-2 md:p-4 hide-types text-slate-900 dense hc">
+ <body class="p-2 md:p-4 hide-types text-slate-900">
   <div class="max-w-7xl mx-auto">
    <!-- Header -->
    <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-3 gap-3">
@@ -391,12 +380,12 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </button>
        <div class="w-px h-5 bg-slate-200">
        </div>
-       <button aria-pressed="true" class="text-slate-700 hover:text-indigo-700 hover:bg-slate-50 active:bg-slate-100 px-2 h-[28px] rounded-md transition flex items-center gap-1" id="contrast-toggle-btn" onclick="toggleHighContrast(event)" title="Passer à la palette standard" type="button">
+       <button aria-pressed="false" class="text-slate-700 hover:text-indigo-700 hover:bg-slate-50 active:bg-slate-100 px-2 h-[28px] rounded-md transition flex items-center gap-1" id="contrast-toggle-btn" onclick="toggleHighContrast(event)" title="Passer au haut contraste" type="button">
         <span class="material-icons-round text-base">
          invert_colors
         </span>
         <span class="text-[11px] font-extrabold tracking-wide" id="contrast-btn-text">
-         HC
+         STD
         </span>
        </button>
        <div class="w-px h-5 bg-slate-200">
@@ -419,18 +408,10 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        Aide
       </span>
       <div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-1 shadow-sm h-[34px]">
-       <button class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center justify-center" data-i18n-title="title_help" onclick="togglePanel('help-panel')">
-        <span class="material-icons-round text-xl">
-         help_outline
-        </span>
-       </button>
       </div>
      </div>
     </div>
    </header>
-   <!-- Foldable Help Panel -->
-   <div class="mb-3 bg-blue-50 rounded-lg shadow-sm border border-blue-100 overflow-hidden panel-content no-print" id="help-panel">
-   </div>
    <!-- Foldable Key Parameters Panel -->
    <div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
     <button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px]" data-i18n-title="title_toggle_panel" onclick="togglePanel('key-params-panel')">
@@ -1151,7 +1132,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         const stepTemplate = document.getElementById('step-template');
         const tooltipEl = document.getElementById('global-tooltip');
 
-        let currentLang = 'fr';
+        const currentLang = 'fr';
 
         // --- Global confirm modal plumbing (single binding; prevents handler stacking) ---
         let __confirmAction = null;
@@ -1720,18 +1701,6 @@ function initSortableSteps(container) {
         function togglePanel(panelId) {
             const content = document.getElementById(panelId);
             const icon = document.getElementById(panelId + '-icon');
-            
-            // Check if it's the help panel (which doesn't have an icon ID like key-params)
-            if(panelId === 'help-panel') {
-                if (content.classList.contains('open')) {
-                    content.classList.remove('open');
-                    setTimeout(() => content.style.display = 'none', 300); 
-                } else {
-                    content.style.display = getPanelDisplay(content);
-                    setTimeout(() => content.classList.add('open'), 10);
-                }
-                return;
-            }
 
             if (content.classList.contains('open')) {
                 content.classList.remove('open');
@@ -2088,7 +2057,7 @@ keyParams: {
                 try {
                     const project = JSON.parse(e.target.result);
                     root.innerHTML = '';
-                    currentLang = 'fr';
+
 // Restore Key Params
                     if (project.keyParams) {
                         document.getElementById('param-name').value = project.keyParams.name || "";
@@ -2419,6 +2388,32 @@ keyParams: {
             }
             return `${mins}m`;
         }
+
+        // --- Export helpers (cohérence / robustesse) ---
+        function el(id) { return document.getElementById(id); }
+        function val(id) { return el(id)?.value || ''; }
+        function txt(id) { return el(id)?.innerText || ''; }
+        function selTxt(id) { return el(id)?.selectedOptions?.[0]?.innerText || ''; }
+
+        function fmtTotalDuration(totalSecs, t) {
+            const secs = Math.max(0, Number(totalSecs || 0));
+            if (!secs) return `0 ${t.unit_mins}`;
+            if (secs >= 604800) return `${(secs / 604800).toFixed(1)} ${t.unit_weeks}`;
+            if (secs >= 86400) return `${(secs / 86400).toFixed(1)} ${t.unit_days}`;
+            if (secs >= 3600) {
+                const h = Math.floor(secs / 3600);
+                const m = Math.round((secs % 3600) / 60);
+                return `${h}h ${m}m`;
+            }
+            return `${Math.round(secs / 60)} ${t.unit_mins}`;
+        }
+
+        function escapeRtf(s) {
+            return String(s ?? '')
+                .replace(/[\\{}]/g, '\\$&')
+                .replace(/\r?\n/g, '\\par ');
+        }
+
 
 
         function updateStats() {
@@ -2797,6 +2792,8 @@ keyParams: {
         
         function exportRichText() {
              const t = translations[currentLang];
+            const totals = getTotals();
+            const totalDuration = fmtTotalDuration(totals.totalSecs, t);
             let html = `
             <!DOCTYPE html>
             <html lang="${currentLang}">
@@ -2838,7 +2835,7 @@ keyParams: {
                 <div class="meta-item"><span class="meta-label">${t.label_authors}:</span> ${document.getElementById('param-authors').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_mode}:</span> ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_class_size}:</span> ${document.getElementById('global-class-size').value}</div>
-                <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${document.getElementById('total-duration').innerText}</div>
+                <div class="meta-item"><span class="meta-label">${t.label_total_time}:</span> ${totalDuration}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_learning_time}:</span> ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}</div>
                 
                 <h2>Key Info</h2>
@@ -2918,6 +2915,88 @@ html += `<div class="activity-block">
             URL.revokeObjectURL(url);
         }
 
+        function exportRTF() {
+            const t = translations[currentLang];
+            const totals = getTotals();
+            const totalDuration = fmtTotalDuration(totals.totalSecs, t);
+
+            const learningVal = val('param-learning-val');
+            const learningUnit = selTxt('param-learning-unit');
+            const designedVal = val('param-designed-val');
+            const designedUnit = txt('param-designed-unit-display') || learningUnit;
+
+            const meta = [
+                [t.label_course_name, val('param-name')],
+                [t.label_topic, val('param-topic')],
+                [t.label_authors, val('param-authors')],
+                [t.label_mode, selTxt('param-mode')],
+                [t.label_class_size, val('global-class-size')],
+                [t.label_total_time, totalDuration],
+                [t.label_learning_time, `${learningVal} ${learningUnit}`.trim()],
+                [t.label_designed_time, `${designedVal} ${designedUnit}`.trim()],
+                ['Export Timestamp', new Date().toISOString()]
+            ];
+
+            let rtf = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Segoe UI;}}\\fs22\\pard\n';
+            rtf += `\\b ${escapeRtf(t.rtf_title || t.md_title || 'Export')}\\b0\\par\\par\n`;
+            rtf += `\\b Metadata\\b0\\par\n`;
+            meta.forEach(([k, v]) => {
+                if (!k) return;
+                if (v === undefined || v === null) return;
+                const vv = String(v).trim();
+                if (!vv) return;
+                rtf += `\\b ${escapeRtf(k)}:\\b0 ${escapeRtf(vv)}\\par\n`;
+            });
+            rtf += '\\par\n';
+
+            const activities = document.querySelectorAll('.activity-group');
+            activities.forEach((act, aIdx) => {
+                const title = (act.querySelector('.activity-title')?.value || '').trim() || `${t.md_untitled_activity || 'Activité'} ${aIdx + 1}`;
+                const desc = (act.querySelector('.activity-description')?.value || '').trim();
+
+                rtf += `\\b ${escapeRtf(title)}\\b0\\par\n`;
+                if (desc) rtf += `${escapeRtf(desc)}\\par\n`;
+
+                const steps = act.querySelectorAll('.step-card');
+                steps.forEach((step, sIdx) => {
+                    const stepTitle = (step.querySelector('.step-input-title')?.value || '').trim() || `${t.md_untitled_step || 'Étape'} ${sIdx + 1}`;
+                    const dur = Math.max(0, parseFloat(step.querySelector('.duration-input')?.value) || 0);
+                    const unit = parseFloat(step.querySelector('.duration-unit')?.value) || 60;
+                    const secs = dur * unit;
+                    const type = step.querySelector('.learning-type-select')?.value || '';
+                    const typeLabel = type ? (t[`type_${type}`] || type) : '';
+                    const durLabel = formatTimelineDuration(secs);
+
+                    const trainer = step.querySelector('.trainer-select')?.value || '';
+                    const place = step.querySelector('.place-select')?.value || '';
+                    const time = step.querySelector('.time-select')?.value || '';
+
+                    rtf += `\\par\\b - ${escapeRtf(stepTitle)}\\b0 (${escapeRtf(typeLabel)}; ${escapeRtf(durLabel)})\\par\n`;
+
+                    const modality = [trainer, place, time].filter(Boolean).join(', ');
+                    if (modality) rtf += `${escapeRtf(t.md_modality || 'Modalité')}: ${escapeRtf(modality)}\\par\n`;
+
+                    const tasks = (step.querySelector('.step-input-tasks')?.value || '').trim();
+                    if (tasks) rtf += `\\i ${escapeRtf(t.label_tasks || 'Tâches')}:\\i0\\par ${escapeRtf(tasks)}\\par\n`;
+
+                    const notes = (step.querySelector('.step-input-notes')?.value || '').trim();
+                    if (notes) rtf += `\\i ${escapeRtf(t.label_notes || 'Notes')}:\\i0\\par ${escapeRtf(notes)}\\par\n`;
+                });
+
+                rtf += '\\par\\par\n';
+            });
+
+            rtf += '}';
+            const blob = new Blob([rtf], { type: 'application/rtf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'learning-design-profile.rtf';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+
         function exportMarkdown() {
             const data = getTotals();
             const t = translations[currentLang];
@@ -2928,7 +3007,7 @@ html += `<div class="activity-block">
             md += `- **${t.label_authors}:** ${document.getElementById('param-authors').value}\n`;
             md += `- **${t.label_mode}:** ${document.getElementById('param-mode').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
-            md += `- **${t.label_total_time}:** ${document.getElementById('total-duration').innerText}\n`;
+            md += `- **${t.label_total_time}:** ${fmtTotalDuration(data.totalSecs, t)}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
 md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
