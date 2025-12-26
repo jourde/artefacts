@@ -210,6 +210,9 @@
         input, select, textarea { font-size: 0.88rem; }
         .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
         .compact-label-lg { font-size: 0.74rem; }
+
+        /* Ensure grouping/trainer/place/time titles in each activity have the same size */
+        .step-body label [data-i18n="label_grouping"] { font-size: 10px; }
         #timeline-panel { gap: 0.75rem ; }
         #timeline-panel .timeline-track-pedagogy,
         #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem ; }
@@ -268,6 +271,26 @@
 /* Timeline details – tighter stacking (Regroupement / Formateur / Lieu / Temps) */
 #timeline-details .timeline-track { padding: 0.40rem; }
 #timeline-details .timeline-track { background: transparent !important; border: 0 !important; }
+/* Harmonise la taille de police des titres Dimensions (Regroupement / Formateur / Lieu / Temps) */
+#timeline-details [data-i18n="label_grouping"],
+#timeline-details [data-i18n="label_trainer"],
+#timeline-details [data-i18n="label_place"],
+#timeline-details [data-i18n="label_time"],
+.step-card [data-i18n="label_grouping"],
+.step-card [data-i18n="label_trainer"],
+.step-card [data-i18n="label_place"],
+.step-card [data-i18n="label_time"]{
+  font-size: 10px !important;
+}
+
+/* Harmonise la taille de police des menus déroulants (Regroupement / Formateur / Lieu / Temps) */
+.step-card .step-group-mode,
+.step-card .trainer-select,
+.step-card .place-select,
+.step-card .time-select {
+  font-size: 10px !important;
+}
+
 #timeline-panel .timeline-duration-label { background: transparent !important; border: 0 !important; box-shadow: none !important; }
 
 #timeline-panel .timeline-track { transition: box-shadow 0.15s ease; }
@@ -654,7 +677,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         <span aria-hidden="true" class="material-icons-round text-slate-500 text-base">
          tune
         </span>
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" data-i18n="label_timeline_details">
          Détails
         </span>
        </div>
@@ -1042,8 +1065,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         </div>
        </div>
        <div class="space-y-1 pt-1 border-t border-slate-100">
-        <div class="flex items-center gap-1">
-         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+        <div class="space-y-0.5">
+         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5 relative z-10">
           <span class="material-icons-round text-[10px]">
            face
           </span>
@@ -1051,7 +1074,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
            Formateur
           </span>
          </span>
-         <select class="trainer-select flex-1 px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
+         <select class="trainer-select w-full px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
           <option data-i18n="opt_present" value="present">
            Présent
           </option>
@@ -1060,8 +1083,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
           </option>
          </select>
         </div>
-        <div class="flex items-center gap-1">
-         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+        <div class="space-y-0.5">
+         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5 relative z-10">
           <span class="material-icons-round text-[10px]">
            place
           </span>
@@ -1069,7 +1092,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
            Lieu
           </span>
          </span>
-         <select class="place-select flex-1 px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
+         <select class="place-select w-full px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
           <option data-i18n="opt_insitu" value="situ">
            Présentiel
           </option>
@@ -1078,8 +1101,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
           </option>
          </select>
         </div>
-        <div class="flex items-center gap-1">
-         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5">
+        <div class="space-y-0.5">
+         <span class="text-[10px] w-12 text-slate-400 font-bold uppercase flex items-center gap-0.5 relative z-10">
           <span class="material-icons-round text-[10px]">
            event
           </span>
@@ -1087,7 +1110,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
            Temps
           </span>
          </span>
-         <select class="time-select flex-1 px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
+         <select class="time-select w-full px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
           <option data-i18n="opt_sync" value="sync">
            Synchrone
           </option>
@@ -1102,13 +1125,24 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div>
         <label class="compact-label flex items-center gap-1">
          <span class="material-icons-round text-[10px] text-slate-400">
+          flag
+         </span>
+         <span>
+          Objectif de l'activité
+         </span>
+        </label>
+        <textarea class="step-input-objective w-full px-2 py-1.5 text-[12px] border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 bg-slate-50 text-slate-700" placeholder="Décrivez l'objectif de cette activité..." rows="2"></textarea>
+       </div>
+       <div>
+        <label class="compact-label flex items-center gap-1">
+         <span class="material-icons-round text-[10px] text-slate-400">
           assignment
          </span>
          <span data-i18n="label_tasks">
           Ce que les apprenants doivent faire
          </span>
         </label>
-        <textarea class="step-input-tasks w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-none leading-relaxed" data-i18n-placeholder="ph_tasks" placeholder="Décrivez les étapes, instructions et tâches..." rows="4"></textarea>
+        <textarea class="step-input-tasks w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y leading-relaxed" data-i18n-placeholder="ph_tasks" placeholder="Décrivez les étapes, instructions et tâches..." rows="4"></textarea>
        </div>
        <div>
         <label class="compact-label flex items-center gap-1">
@@ -1119,7 +1153,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
           Notes
          </span>
         </label>
-        <textarea class="step-input-notes w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-none bg-slate-50 text-slate-600 italic" data-i18n-placeholder="ph_notes" placeholder="Notes formateur, ressources ou liens..." rows="2"></textarea>
+        <textarea class="step-input-notes w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y bg-slate-50 text-slate-600 italic" data-i18n-placeholder="ph_notes" placeholder="Notes formateur, ressources ou liens..." rows="2"></textarea>
        </div>
       </div>
      </div>
@@ -1350,6 +1384,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 status_calculating: "Calcul auto...",
                 label_class_size: "Taille de la cohorte",
                 label_timeline_structure: "Modules conçus (un module doit avoir au moins une activité)",
+                label_timeline_details: "Détails",
                 label_timeline_structure_planned: "Modules prévus",
                 label_timeline_pedagogy: "Types d'apprentissage",
                 empty_title: "Aucun module conçu",
@@ -1363,8 +1398,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 label_learning_type: "Type d'apprentissage",
                 label_duration: "Durée",
                 label_grouping: "Regroupement",
-                opt_whole_class: "Classe entière",
-                opt_groups: "Groupes",
+                opt_whole_class: "Groupe entier",
+                opt_groups: "Sous-groupes",
                 ph_nb_groups: "Nb groupes",
                 label_short_groups: "Grps",
                 ph_per_group: "Par groupe",
@@ -2023,6 +2058,7 @@ keyParams: {
                         trainer: stepEl.querySelector('.trainer-select').value,
                         place: stepEl.querySelector('.place-select').value,
                         time: stepEl.querySelector('.time-select').value,
+                        objective: stepEl.querySelector('.step-input-objective').value,
                         tasks: stepEl.querySelector('.step-input-tasks').value,
                         notes: stepEl.querySelector('.step-input-notes').value
                     });
@@ -2133,6 +2169,7 @@ keyParams: {
             stepEl.querySelector('.trainer-select').value = data.trainer || "present";
             stepEl.querySelector('.place-select').value = data.place || "situ";
             stepEl.querySelector('.time-select').value = data.time || "sync";
+            stepEl.querySelector('.step-input-objective').value = data.objective || "";
             stepEl.querySelector('.step-input-tasks').value = data.tasks || "";
             stepEl.querySelector('.step-input-notes').value = data.notes || "";
             if (data.groupMode === 'groups') stepEl.querySelector('.step-group-details').classList.remove('hidden');
@@ -2161,32 +2198,11 @@ keyParams: {
         function toggleGroupMode(select) {
             const card = select.closest('.step-card');
             const details = card.querySelector('.step-group-details');
-            if (select.value === 'groups') {
-                details.classList.remove('hidden');
-                const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
-                const countInput = card.querySelector('.step-group-count');
-                const sizeInput = card.querySelector('.step-group-size');
-                if(!countInput.value && classSize > 0) {
-                    countInput.value = Math.ceil(classSize / 5);
-                    sizeInput.value = Math.floor(classSize / countInput.value);
-                }
-            } else {
-                details.classList.add('hidden');
-            }
+            if (details) details.classList.add('hidden');
             updateStats();
         }
 
         function updateGroupMath(input, type) {
-            const card = input.closest('.step-card');
-            const classSize = parseInt(document.getElementById('global-class-size').value) || 0;
-            if (classSize === 0) return;
-            const countInput = card.querySelector('.step-group-count');
-            const sizeInput = card.querySelector('.step-group-size');
-            const val = parseInt(input.value) || 0;
-            if (val > 0) {
-                if (type === 'count') sizeInput.value = Math.max(1, Math.round(classSize / val));
-                else countInput.value = Math.max(1, Math.round(classSize / val));
-            }
             updateStats();
         }
 
@@ -2880,6 +2896,7 @@ html += `<div class="activity-block">
                     const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
                     let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    const objective = step.querySelector('.step-input-objective').value || "";
                     const tasks = step.querySelector('.step-input-tasks').value || "";
                     const notes = step.querySelector('.step-input-notes').value || "";
                     const typeKey = step.querySelector('.learning-type-select').value;
@@ -2896,6 +2913,7 @@ html += `<div class="activity-block">
                             <strong>Group:</strong> ${groupInfo} | 
                             <strong>Mode:</strong> ${trainerText}, ${placeText}, ${timeText}
                         </div>
+                        ${objective ? `<div class="task-box"><strong>Objectif de l'activité:</strong><br>${objective.replace(/\n/g, '<br>')}</div>` : ''}
                         ${tasks ? `<div class="task-box"><strong>${t.label_tasks}:</strong><br>${tasks.replace(/\n/g, '<br>')}</div>` : ''}
                         ${notes ? `<div style="margin-top: 10px; font-size: 0.9em; color: #475569;"><strong>${t.label_notes}:</strong> ${notes.replace(/\n/g, '<br>')}</div>` : ''}
                     </div>`;
@@ -2977,6 +2995,9 @@ html += `<div class="activity-block">
                     const modality = [trainer, place, time].filter(Boolean).join(', ');
                     if (modality) rtf += `${escapeRtf(t.md_modality || 'Modalité')}: ${escapeRtf(modality)}\\par\n`;
 
+                    const objective = (step.querySelector('.step-input-objective')?.value || '').trim();
+                    if (objective) rtf += `\\i Objectif de l\'activité:\\i0\\par ${escapeRtf(objective)}\\par\n`;
+
                     const tasks = (step.querySelector('.step-input-tasks')?.value || '').trim();
                     if (tasks) rtf += `\\i ${escapeRtf(t.label_tasks || 'Tâches')}:\\i0\\par ${escapeRtf(tasks)}\\par\n`;
 
@@ -3044,6 +3065,7 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
                     const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
                     let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
+                    const objective = step.querySelector('.step-input-objective').value || "N/A";
                     const tasks = step.querySelector('.step-input-tasks').value || "N/A";
                     const notes = step.querySelector('.step-input-notes').value || "N/A";
                     const typeKey = step.querySelector('.learning-type-select').value;
