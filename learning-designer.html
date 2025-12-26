@@ -967,9 +967,34 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 moment-index shrink-0 text-xs">1</div>
       <input class="moment-title flex-1 text-sm font-semibold text-slate-800 bg-transparent focus:outline-none focus:ring-0 border-0 p-0 m-0 min-w-0" type="text" placeholder="Nom du moment (ex : Accueil)"/>
      </div>
+
+     <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
+       <!-- Target Time -->
+       <div class="flex flex-col items-end">
+        <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_target">Cible</span>
+        <div class="flex gap-1 items-center">
+         <input class="moment-target-time w-12 px-1 py-0.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" min="0" oninput="updateStats()" placeholder="0" type="number"/>
+         <select class="moment-target-unit w-20 px-1 py-0.5 text-xs border border-slate-200 rounded bg-slate-50 focus:ring-1 focus:ring-indigo-500 outline-none h-[22px]" onchange="updateStats()">
+          <option data-i18n="unit_mins" value="60">min</option>
+          <option data-i18n="unit_hours" value="3600">Heures</option>
+          <option data-i18n="unit_days" value="86400">Jours</option>
+          <option data-i18n="unit_weeks" value="604800">Semaines</option>
+         </select>
+        </div>
+       </div>
+       <!-- Designed Time Display -->
+       <div class="flex flex-col items-end">
+        <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">Conçu</span>
+        <div class="bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5 h-[22px] flex items-center min-w-[3rem] justify-end">
+         <span class="moment-total-time text-xs font-bold text-indigo-700 font-mono">0m</span>
+        </div>
+       </div>
+      </div>
      <button class="no-print text-slate-400 hover:text-rose-600 transition-colors" type="button" title="Supprimer ce moment" onclick="deleteMoment(this)">
       <span class="material-icons-round text-lg">delete_outline</span>
      </button>
+     </div>
     </div>
     <div class="px-3 pb-3">
      <div class="activity-steps-container activity-container space-y-2 min-h-[20px]"></div>
@@ -1236,8 +1261,6 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 if (e.target === modal) close();
             });
         })();
-
-
         // --- Action button dispatcher (prevents cloned inline onclick mix-ups) ---
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
@@ -1774,6 +1797,8 @@ function initSortableSteps(container) {
             momentsRoot.appendChild(clone);
             const moment = momentsRoot.lastElementChild;
             initSortableSteps(moment.querySelector('.activity-steps-container'));
+            const mUnitSel = moment.querySelector('.moment-target-unit');
+            if (mUnitSel) mUnitSel.value = getDefaultDurationUnitSecs();
             updateMomentIndexes(activityGroup);
             return moment;
         }
@@ -1795,6 +1820,8 @@ function initSortableSteps(container) {
             momentsRoot.appendChild(clone);
             const moment = momentsRoot.lastElementChild;
             initSortableSteps(moment.querySelector('.activity-steps-container'));
+            const mUnitSel = moment.querySelector('.moment-target-unit');
+            if (mUnitSel) mUnitSel.value = getDefaultDurationUnitSecs();
             updateMomentIndexes(activityGroup);
             applyTranslations();
             updateStats();
@@ -2094,44 +2121,45 @@ function initSortableSteps(container) {
 
         // --- Save / Load Feature Logic ---
 
+        
         function saveProject() {
             // Collect outcomes with their categories
             const outcomes = [];
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 outcomes.push({
-                    text: li.querySelector('.outcome-text').innerText,
-                    level: li.querySelector('.outcome-bloom-level').value,
-                    sub: li.querySelector('.outcome-bloom-sub').value
+                    texte: li.querySelector('.outcome-text').innerText,
+                    niveau: li.querySelector('.outcome-bloom-level').value,
+                    sousNiveau: li.querySelector('.outcome-bloom-sub').value
                 });
             });
 
-            const project = {
+            const exportProject = {
                 version: "1.8",
-keyParams: {
-                    name: document.getElementById('param-name').value,
-                    topic: document.getElementById('param-topic').value,
-                    authors: document.getElementById('param-authors').value,
-                    mode: document.getElementById('param-mode').value,
-                    cohortSize: document.getElementById('global-class-size').value,
-                    learningTimeVal: document.getElementById('param-learning-val').value,
-                    learningTimeUnit: document.getElementById('param-learning-unit').value,
-                    designedTimeVal: document.getElementById('param-designed-val').value,
-                    designedTimeUnit: document.getElementById('param-learning-unit').value, // Use learning unit
-                    aims: document.getElementById('param-aims').value,
-                    outcomes: outcomes,
+                parametres: {
+                    nom: document.getElementById('param-name').value,
+                    theme: document.getElementById('param-topic').value,
+                    auteurs: document.getElementById('param-authors').value,
+                    modalite: document.getElementById('param-mode').value,
+                    tailleCohorte: document.getElementById('global-class-size').value,
+                    dureeApprentissageValeur: document.getElementById('param-learning-val').value,
+                    dureeApprentissageUnite: document.getElementById('param-learning-unit').value,
+                    dureeConcueValeur: document.getElementById('param-designed-val').value,
+                    dureeConcueUnite: document.getElementById('param-learning-unit').value, // même unité
+                    objectifs: document.getElementById('param-aims').value,
+                    resultats: outcomes,
                     description: document.getElementById('param-description').value
                 },
-                activities: []
+                modules: []
             };
 
             document.querySelectorAll('.activity-group').forEach(actEl => {
-                const actData = {
-                    title: actEl.querySelector('.activity-title').value,
+                const moduleData = {
+                    titre: actEl.querySelector('.activity-title').value,
                     description: actEl.querySelector('.activity-description').value,
-                    targetTime: actEl.querySelector('.activity-target-time').value,
-                    targetUnit: actEl.querySelector('.activity-target-unit')?.value || "60",
+                    dureeCible: actEl.querySelector('.activity-target-time').value,
+                    uniteDureeCible: actEl.querySelector('.activity-target-unit')?.value || "60",
                     moments: [],
-                    steps: []
+                    activites: []
                 };
 
                 const momentsRoot = actEl.querySelector('.activity-moments-container');
@@ -2140,64 +2168,72 @@ keyParams: {
                 if (momentEls && momentEls.length) {
                     momentEls.forEach(momentEl => {
                         const momentData = {
-                            title: momentEl.querySelector('.moment-title')?.value || "",
-                            steps: []
+                            titre: momentEl.querySelector('.moment-title')?.value || "",
+                            dureeCible: momentEl.querySelector('.moment-target-time')?.value,
+                            uniteDureeCible: momentEl.querySelector('.moment-target-unit')?.value || getDefaultDurationUnitSecs(),
+                            activites: []
                         };
                         momentEl.querySelectorAll('.step-card').forEach(stepEl => {
                             const stepObj = {
-                                title: stepEl.querySelector('.step-input-title').value,
+                                titre: stepEl.querySelector('.step-input-title').value,
                                 type: stepEl.querySelector('.learning-type-select').value,
-                                duration: stepEl.querySelector('.duration-input').value,
-                                unit: stepEl.querySelector('.duration-unit').value,
-                                groupMode: stepEl.querySelector('.step-group-mode').value,
-                                groupCount: stepEl.querySelector('.step-group-count').value,
-                                groupSize: stepEl.querySelector('.step-group-size').value,
-                                trainer: stepEl.querySelector('.trainer-select').value,
-                                place: stepEl.querySelector('.place-select').value,
-                                time: stepEl.querySelector('.time-select').value,
-                                objective: stepEl.querySelector('.step-input-objective').value,
-                                tasks: stepEl.querySelector('.step-input-tasks').value,
+                                duree: stepEl.querySelector('.duration-input').value,
+                                unite: stepEl.querySelector('.duration-unit').value,
+                                regroupement: stepEl.querySelector('.step-group-mode').value,
+                                nombreGroupes: stepEl.querySelector('.step-group-count').value,
+                                tailleGroupe: stepEl.querySelector('.step-group-size').value,
+                                formateur: stepEl.querySelector('.trainer-select').value,
+                                lieu: stepEl.querySelector('.place-select').value,
+                                temps: stepEl.querySelector('.time-select').value,
+                                objectifActivite: stepEl.querySelector('.step-input-objective').value,
+                                aFaire: stepEl.querySelector('.step-input-tasks').value,
                                 notes: stepEl.querySelector('.step-input-notes').value
                             };
-                            momentData.steps.push(stepObj);
-                            actData.steps.push({ ...stepObj });
+                            momentData.activites.push(stepObj);
+                            moduleData.activites.push({ ...stepObj });
                         });
-                        actData.moments.push(momentData);
+                        moduleData.moments.push(momentData);
                     });
                 } else {
                     actEl.querySelectorAll('.step-card').forEach(stepEl => {
-                        actData.steps.push({
-                            title: stepEl.querySelector('.step-input-title').value,
+                        moduleData.activites.push({
+                            titre: stepEl.querySelector('.step-input-title').value,
                             type: stepEl.querySelector('.learning-type-select').value,
-                            duration: stepEl.querySelector('.duration-input').value,
-                            unit: stepEl.querySelector('.duration-unit').value,
-                            groupMode: stepEl.querySelector('.step-group-mode').value,
-                            groupCount: stepEl.querySelector('.step-group-count').value,
-                            groupSize: stepEl.querySelector('.step-group-size').value,
-                            trainer: stepEl.querySelector('.trainer-select').value,
-                            place: stepEl.querySelector('.place-select').value,
-                            time: stepEl.querySelector('.time-select').value,
-                            objective: stepEl.querySelector('.step-input-objective').value,
-                            tasks: stepEl.querySelector('.step-input-tasks').value,
+                            duree: stepEl.querySelector('.duration-input').value,
+                            unite: stepEl.querySelector('.duration-unit').value,
+                            regroupement: stepEl.querySelector('.step-group-mode').value,
+                            nombreGroupes: stepEl.querySelector('.step-group-count').value,
+                            tailleGroupe: stepEl.querySelector('.step-group-size').value,
+                            formateur: stepEl.querySelector('.trainer-select').value,
+                            lieu: stepEl.querySelector('.place-select').value,
+                            temps: stepEl.querySelector('.time-select').value,
+                            objectifActivite: stepEl.querySelector('.step-input-objective').value,
+                            aFaire: stepEl.querySelector('.step-input-tasks').value,
                             notes: stepEl.querySelector('.step-input-notes').value
                         });
                     });
                 }
 
-                project.activities.push(actData);
+                exportProject.modules.push(moduleData);
             });
 
-            const blob = new Blob([JSON.stringify(project, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(exportProject, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
+
             const courseName = (document.getElementById('param-name')?.value || '').trim();
             const safeCourseName = courseName
                 .replace(/[\\/:*?"<>|]+/g, '-')
                 .replace(/\s+/g, ' ')
                 .trim()
                 .slice(0, 120);
-            a.download = safeCourseName ? `${safeCourseName}-${new Date().toISOString().slice(0,10)}.json` : `learning-design-${new Date().toISOString().slice(0,10)}.json`;
+
+            const ymd = new Date().toISOString().slice(0, 10);
+            a.download = safeCourseName
+                ? `conception_pedagogique_${safeCourseName}_${ymd}.json`
+                : `conception_pedagogique_${ymd}.json`;
+
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -2213,8 +2249,13 @@ keyParams: {
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const project = JSON.parse(e.target.result);
-                    root.innerHTML = '';
+                    let project = JSON.parse(e.target.result);
+                    // Support multiple saved-file shapes (legacy / FR / wrapper objects)
+                    if (project && typeof project === 'object') {
+                        project = project.project || project.data || project.conception || project.learningDesign || project;
+                    }
+                    const rootEl = document.getElementById('activities-root') || root;
+                    if (rootEl) rootEl.innerHTML = '';
 
 // Restore Key Params
                     if (project.keyParams) {
@@ -2238,14 +2279,77 @@ keyParams: {
                         }
                         checkOutcomesEmpty();
 
-                    } else if (project.cohortSize) {
+                    
+                    } else if (project.parametres) {
+                        document.getElementById('param-name').value = project.parametres.nom || "";
+                        document.getElementById('param-topic').value = project.parametres.theme || "";
+                        document.getElementById('param-authors').value = project.parametres.auteurs || "";
+                        document.getElementById('param-mode').value = project.parametres.modalite || "";
+                        document.getElementById('global-class-size').value = project.parametres.tailleCohorte || 30;
+                        document.getElementById('param-learning-val').value = project.parametres.dureeApprentissageValeur || "";
+                        document.getElementById('param-learning-unit').value = project.parametres.dureeApprentissageUnite || "mins";
+                        document.getElementById('param-designed-val').value = project.parametres.dureeConcueValeur || "";
+                        document.getElementById('param-aims').value = project.parametres.objectifs || "";
+                        document.getElementById('param-description').value = project.parametres.description || "";
+
+                        // Restore Outcomes (FR export)
+                        document.getElementById('outcomes-list').innerHTML = '';
+                        if (project.parametres.resultats && Array.isArray(project.parametres.resultats)) {
+                            project.parametres.resultats.forEach(out => addOutcome({
+                                text: out.texte ?? out.text,
+                                level: out.niveau ?? out.level,
+                                sub: out.sousNiveau ?? out.sub
+                            }));
+                        }
+                        checkOutcomesEmpty();
+} else if (project.cohortSize) {
                         document.getElementById('global-class-size').value = project.cohortSize;
                     }
 
                     applyTranslations();
 
-                    project.activities.forEach(actData => {
-                        addActivityFromData(actData);
+                    
+                    // Backward/forward compatible: tolerate alternative keys (FR/EN) or legacy array format
+                    const loadedActivitiesRaw = Array.isArray(project.activities)
+                        ? project.activities
+                        : (Array.isArray(project.modules)
+                            ? project.modules
+                            : (Array.isArray(project) ? project : []));
+
+                    const normaliseStep = (s) => ({
+                        title: s?.title ?? s?.titre ?? "",
+                        type: s?.type ?? "",
+                        duration: s?.duration ?? s?.duree ?? "",
+                        unit: s?.unit ?? s?.unite ?? "",
+                        groupMode: s?.groupMode ?? s?.regroupement ?? "Classe entière",
+                        groupCount: s?.groupCount ?? s?.nombreGroupes ?? "",
+                        groupSize: s?.groupSize ?? s?.tailleGroupe ?? "",
+                        trainer: s?.trainer ?? s?.formateur ?? "",
+                        place: s?.place ?? s?.lieu ?? "",
+                        time: s?.time ?? s?.temps ?? "",
+                        objective: s?.objective ?? s?.objectifActivite ?? "",
+                        tasks: s?.tasks ?? s?.aFaire ?? "",
+                        notes: s?.notes ?? ""
+                    });
+
+                    const normaliseMoment = (m) => ({
+                        title: m?.title ?? m?.titre ?? "",
+                        targetTime: m?.targetTime ?? m?.dureeCible ?? "",
+                        targetUnit: m?.targetUnit ?? m?.uniteDureeCible ?? (document.getElementById('param-learning-unit')?.value || "mins"),
+                        steps: Array.isArray(m?.steps) ? m.steps.map(normaliseStep) : (Array.isArray(m?.activites) ? m.activites.map(normaliseStep) : [])
+                    });
+
+                    const normaliseActivity = (a) => ({
+                        title: a?.title ?? a?.titre ?? "",
+                        description: a?.description ?? "",
+                        targetTime: a?.targetTime ?? a?.dureeCible ?? "",
+                        targetUnit: a?.targetUnit ?? a?.uniteDureeCible ?? "60",
+                        moments: Array.isArray(a?.moments) ? a.moments.map(normaliseMoment) : [],
+                        steps: Array.isArray(a?.steps) ? a.steps.map(normaliseStep) : (Array.isArray(a?.activites) ? a.activites.map(normaliseStep) : [])
+                    });
+
+                    loadedActivitiesRaw.forEach(actData => {
+                        addActivityFromData(normaliseActivity(actData));
                     });
 
                     updateEmptyState();
@@ -2253,6 +2357,7 @@ keyParams: {
                     event.target.value = '';
                 } catch (err) {
                     console.error("Failed to load project file.", err);
+                    alert("Erreur : impossible de charger ce fichier de sauvegarde. Vérifiez qu’il s’agit bien d’un fichier JSON exporté par cet outil.");
                 }
             };
             reader.readAsText(file);
@@ -2270,7 +2375,7 @@ keyParams: {
             actEl.querySelector('.activity-description').value = data.description || "";
             actEl.querySelector('.activity-target-time').value = data.targetTime || "";
             const tgtUnitSel = actEl.querySelector('.activity-target-unit');
-            if (tgtUnitSel) tgtUnitSel.value = data.targetUnit || "60";
+            if (tgtUnitSel) tgtUnitSel.value = mapUnitToSecs(data.targetUnit || getDefaultDurationUnitKey());
 
             // Clear any template content and rebuild moments/steps from data (backward compatible)
             if (momentsRoot) momentsRoot.innerHTML = '';
@@ -2283,7 +2388,11 @@ keyParams: {
                     if (momentEl) {
                         const titleInput = momentEl.querySelector('.moment-title');
                         if (titleInput) titleInput.value = momentData.title || "";
-                        const stepsContainer = momentEl.querySelector('.activity-steps-container');
+                                                const mTgt = momentEl.querySelector('.moment-target-time');
+                        if (mTgt) mTgt.value = momentData.targetTime || "";
+                        const mUnitSel = momentEl.querySelector('.moment-target-unit');
+                        if (mUnitSel) mUnitSel.value = mapUnitToSecs(momentData.targetUnit ?? getDefaultDurationUnitKey());
+const stepsContainer = momentEl.querySelector('.activity-steps-container');
                         initSortableSteps(stepsContainer);
                         (momentData.steps || []).forEach(stepData => {
                             addStepToContainerFromData(stepsContainer, stepData);
@@ -2313,7 +2422,7 @@ keyParams: {
             stepEl.querySelector('.step-input-title').value = data.title || "";
             stepEl.querySelector('.learning-type-select').value = data.type || "acquisition";
             stepEl.querySelector('.duration-input').value = data.duration || 0;
-            stepEl.querySelector('.duration-unit').value = data.unit || "60";
+            stepEl.querySelector('.duration-unit').value = mapUnitToSecs(data.unit || getDefaultDurationUnitKey());
             stepEl.querySelector('.step-group-mode').value = data.groupMode || "class";
             stepEl.querySelector('.step-group-count').value = data.groupCount || 1;
             stepEl.querySelector('.step-group-size').value = data.groupSize || 30;
@@ -2383,6 +2492,8 @@ keyParams: {
             const momentsRoot = lastActivity.querySelector('.activity-moments-container');
             initSortableMoments(momentsRoot);
             ensureDefaultMoment(lastActivity);
+            const actUnitSel = lastActivity.querySelector('.activity-target-unit');
+            if (actUnitSel) actUnitSel.value = getDefaultDurationUnitSecs();
 
             addStepToActivity(lastActivity.querySelector('button'));
             applyTranslations();
@@ -2402,6 +2513,9 @@ keyParams: {
             const currentClassSize = document.getElementById('global-class-size').value;
             clone.querySelector('.step-group-size').value = currentClassSize;
             container.appendChild(clone);
+            const newStep = container.lastElementChild;
+            const du = newStep ? newStep.querySelector('.duration-unit') : null;
+            if (du) du.value = getDefaultDurationUnitSecs();
             applyTranslations();
             updateStats();
         }
@@ -2607,7 +2721,35 @@ keyParams: {
 
 
 
-        function updateStats() {
+        
+        function getDefaultDurationUnitKey() {
+            const sel = document.getElementById('param-learning-unit');
+            return (sel && sel.value) ? sel.value : 'mins';
+        }
+
+        function getDefaultDurationUnitSecs() {
+            const key = getDefaultDurationUnitKey();
+            return mapUnitToSecs(key);
+        }
+
+        function mapUnitToSecs(unit) {
+            // Accept seconds values ("60", 60), or parameter keys ("mins", "hours", ...)
+            const v = (unit ?? '').toString().trim();
+            if (v === '') return 60;
+            if (!isNaN(parseFloat(v)) && isFinite(parseFloat(v))) return parseFloat(v);
+
+            if (v === 'mins' || v === 'min' || v === 'minute' || v === 'minutes') return 60;
+            if (v === 'hours' || v === 'hour' || v === 'h' || v === 'heures' || v === 'heure') return 3600;
+            if (v === 'days' || v === 'day' || v === 'd' || v === 'jours' || v === 'jour') return 86400;
+            if (v === 'weeks' || v === 'week' || v === 'w' || v === 'semaines' || v === 'semaine') return 604800;
+            // If months was selected in Parameters, default to weeks for per-field units
+            if (v === 'months' || v === 'month' || v === 'mois') return 604800;
+
+            return 60;
+        }
+
+
+function updateStats() {
             const totals = getTotals();
             let display = "0 mins";
             if (totals.totalSecs >= 604800) display = `${(totals.totalSecs / 604800).toFixed(1)} ${translations[currentLang].unit_weeks}`;
@@ -2646,6 +2788,29 @@ keyParams: {
             else designedVal = parseFloat(designedVal.toFixed(1)); 
             
             designedInput.value = designedVal;
+            // Update designed time per moment (sum of contained activities), expressed in the moment unit
+            document.querySelectorAll('.moment-group').forEach(momentEl => {
+                let secs = 0;
+                momentEl.querySelectorAll('.step-card').forEach(stepEl => {
+                    const v = parseFloat(stepEl.querySelector('.duration-input')?.value) || 0;
+                    const u = parseFloat(stepEl.querySelector('.duration-unit')?.value) || 60;
+                    secs += v * u;
+                });
+
+                const unitSel = momentEl.querySelector('.moment-target-unit');
+                const unitSecs = parseFloat(unitSel?.value) || getDefaultDurationUnitSecs();
+                const unitText = unitSel?.options?.[unitSel.selectedIndex]?.text || translations[currentLang].unit_mins;
+
+                const label = momentEl.querySelector('.moment-total-time');
+                if (label) {
+                    let v = secs / unitSecs;
+                    // minutes: integer; others: 1 decimal
+                    if (unitSecs === 60) v = Math.round(v);
+                    else v = parseFloat(v.toFixed(1));
+                    label.innerText = `${v} ${unitText}`;
+                }
+            });
+
 
             // DOM Elements for the two timelines
             const containerActivitiesPlanned = document.getElementById('timeline-activities-planned');
@@ -3103,7 +3268,7 @@ html += `<div class="activity-block">
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'learning-design-profile.html';
+            a.download = 'profil_conception_pedagogique.html';
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -3187,7 +3352,7 @@ html += `<div class="activity-block">
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'learning-design-profile.rtf';
+            a.download = 'profil_conception_pedagogique.rtf';
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -3218,7 +3383,7 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
                 
                 let bloomText = "";
                 if(level) {
-                    bloomText += `[${t[`bloom_${level}`] || level.toUpperCase()}`;
+                    bloomText += "[" + (t[`bloom_${level}`] || level.toUpperCase());
                     if(sub) bloomText += ` - ${t[`bloom_sub_${sub}`] || sub}`;
                     bloomText += "] ";
                 }
@@ -3263,7 +3428,7 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'learning-design-profile.md';
+            a.download = 'profil_conception_pedagogique.md';
             a.click();
             URL.revokeObjectURL(url);
         }
