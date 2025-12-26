@@ -3185,7 +3185,7 @@ function updateStats() {
             <body>
                 <h1>${t.rtf_title}</h1>
                 
-                <h2>Metadata</h2>
+                <h2>Métadonnées</h2>
                 <div class="meta-item"><span class="meta-label">${t.label_course_name}:</span> ${document.getElementById('param-name').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_topic}:</span> ${document.getElementById('param-topic').value}</div>
                 <div class="meta-item"><span class="meta-label">${t.label_authors}:</span> ${document.getElementById('param-authors').value}</div>
@@ -3218,7 +3218,7 @@ function updateStats() {
                 <h3>${t.label_description}</h3>
                 <p>${document.getElementById('param-description').value.replace(/\n/g, '<br>')}</p>
                 
-                <h2>Pedagogical Structure</h2>`;
+                <h2>Structure pédagogique</h2>`;
 
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
@@ -3248,9 +3248,9 @@ html += `<div class="activity-block">
                     html += `<div class="step-block type-${typeKey}">
                         <h4>${sIdx + 1}. ${stepTitle} <span class="tag bg-${typeKey}" style="float: right;">${typeLabel}</span></h4>
                         <div style="font-size: 0.9em; color: #64748b; margin-bottom: 10px;">
-                            <strong>Duration:</strong> ${duration} | 
-                            <strong>Group:</strong> ${groupInfo} | 
-                            <strong>Mode:</strong> ${trainerText}, ${placeText}, ${timeText}
+                            <strong>Durée :</strong> ${duration} | 
+                            <strong>Regroupement :</strong> ${groupInfo} | 
+                            <strong>Modalité :</strong> ${trainerText}, ${placeText}, ${timeText}
                         </div>
                         ${objective ? `<div class="task-box"><strong>Objectif de l'activité:</strong><br>${objective.replace(/\n/g, '<br>')}</div>` : ''}
                         ${tasks ? `<div class="task-box"><strong>${t.label_tasks}:</strong><br>${tasks.replace(/\n/g, '<br>')}</div>` : ''}
@@ -3292,12 +3292,12 @@ html += `<div class="activity-block">
                 [t.label_total_time, totalDuration],
                 [t.label_learning_time, `${learningVal} ${learningUnit}`.trim()],
                 [t.label_designed_time, `${designedVal} ${designedUnit}`.trim()],
-                ['Export Timestamp', new Date().toISOString()]
+                ['Horodatage d\'export', new Date().toISOString()]
             ];
 
             let rtf = '{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Segoe UI;}}\\fs22\\pard\n';
             rtf += `\\b ${escapeRtf(t.rtf_title || t.md_title || 'Export')}\\b0\\par\\par\n`;
-            rtf += `\\b Metadata\\b0\\par\n`;
+            rtf += `\\b Métadonnées\\b0\\par\n`;
             meta.forEach(([k, v]) => {
                 if (!k) return;
                 if (v === undefined || v === null) return;
@@ -3362,7 +3362,7 @@ html += `<div class="activity-block">
             const data = getTotals();
             const t = translations[currentLang];
             let md = `# ${t.md_title}\n\n`;
-            md += `## metadata\n`;
+            md += `## métadonnées\n`;
             md += `- **${t.label_course_name}:** ${document.getElementById('param-name').value}\n`;
             md += `- **${t.label_topic}:** ${document.getElementById('param-topic').value}\n`;
             md += `- **${t.label_authors}:** ${document.getElementById('param-authors').value}\n`;
@@ -3371,9 +3371,9 @@ html += `<div class="activity-block">
             md += `- **${t.label_total_time}:** ${fmtTotalDuration(data.totalSecs, t)}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
             md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
-md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
+md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             
-            md += `## key_info\n`;
+            md += `## informations_clés\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
             md += `### ${t.label_outcomes}\n`;
             document.querySelectorAll('#outcomes-list li').forEach(li => {
@@ -3392,21 +3392,21 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
             });
             md += `\n### ${t.label_description}\n${document.getElementById('param-description').value}\n\n`;
 
-            md += `## pedagogical_structure\n\n`;
+            md += `## structure_pédagogique\n\n`;
             document.querySelectorAll('.activity-group').forEach((activity, aIdx) => {
                 const activityTitle = activity.querySelector('.activity-title').value || t.md_untitled_activity;
                 const activityDesc = activity.querySelector('.activity-description').value;
                 
                 // Terminology Update: Activity -> Module
-                md += `### MODULE ${aIdx + 1}: ${activityTitle.toUpperCase()}\n\n`;
+                md += `### MODULE ${aIdx + 1} : ${activityTitle.toUpperCase()}\n\n`;
                 if(activityDesc) md += `> ${activityDesc}\n\n`;
                 activity.querySelectorAll('.step-card').forEach((step, sIdx) => {
                     const stepTitle = step.querySelector('.step-input-title').value || t.md_untitled_step;
                     const groupMode = step.querySelector('.step-group-mode').value;
                     let groupInfo = groupMode === 'class' ? t.md_format_whole : `${t.md_format_groups} ${step.querySelector('.step-group-size').value}`;
-                    const objective = step.querySelector('.step-input-objective').value || "N/A";
-                    const tasks = step.querySelector('.step-input-tasks').value || "N/A";
-                    const notes = step.querySelector('.step-input-notes').value || "N/A";
+                    const objective = step.querySelector('.step-input-objective').value || "Non renseigné";
+                    const tasks = step.querySelector('.step-input-tasks').value || "Non renseigné";
+                    const notes = step.querySelector('.step-input-notes').value || "Non renseigné";
                     const typeKey = step.querySelector('.learning-type-select').value;
                     const typeLabel = t[`type_${typeKey}`];
                     const trainerText = step.querySelector('.trainer-select').selectedOptions[0].innerText;
@@ -3414,13 +3414,13 @@ md += `- **Export Timestamp:** ${new Date().toISOString()}\n\n`;
                     const timeText = step.querySelector('.time-select').selectedOptions[0].innerText;
                     
                     // Terminology Update: Step -> Activity
-                    md += `#### ACTIVITY ${aIdx + 1}.${sIdx + 1}: ${stepTitle}\n`;
-                    md += `- **TYPE:** ${typeLabel}\n`;
-                    md += `- **DURATION:** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
-                    md += `- **SOCIAL_ORG:** ${groupInfo}\n`;
-                    md += `- **MODALITY:** ${trainerText}, ${placeText}, ${timeText}\n`;
-                    md += `\n**LEARNER_TASKS:**\n${tasks}\n\n`;
-                    md += `**PEDAGOGICAL_NOTES:**\n${notes}\n\n`;
+                    md += `#### ACTIVITÉ ${aIdx + 1}.${sIdx + 1} : ${stepTitle}\n`;
+                    md += `- **Type :** ${typeLabel}\n`;
+                    md += `- **Durée :** ${step.querySelector('.duration-input').value} ${step.querySelector('.duration-unit').selectedOptions[0].innerText}\n`;
+                    md += `- **Regroupement :** ${groupInfo}\n`;
+                    md += `- **Modalité :** ${trainerText}, ${placeText}, ${timeText}\n`;
+                    md += `\n**Ce que les apprenants doivent faire :**\n${tasks}\n\n`;
+                    md += `**Notes pédagogiques :**\n${notes}\n\n`;
                 });
                 md += `\n---\n\n`;
             });
