@@ -1094,10 +1094,13 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </span>
          <select class="place-select w-full px-1 py-0.5 text-[10px] rounded border border-slate-200 bg-white outline-none h-[22px]" onchange="updateStats()">
           <option data-i18n="opt_insitu" value="situ">
-           Présentiel
+           Présentiel (sur site)
           </option>
           <option data-i18n="opt_online" value="online">
-           En ligne
+           Distanciel (en ligne)
+          </option>
+          <option data-i18n="opt_hybrid" value="hybrid">
+           Hybride (sur site et en ligne)
           </option>
          </select>
         </div>
@@ -1408,8 +1411,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 opt_present: "Présent",
                 opt_absent: "Absent",
                 label_place: "Lieu",
-                opt_insitu: "Présentiel",
-                opt_online: "En ligne",
+                opt_insitu: "Présentiel (sur site)",
+                opt_online: "Distanciel (en ligne)",
+                opt_hybrid: "Hybride (sur site et en ligne)",
                 label_time: "Temps",
                 opt_sync: "Synchrone",
                 opt_async: "Asynchrone",
@@ -2696,9 +2700,9 @@ keyParams: {
                                 containerTrainer.appendChild(createBlock(trColor, `<strong>${step.title}</strong><br>${t.label_trainer}: ${trLabel}`, trPattern));
 
                                 // Place (Stripes for Online)
-                                const plColor = step.place === 'situ' ? greySolid : greyStriped;
-                                const plPattern = step.place === 'online' ? 'pattern-stripes' : '';
-                                const plLabel = step.place === 'situ' ? t.opt_insitu : t.opt_online;
+                                const plColor = greySolid;
+                                const plPattern = step.place === 'online' ? 'pattern-stripes' : (step.place === 'hybrid' ? 'pattern-dots' : '');
+                                const plLabel = step.place === 'situ' ? t.opt_insitu : (step.place === 'online' ? t.opt_online : t.opt_hybrid);
                                 containerPlace.appendChild(createBlock(plColor, `<strong>${step.title}</strong><br>${t.label_place}: ${plLabel}`, plPattern));
 
                                 // Time (Stripes for Async)
