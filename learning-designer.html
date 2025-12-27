@@ -1805,10 +1805,22 @@ function initSortableSteps(container) {
 
         function updateMomentIndexes(activityGroup) {
             if (!activityGroup) return;
+
+            // Module index is the activity index badge (kept in sync by updateEmptyState / drag-and-drop)
+            let moduleNum = '';
+            const moduleBadge = activityGroup.querySelector('.activity-index');
+            if (moduleBadge) moduleNum = String(moduleBadge.textContent || moduleBadge.innerText || '').trim();
+
+            if (!moduleNum) {
+                const allActs = Array.from(root.querySelectorAll('.activity-group'));
+                const idx = allActs.indexOf(activityGroup);
+                moduleNum = String((idx >= 0 ? idx : 0) + 1);
+            }
+
             const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
             moments.forEach((m, i) => {
                 const badge = m.querySelector('.moment-index');
-                if (badge) badge.textContent = String(i + 1);
+                if (badge) badge.textContent = moduleNum + '.' + String(i + 1);
             });
         }
 
@@ -2481,6 +2493,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             const hasActivities = root.children.length > 0;
             emptyState.classList.toggle('hidden', hasActivities);
             document.querySelectorAll('.activity-index').forEach((el, i) => { el.innerText = i + 1; });
+            root.querySelectorAll('.activity-group').forEach((ag) => { updateMomentIndexes(ag); });
             updateStats();
         }
 
