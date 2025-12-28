@@ -738,7 +738,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </span>
         </div>
        </div>
-       <div class="w-full h-6 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-steps">
+       <div class="w-full h-6 flex rounded-lg overflow-visible bg-slate-100 border border-slate-200 cursor-help" id="timeline-steps">
        </div>
       </div>
 
@@ -3095,75 +3095,156 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 }
 
 // --- TRACK 2: LEARNING TYPES (STEPS) ---
-                totals.detailedTimeline.forEach((activity) => {
-                    // We iterate through activities, then steps, to maintain order
-                    if (activity.duration > 0) {
+                // Group segments by planned module so Track 2 aligns with Tracks 0/1.
+                // Also show the same "Trop court / Trop long" alerts when designed duration diverges from planned.
+                const t = translations[currentLang];
+
+                // Standard Grey Colours
+                const greySolid = '#64748b';   // Slate-500
+                const greyStriped = '#94a3b8'; // Slate-400
+
+                const makeModuleWrapper = (widthPct) => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'h-full border-r border-white last:border-0 relative group box-border overflow-visible';
+                    wrap.style.width = `${widthPct}%`;
+                    return wrap;
+                };
+
+                const makeFillContainer = (ratio) => {
+                    const fill = document.createElement('div');
+                    fill.className = 'absolute left-0 top-0 bottom-0 flex';
+                    fill.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+                    return fill;
+                };
+
+                // Helper to create simple blocks with patterns (for Regroupement / Formateur / Lieu / Temps).
+                const createBlock = (widthPct, bgColor, patternClass, tooltip) => {
+                    const el = document.createElement('div');
+                    el.style.width = `${widthPct}%`;
+                    el.style.backgroundColor = bgColor;
+                    el.className = `h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer ${patternClass}`;
+                    el.onmouseenter = (e) => showTooltip(e, tooltip);
+                    el.onmousemove = (e) => updateTooltipPos(e);
+                    el.onmouseleave = () => hideTooltip();
+                    return el;
+                };
+
+                plannedTimeline.forEach((planned, index) => {
+                    const plannedSecs = planned && planned.secs ? planned.secs : 0;
+                    const activity = totals.detailedTimeline[index];
+                    const designedSecs = (activity && activity.duration) ? activity.duration : 0;
+
+                    if (plannedSecs <= 0 && designedSecs <= 0) return;
+
+                    // Width is based on planned segment to ensure alignment with Track 0/1
+                    const segmentSecsForWidth = plannedSecs > 0 ? plannedSecs : designedSecs;
+                    const moduleWidthPct = (segmentSecsForWidth / baseTotalSecs) * 100;
+
+                    // Fill ratio (designed within planned) – capped to 100% (overrun is shown via overlay)
+                    const ratio = plannedSecs > 0 ? Math.min(1, Math.max(0, designedSecs / plannedSecs)) : 1;
+
+                    // Module wrappers for each detail track
+                    const stepsWrap = makeModuleWrapper(moduleWidthPct);
+                    const groupingWrap = makeModuleWrapper(moduleWidthPct);
+                    const trainerWrap = makeModuleWrapper(moduleWidthPct);
+                    const placeWrap = makeModuleWrapper(moduleWidthPct);
+                    const timeWrap = makeModuleWrapper(moduleWidthPct);
+
+                    // Alerts on Track 2 (Learning types) – same behaviour as Track 1
+                    const missingEl = document.createElement('div');
+                    missingEl.className = 'absolute inset-0 timeline-missing-light';
+                    if (!(plannedSecs > 0 && designedSecs < plannedSecs)) {
+                        missingEl.style.display = 'none';
+                    }
+
+                    const overEl = document.createElement('div');
+                    overEl.className = 'absolute inset-0 timeline-alert-light pointer-events-none';
+                    if (!(plannedSecs > 0 && designedSecs > plannedSecs)) {
+                        overEl.style.display = 'none';
+                    }
+
+                    const iconsEl = document.createElement('div');
+                    iconsEl.className = 'timeline-alert-icons';
+                    if (plannedSecs > 0 && designedSecs !== plannedSecs) {
+                        iconsEl.innerText = (designedSecs < plannedSecs) ? 'Trop court !' : 'Trop long !';
+                    } else {
+                        iconsEl.style.display = 'none';
+                    }
+
+                    const tooltipTextModule = `<strong>${planned.title}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
+                    stepsWrap.onmouseenter = (e) => showTooltip(e, tooltipTextModule);
+                    stepsWrap.onmousemove = (e) => updateTooltipPos(e);
+                    stepsWrap.onmouseleave = () => hideTooltip();
+
+                    stepsWrap.appendChild(missingEl);
+                    stepsWrap.appendChild(overEl);
+                    stepsWrap.appendChild(iconsEl);
+
+                    // Fill containers (only the designed portion is filled with step-level segments)
+                    const stepsFill = makeFillContainer(ratio);
+                    const groupingFill = makeFillContainer(ratio);
+                    const trainerFill = makeFillContainer(ratio);
+                    const placeFill = makeFillContainer(ratio);
+                    const timeFill = makeFillContainer(ratio);
+
+                    // When there is no designed time, we still append empty wrappers to preserve alignment.
+                    if (activity && Array.isArray(activity.steps) && activity.steps.length && designedSecs > 0) {
                         activity.steps.forEach(step => {
-                            if (step.duration > 0) {
-                                const stepWidthPct = (step.duration / baseTotalSecs) * 100;
-                                const stepEl = document.createElement('div');
-                                
-                                // Color based on pedagogical type
-                                stepEl.style.backgroundColor = TYPE_COLORS[step.type];
-                                stepEl.style.width = `${stepWidthPct}%`;
-                                stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer';
-                                
-                                // Tooltip Content for Step
-                                const sDur = Math.round(step.duration / 60);
-                                const tooltipText = `<strong>${step.title}</strong><br><span class="opacity-80">${step.learningTypeLabel}</span><br><span class="text-slate-300">${sDur}m</span>`;
+                            if (!(step && step.duration > 0)) return;
+                            const stepPctWithinDesigned = (step.duration / designedSecs) * 100;
 
-                                // Attach Custom Tooltip Events
-                                stepEl.onmouseenter = (e) => showTooltip(e, tooltipText);
-                                stepEl.onmousemove = (e) => updateTooltipPos(e);
-                                stepEl.onmouseleave = () => hideTooltip();
+                            // Track 2 – Learning types (coloured by pedagogical type)
+                            const stepEl = document.createElement('div');
+                            stepEl.style.backgroundColor = TYPE_COLORS[step.type];
+                            stepEl.style.width = `${stepPctWithinDesigned}%`;
+                            stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer';
 
-                                containerSteps.appendChild(stepEl);
+                            const sDur = Math.round(step.duration / 60);
+                            const tooltipText = `<strong>${step.title}</strong><br><span class="text-slate-300">${step.learningTypeLabel}</span><br><span class="text-slate-300">${sDur}m</span>`;
+                            stepEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                            stepEl.onmousemove = (e) => updateTooltipPos(e);
+                            stepEl.onmouseleave = () => hideTooltip();
+                            stepsFill.appendChild(stepEl);
 
-                                // Helper to create simple blocks with patterns
-                                const createBlock = (color, tooltip, patternClass = '') => {
-                                    const el = document.createElement('div');
-                                    el.style.width = `${stepWidthPct}%`;
-                                    el.style.backgroundColor = color;
-                                    el.className = `h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer ${patternClass}`;
-                                    el.onmouseenter = (e) => showTooltip(e, tooltip);
-                                    el.onmousemove = (e) => updateTooltipPos(e);
-                                    el.onmouseleave = () => hideTooltip();
-                                    return el;
-                                };
+                            // Grouping (Stripes for Groups)
+                            const grpColor = step.groupMode === 'class' ? greySolid : greyStriped;
+                            const grpPattern = step.groupMode === 'groups' ? 'pattern-stripes' : '';
+                            const grpLabel = step.groupMode === 'class' ? t.opt_whole_class : t.opt_groups;
+                            groupingFill.appendChild(createBlock(stepPctWithinDesigned, grpColor, grpPattern, `<strong>${grpLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
 
-                                const t = translations[currentLang];
-                                
-                                // Standard Grey Colors
-                                const greySolid = '#64748b';   // Slate-500
-                                const greyStriped = '#94a3b8'; // Slate-400
+                            // Trainer (Stripes for Absent)
+                            const trainerColor = step.trainer === 'present' ? greySolid : greyStriped;
+                            const trainerPattern = step.trainer === 'absent' ? 'pattern-stripes' : '';
+                            const trainerLabel = step.trainer === 'present' ? t.opt_present : t.opt_absent;
+                            trainerFill.appendChild(createBlock(stepPctWithinDesigned, trainerColor, trainerPattern, `<strong>${trainerLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
 
-                                // Grouping (Stripes for Groups)
-                                const grpColor = step.groupMode === 'class' ? greySolid : greyStriped; 
-                                const grpPattern = step.groupMode === 'groups' ? 'pattern-stripes' : '';
-                                const grpLabel = step.groupMode === 'class' ? t.opt_whole_class : t.opt_groups;
-                                containerGrouping.appendChild(createBlock(grpColor, `<strong>${step.title}</strong><br>${grpLabel}`, grpPattern));
+                            // Place (Stripes for Online / Hybrid)
+                            const placeLabel = (step.place === 'situ') ? t.opt_insitu : (step.place === 'online') ? t.opt_online : t.opt_hybrid;
+                            const placeColor = (step.place === 'situ') ? greySolid : greyStriped;
+                            const placePattern = (step.place === 'situ') ? '' : 'pattern-stripes';
+                            placeFill.appendChild(createBlock(stepPctWithinDesigned, placeColor, placePattern, `<strong>${placeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
 
-                                // Trainer (Stripes for Absent)
-                                const trColor = step.trainer === 'present' ? greySolid : greyStriped; 
-                                const trPattern = step.trainer === 'absent' ? 'pattern-stripes' : '';
-                                const trLabel = step.trainer === 'present' ? t.opt_present : t.opt_absent;
-                                containerTrainer.appendChild(createBlock(trColor, `<strong>${step.title}</strong><br>${t.label_trainer}: ${trLabel}`, trPattern));
-
-                                // Place (Stripes for Online)
-                                const plColor = greySolid;
-                                const plPattern = step.place === 'online' ? 'pattern-stripes' : (step.place === 'hybrid' ? 'pattern-dots' : '');
-                                const plLabel = step.place === 'situ' ? t.opt_insitu : (step.place === 'online' ? t.opt_online : t.opt_hybrid);
-                                containerPlace.appendChild(createBlock(plColor, `<strong>${step.title}</strong><br>${t.label_place}: ${plLabel}`, plPattern));
-
-                                // Time (Stripes for Async)
-                                const tmColor = step.time === 'sync' ? greySolid : greyStriped; 
-                                const tmPattern = step.time === 'async' ? 'pattern-stripes' : '';
-                                const tmLabel = step.time === 'sync' ? t.opt_sync : t.opt_async;
-                                containerTime.appendChild(createBlock(tmColor, `<strong>${step.title}</strong><br>${t.label_time}: ${tmLabel}`, tmPattern));
-                            }
+                            // Time (Stripes for Asynchronous)
+                            const timeLabel = (step.time === 'sync') ? t.opt_sync : t.opt_async;
+                            const timeColor = (step.time === 'sync') ? greySolid : greyStriped;
+                            const timePattern = (step.time === 'sync') ? '' : 'pattern-stripes';
+                            timeFill.appendChild(createBlock(stepPctWithinDesigned, timeColor, timePattern, `<strong>${timeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
                         });
                     }
+
+                    stepsWrap.appendChild(stepsFill);
+                    groupingWrap.appendChild(groupingFill);
+                    trainerWrap.appendChild(trainerFill);
+                    placeWrap.appendChild(placeFill);
+                    timeWrap.appendChild(timeFill);
+
+                    containerSteps.appendChild(stepsWrap);
+                    containerGrouping.appendChild(groupingWrap);
+                    containerTrainer.appendChild(trainerWrap);
+                    containerPlace.appendChild(placeWrap);
+                    containerTime.appendChild(timeWrap);
                 });
+
 
                 // --- RULER ---
                 const totalMins = baseTotalSecs / 60;
