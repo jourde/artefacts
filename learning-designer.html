@@ -8,10 +8,10 @@
   </title>
   <script src="https://cdn.tailwindcss.com">
   </script>
-  <!-- Drag and Drop Library -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js">
   </script>
-  <!-- Material Icons -->
+  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
   <style>
    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -23,7 +23,7 @@
             font-size: 0.92rem;line-height: 1.4;
         }
 
-        /* Timeline Visual Cues (Patterns) */
+        
         .pattern-stripes {
             background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
             background-size: 8px 8px;
@@ -44,7 +44,7 @@
             background-size: 6px 6px;
         }
 
-        /* Hide Learning Types Toggle Logic */
+        
         body.hide-types .learning-type-container,
         body.hide-types .timeline-track-pedagogy,
         body.hide-types .activity-type-bar {
@@ -52,14 +52,14 @@
         }
 
         .activity-container {
-            border-left: 3px solid #cbd5e1; /* Thinner border */
+            border-left: 3px solid #cbd5e1; 
         }
 
         .step-card {
             transition: transform 0.1s ease;
         }
 
-        /* Sortable ghost styles */
+        
         .sortable-ghost {
             opacity: 0.3;
             background-color: #f1f5f9 !important;
@@ -71,7 +71,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Pedagogical Color Codes - Thinner borders */
+        
         .type-none { border-left: 5px solid #e5e7eb; }
 
         .type-acquisition { border-left: 5px solid #a1f5ed; } 
@@ -100,7 +100,7 @@
             cursor: grabbing;
         }
 
-        /* Helper for Material Icons vertical alignment */
+        
         .material-icons-round {
             display: inline-flex;
             vertical-align: middle;
@@ -109,7 +109,7 @@
             font-size: 1.25rem;
         }
 
-        /* Foldable Panel Transition */
+        
         .panel-content {
             transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
             max-height: 0;
@@ -127,7 +127,7 @@
             transform: rotate(180deg);
         }
 
-        /* Step Body Foldable */
+        
         .step-body {
             transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
             max-height: 2000px;
@@ -141,7 +141,7 @@
             padding-bottom: 0 !important;
         }
 
-        /* Activity Body Foldable */
+        
         .activity-body {
             transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
             max-height: 5000px; 
@@ -153,7 +153,7 @@
             opacity: 0;
         }
         
-        /* Compact specific overrides */
+        
         input, select, textarea {
             font-size: 0.9rem;
         }
@@ -192,14 +192,14 @@
         }
     
 
-        /* Readability tweaks */
+        
         .activity-group { scroll-margin-top: 80px; }
         .step-card { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
         .step-card:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); }
         .activity-title { letter-spacing: -0.01em; }
         .activity-container { border-left-color: #cbd5e1; }
 
-        /* Densité (valeur par défaut) + Haut contraste (optionnel) */
+        
         header { margin-bottom: 0.5rem ; }
         .activity-group { padding: 0.5rem ; }
         .activity-group > .flex { margin-bottom: 0.5rem ; gap: 0.5rem ; }
@@ -211,14 +211,14 @@
         .compact-label { font-size: 0.68rem; margin-bottom: 2px; }
         .compact-label-lg { font-size: 0.74rem; }
 
-        /* Ensure grouping/trainer/place/time titles in each activity have the same size */
+        
         .step-body label [data-i18n="label_grouping"] { font-size: 10px; }
         #timeline-panel { gap: 0.75rem ; }
         #timeline-panel .timeline-track-pedagogy,
         #timeline-panel .flex.flex-col.gap-0\.5 { gap: 0.35rem ; }
 
         
-        /* Timelines – lisibilité */
+        
         #timeline-panel [data-i18n^="label_timeline_"] { font-size: 0.82rem ; }
         #timeline-panel [data-i18n^="label_"][data-i18n$="grouping"],
         #timeline-panel [data-i18n="label_trainer"],
@@ -262,16 +262,13 @@
             outline-color: rgba(37, 99, 235, 0.8);
         }
 
-/* Timeline panel – UI polish */
 #timeline-panel { gap: 0.75rem; }
 
 #timeline-details { gap: 0.35rem; }
 
-
-/* Timeline details – tighter stacking (Regroupement / Formateur / Lieu / Temps) */
 #timeline-details .timeline-track { padding: 0.40rem; }
 #timeline-details .timeline-track { background: transparent !important; border: 0 !important; }
-/* Harmonise la taille de police des titres Dimensions (Regroupement / Formateur / Lieu / Temps) */
+
 #timeline-details [data-i18n="label_grouping"],
 #timeline-details [data-i18n="label_trainer"],
 #timeline-details [data-i18n="label_place"],
@@ -283,7 +280,6 @@
   font-size: 10px !important;
 }
 
-/* Harmonise la taille de police des menus déroulants (Regroupement / Formateur / Lieu / Temps) */
 .step-card .step-group-mode,
 .step-card .trainer-select,
 .step-card .place-select,
@@ -305,7 +301,6 @@
 #timeline-panel #timeline-time { height: 0.95rem ; }
 #timeline-panel #timeline-ruler { height: 2.25rem ; }
 
-/* Timeline ruler – readability */
 #timeline-ruler { padding: 0.25rem 0.4rem 0.15rem 0.4rem; }
 #timeline-ruler .timeline-ruler-tick { top: 0.3rem; bottom: 1.15rem; background-color: #94a3b8; }
 #timeline-ruler .timeline-ruler-label {
@@ -323,14 +318,13 @@
 body.hc #timeline-ruler .timeline-ruler-tick { background-color: #475569; }
 body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; background-color: #ffffff; }
   
-/* Hide moment target duration (only show designed duration) */
+
 .moment-target-wrap{display:none !important;}
 
-
-  /* Alerte : écart entre durée conçue et durée prévue (même teinte rouge clair, plus visible) */
+  
   .timeline-missing-light,
   .timeline-alert-light{
-    /* base rouge clair + hachures pour lisibilité */
+    
     background:
       repeating-linear-gradient(
         135deg,
@@ -342,14 +336,14 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
     box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.95);
   }
 
-  /* Alerte : écart entre durée conçue et durée cible (cartouche "Conçu" du module) */
+  
   .duration-alert-light{
     background: rgba(254, 202, 202, 0.95) !important;
     border-color: rgba(239, 68, 68, 0.55) !important;
     box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.35) !important;
   }
 
-  /* Icônes d’alerte plus visibles */
+  
   .timeline-alert-icons{
     position:absolute;
     top:-18px;
@@ -377,7 +371,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
     filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.45));
   }
 
-  /* Animation discrète pour attirer l’attention */
+  
   @keyframes timelineAlertPulse{
     0%, 100% { filter: saturate(1) brightness(1); }
     50%      { filter: saturate(1.15) brightness(1.05); }
@@ -387,17 +381,17 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
     animation: timelineAlertPulse 1.4s ease-in-out infinite;
   }
 
-  /* (Compat) */
+  
   .timeline-overrun-light{background:#fecaca;}
 
-  /* Allow alert icons to overflow above designed timeline */
+  
   #timeline-panel #timeline-activities{ overflow: visible !important; }
 
 </style>
  </head>
  <body class="p-2 md:p-4 hide-types text-slate-900">
   <div class="max-w-7xl mx-auto">
-   <!-- Header -->
+   
    <header class="flex flex-col xl:flex-row xl:items-end justify-between mb-3 gap-3">
     <div class="mb-1 xl:mb-0">
      <h1 class="text-2xl font-bold text-slate-900 leading-tight" data-i18n="app_title">
@@ -408,7 +402,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </p>
     </div>
     <div class="flex flex-wrap gap-3 no-print items-end">
-     <!-- Project Group -->
+     
      <div class="flex flex-col gap-0.5">
       <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">
        Projet
@@ -448,7 +442,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
            PDF
           </option>
           <option data-i18n="opt_rtf" value="richtext">
-           Rich Text
+           Texte enrichi
           </option>
           <option data-i18n="opt_real_rtf" value="rtf">
            Text (.rtf)
@@ -462,7 +456,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <input accept=".json" class="hidden" id="load-file-input" onchange="loadProject(event)" type="file"/>
       </div>
      </div>
-     <!-- View Group -->
+     
      <div class="flex flex-col gap-0.5">
       <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">
        Vue
@@ -497,7 +491,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </div>
       </div>
      </div>
-     <!-- Help Group (Isolated) -->
+     
      <div aria-hidden="true" class="flex flex-col gap-0.5" style="visibility:hidden; pointer-events:none;">
       <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_help">
        Aide
@@ -507,7 +501,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </div>
     </div>
    </header>
-   <!-- Foldable Key Parameters Panel -->
+   
    <div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
     <button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px]" data-i18n-title="title_toggle_panel" onclick="togglePanel('key-params-panel')">
      <div class="flex items-center gap-1.5">
@@ -522,9 +516,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       expand_more
      </span>
     </button>
-    <!-- Champs toujours visibles -->
+    
     <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-     <!-- 4. Mode of Delivery -->
+     
      <div>
       <label class="compact-label block" data-i18n="label_mode">
        Modalité
@@ -544,14 +538,14 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </option>
       </select>
      </div>
-     <!-- 5. Size of class (Cohort Size) -->
+     
      <div>
       <label class="compact-label block" data-i18n="label_class_size">
        Taille de la cohorte
       </label>
       <input class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none font-bold text-slate-800" id="global-class-size" min="1" oninput="updateStats()" type="number" value="30"/>
      </div>
-     <!-- 6. Learning Time -->
+     
      <div>
       <div class="flex flex-col sm:flex-row gap-2">
        <div class="flex-1">
@@ -586,45 +580,45 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         <div class="flex gap-1 items-center">
          <input class="w-2/3 px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none bg-slate-100 text-slate-500" id="param-designed-val" min="0" placeholder="0" readonly="" type="number"/>
          <span class="w-1/3 text-xs text-slate-600 font-bold px-1" id="param-designed-unit-display">
-          mins
+          min
          </span>
         </div>
        </div>
       </div>
      </div>
     </div>
-    <!-- Champs supplémentaires (pliés par défaut) -->
+    
     <div class="panel-content" id="key-params-panel" style="display: none;">
      <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      <!-- 1. Name -->
+      
       <div>
        <label class="compact-label block" data-i18n="label_course_name">
         Nom de la formation
        </label>
        <input class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" data-i18n-placeholder="ph_course_name" id="param-name" placeholder="Entrez le nom de la formation..." type="text"/>
       </div>
-      <!-- 2. Topic -->
+      
       <div>
        <label class="compact-label block" data-i18n="label_topic">
         Sujet
        </label>
        <input class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" data-i18n-placeholder="ph_topic" id="param-topic" placeholder="Entrez le sujet..." type="text"/>
       </div>
-      <!-- 3. Author(s) -->
+      
       <div>
        <label class="compact-label block" data-i18n="label_authors">
         Auteur(s)
        </label>
        <input class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none" data-i18n-placeholder="ph_authors" id="param-authors" placeholder="Entrez le nom de l'auteur..." type="text"/>
       </div>
-      <!-- 8. Aims -->
+      
       <div class="md:col-span-2 lg:col-span-3">
        <label class="compact-label block" data-i18n="label_aims">
         Objectifs
        </label>
        <textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-none" data-i18n-placeholder="ph_aims" id="param-aims" placeholder="Entrez les objectifs..." rows="1"></textarea>
       </div>
-      <!-- 9. Outcomes (Dynamic List) -->
+      
       <div class="md:col-span-2 lg:col-span-3">
        <label class="compact-label block" data-i18n="label_outcomes">
         Résultats d'apprentissage
@@ -635,13 +629,13 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
           <option data-i18n="bloom_placeholder" disabled="" selected="" value="">
            Bloom...
           </option>
-          <!-- Populated by JS -->
+          
          </select>
          <select class="text-[10px] text-slate-600 border border-slate-200 rounded py-1 px-1 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-24 hidden" id="new-bloom-sub">
           <option data-i18n="bloom_sub_placeholder" disabled="" selected="" value="">
            Sous-cat...
           </option>
-          <!-- Populated by JS -->
+          
          </select>
         </div>
         <div class="flex flex-1 gap-1">
@@ -654,13 +648,13 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         </div>
        </div>
        <ul class="space-y-0.5" id="outcomes-list">
-        <!-- Outcomes go here -->
+        
        </ul>
        <p class="text-xs text-slate-400 italic mt-1" data-i18n="text_no_outcomes" id="no-outcomes-text">
         Aucun résultat défini
        </p>
       </div>
-      <!-- 10. Description -->
+      
       <div class="md:col-span-2 lg:col-span-3">
        <label class="compact-label block" data-i18n="label_description">
         Description générale
@@ -670,7 +664,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </div>
     </div>
    </div>
-   <!-- Global Stats Display -->
+   
    <div class="mb-3 no-print flex flex-col md:flex-row gap-2">
     <div class="bg-white p-3 rounded-lg shadow-sm border border-slate-200 flex-1 flex flex-col justify-center">
      <button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px]" data-i18n-title="title_toggle_panel" onclick="togglePanel('timeline-panel')">
@@ -692,7 +686,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       </span>
      </div>
      <div class="panel-content w-full flex flex-col gap-2 mt-2 p-2 rounded-xl border border-slate-200 bg-slate-50" id="timeline-panel" style="display: none;">
-      <!-- Track 0: Planned Structure (Target Durations) -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -709,7 +703,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full flex text-xs text-slate-600 font-medium leading-none mt-1" id="timeline-activities-planned-labels">
        </div>
       </div>
-      <!-- Track 1: Designed Structure -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -726,7 +720,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full flex text-xs text-slate-600 font-medium leading-none mt-1" id="timeline-activities-labels">
        </div>
       </div>
-      <!-- Track 2: Learning Types -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1 timeline-track-pedagogy">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -742,7 +736,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </div>
       </div>
 
-      <!-- Sous-groupe par défaut masqué : Regroupement / Formateur / Lieu / Temps -->
+      
       <button class="w-full px-2 py-1.5 flex items-center justify-between bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors" onclick="toggleTimelineDetails()" type="button">
        <div class="flex items-center gap-1.5">
         <span aria-hidden="true" class="material-icons-round text-slate-500 text-base">
@@ -758,7 +752,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       </button>
       <div class="panel-content w-full flex flex-col gap-2" data-display="flex" id="timeline-details" style="display: none;">
 
-      <!-- Track 3: Grouping -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -776,7 +770,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-grouping">
        </div>
       </div>
-      <!-- Track 4: Trainer -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -794,7 +788,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-trainer">
        </div>
       </div>
-      <!-- Track 5: Place -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -812,7 +806,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        <div class="w-full h-4 flex rounded-lg overflow-hidden bg-slate-100 border border-slate-200 cursor-help" id="timeline-place">
        </div>
       </div>
-      <!-- Track 6: Time -->
+      
       <div class="timeline-track bg-white rounded-xl border border-slate-200 p-2 flex flex-col gap-1">
        <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -831,13 +825,13 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        </div>
       </div>
       </div>
-      <!-- Shared Ruler -->
+      
       <div class="w-full h-9 relative mt-1 select-none pointer-events-none rounded-lg bg-white" id="timeline-ruler">
       </div>
      </div>
     </div>
    </div>
-   <!-- Main Actions Row -->
+   
    <div class="mb-4 no-print flex justify-start">
     <button class="bg-white border border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded font-bold shadow-sm flex items-center gap-1.5 transition-all text-xs" data-i18n-title="title_new_activity" onclick="addActivity()">
      <span class="material-icons-round text-lg">
@@ -848,7 +842,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </span>
     </button>
    </div>
-   <!-- Tab: Designer -->
+   
    <div id="view-designer">
     <div class="flex justify-end mb-2 no-print">
      <button class="text-slate-500 hover:text-indigo-600 text-xs font-medium flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-slate-100" id="btn-toggle-all-main" onclick="toggleAllActivities()">
@@ -861,9 +855,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </button>
     </div>
     <div class="space-y-4" id="activities-root">
-     <!-- Activities will be injected here -->
+     
     </div>
-    <!-- Empty State -->
+    
     <div class="hidden text-center py-12 bg-white rounded-xl border-2 border-dashed border-slate-300" id="empty-state">
      <h3 class="mt-1 text-base font-medium text-slate-900" data-i18n="empty_title">
       Aucun module conçu
@@ -881,7 +875,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </button>
     </div>
    </div>
-   <!-- Footer -->
+   
    <footer class="mt-8 mb-4 text-center text-[10px] text-slate-400 no-print">
     <p>
      François Jourde (2026) - CC BY SA, inspiré par le
@@ -895,7 +889,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
     </p>
    </footer>
   </div>
-  <!-- Custom Modal for Confirmation -->
+  
   <div class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4" id="custom-confirm-modal">
    <div class="bg-white rounded-lg shadow-lg p-4 max-w-sm w-full">
     <h3 class="text-sm font-bold text-slate-800 mb-2" data-i18n="modal_confirm_title">
@@ -914,10 +908,10 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
     </div>
    </div>
   </div>
-  <!-- Custom Tooltip (Pop-up) -->
+  
   <div class="fixed z-[100] hidden bg-slate-800 text-white text-[10px] font-medium rounded px-2 py-1.5 pointer-events-none shadow-xl border border-slate-700 max-w-[200px] whitespace-normal leading-tight" id="global-tooltip">
   </div>
-  <!-- Templates -->
+  
   <template id="activity-template">
    <div class="activity-group relative bg-white rounded-xl shadow-sm border border-slate-200 p-3">
     <div class="flex flex-col sm:flex-row sm:items-start justify-between mb-2 gap-2">
@@ -932,7 +926,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       </div>
       <div class="flex-1 w-full">
        <input class="activity-title text-lg font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 outline-none w-full py-0.5 transition-colors" data-i18n-placeholder="ph_activity_title" oninput="updateStats()" placeholder="Titre du module (ex: Module 1 : Introduction)" type="text"/>
-       <!-- Activity-specific Timeline Bar -->
+       
        <div class="flex items-center gap-2 mt-0.5 pr-1">
         <div class="activity-type-bar flex-1 h-1.5 bg-slate-100 border border-slate-200 rounded-full overflow-hidden flex">
         </div>
@@ -941,7 +935,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
      </div>
      <div class="flex items-center gap-1 no-print">
       <div class="flex items-center gap-3 mr-2">
-       <!-- Target Time Input -->
+       
        <div class="flex flex-col items-end">
         <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_target">
          Cible
@@ -967,7 +961,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </select>
         </div>
        </div>
-       <!-- Designed Time Display -->
+       
        <div class="flex flex-col items-end">
         <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">
          Conçu
@@ -1041,7 +1035,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
      <div class="flex items-center gap-3">
       <div class="flex items-center gap-2">
-       <!-- Target Time -->
+       
        <div class="moment-target-wrap flex flex-col items-end">
         <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_target">Cible</span>
         <div class="flex gap-1 items-center">
@@ -1054,7 +1048,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </select>
         </div>
        </div>
-       <!-- Designed Time Display -->
+       
        <div class="flex flex-col items-end">
         <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">Conçu</span>
         <div class="bg-indigo-50 border border-indigo-100 rounded px-2 py-0.5 h-[22px] flex items-center min-w-[3rem] justify-end">
@@ -1075,7 +1069,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
 <template id="step-template">
    <div class="step-card bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative group flex flex-col">
-    <!-- Header Row -->
+    
     <div class="flex items-center gap-2 p-2 bg-slate-50 border-b border-slate-100 transition-colors">
      <div class="drag-handle-step drag-handle flex items-center justify-center text-slate-300 hover:text-slate-500 cursor-grab">
       <span class="material-icons-round text-base">
@@ -1146,7 +1140,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       </button>
      </div>
     </div>
-    <!-- Body Row - Collapsed by default -->
+    
     <div class="step-body panel-content collapsed p-3 pt-2">
      <div class="flex flex-col lg:flex-row gap-3 mt-1">
       <div class="lg:w-1/3 space-y-2">
@@ -1170,7 +1164,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </select>
          <div class="step-group-details hidden flex gap-1">
           <div class="relative flex-1">
-           <input class="step-group-count w-full px-2 py-0.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[24px]" data-i18n-placeholder="ph_nb_groups" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groups" type="number"/>
+           <input class="step-group-count w-full px-2 py-0.5 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none h-[24px]" data-i18n-placeholder="ph_nb_groups" min="1" oninput="updateGroupMath(this, 'count')" placeholder="Nb groupes" type="number"/>
            <span class="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none pr-1" data-i18n="label_short_groups">
             Grps
            </span>
@@ -1366,9 +1360,6 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             }
         });
 
-
-
-
         // --- Outcomes: robust bindings (no inline handlers) ---
         function showJsErrorBanner(message) {
             const el = document.getElementById('js-error-banner');
@@ -1403,7 +1394,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 }
                 addOutcome();
             } catch (err) {
-                console.error(err);
+
                 showJsErrorBanner('Erreur lors de l\'ajout du résultat : ' + (err && err.message ? err.message : String(err)));
             }
         }
@@ -1832,7 +1823,7 @@ title_new_activity: "Ajouter un nouveau module",
                 });
             }
         } else {
-            console.warn("SortableJS non chargé : glisser-déposer désactivé.");
+
         }
 
 function initSortableSteps(container) {
@@ -1846,7 +1837,6 @@ function initSortableSteps(container) {
                 onEnd: () => { updateStats(); }
             });
         }
-
 
         function initSortableMoments(container) {
             if (typeof Sortable === 'undefined' || !container) return;
@@ -1946,7 +1936,6 @@ function initSortableSteps(container) {
                 }, 10);
             }
         }
-
 
         function toggleTimelineDetails() {
             const content = document.getElementById('timeline-details');
@@ -2439,7 +2428,7 @@ function initSortableSteps(container) {
                     updateStats();
                     event.target.value = '';
                 } catch (err) {
-                    console.error("Failed to load project file.", err);
+
                     alert("Erreur : impossible de charger ce fichier de sauvegarde. Vérifiez qu’il s’agit bien d’un fichier JSON exporté par cet outil.");
                 }
             };
@@ -2803,8 +2792,6 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
                 .replace(/\r?\n/g, '\\par ');
         }
 
-
-
         
         function getDefaultDurationUnitKey() {
             const sel = document.getElementById('param-learning-unit');
@@ -2832,10 +2819,9 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             return 60;
         }
 
-
 function updateStats() {
             const totals = getTotals();
-            let display = "0 mins";
+            let display = `0 ${translations[currentLang].unit_mins}`;
             if (totals.totalSecs >= 604800) display = `${(totals.totalSecs / 604800).toFixed(1)} ${translations[currentLang].unit_weeks}`;
             else if (totals.totalSecs >= 86400) display = `${(totals.totalSecs / 86400).toFixed(1)} ${translations[currentLang].unit_days}`;
             else if (totals.totalSecs >= 3600) {
@@ -2894,7 +2880,6 @@ function updateStats() {
                     label.innerText = `${v} ${unitText}`;
                 }
             });
-
 
             // DOM Elements for the two timelines
             const containerActivitiesPlanned = document.getElementById('timeline-activities-planned');
@@ -3041,14 +3026,12 @@ function updateStats() {
                         fillEl.className = `absolute left-0 top-0 bottom-0 ${bgClass} hover:bg-indigo-500 transition-colors`;
                         fillEl.style.width = `${ratio * 100}%`;
 
-
                         // Overrun alert (designed > planned)
                         const overEl = document.createElement('div');
                         overEl.className = 'absolute inset-0 timeline-alert-light pointer-events-none';
                         if (!(plannedSecs > 0 && designedSecs > plannedSecs)) {
                             overEl.style.display = 'none';
                         }
-
 
                         // Alert badge when designed differs from planned (Trop court / Trop long)
                         const iconsEl = document.createElement('div');
@@ -3245,7 +3228,6 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                     containerTime.appendChild(timeWrap);
                 });
 
-
                 // --- RULER ---
                 const totalMins = baseTotalSecs / 60;
                 let interval = 0;
@@ -3380,7 +3362,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                     .step-block { margin-left: 20px; margin-bottom: 20px; padding: 15px; background-color: white; border-left: 4px solid #cbd5e1; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
                     .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; color: white; margin-right: 5px; }
                     .task-box { background-color: #f1f5f9; padding: 10px; border-radius: 4px; margin-top: 10px; font-style: italic; }
-                    /* Type Colors */
+                    
                     .type-acquisition { border-color: #a1f5ed; } .bg-none { background-color: #e5e7eb; }
  .bg-acquisition { background-color: #7dded6; color: #0f766e; }
                     .type-collaboration { border-color: #ffd966; } .bg-collaboration { background-color: #f0c953; color: #854d0e; }
@@ -3390,7 +3372,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                     .type-production { border-color: #bdea75; } .bg-production { background-color: #a6d15e; color: #3f6212; }
                 
 
-  /* Allow alert icons to overflow above designed timeline */
+  
   #timeline-panel #timeline-activities{ overflow: visible !important; }
 
 </style>
@@ -3657,7 +3639,6 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
             a.click();
             URL.revokeObjectURL(url);
         }
-
 
         function exportMarkdown() {
             const data = getTotals();
