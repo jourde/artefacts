@@ -1539,7 +1539,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
         
         function showTooltip(e, text) {
-            tooltipEl.innerHTML = text;
+            tooltipEl.textContent = text;
             tooltipEl.classList.remove('hidden');
             updateTooltipPos(e);
         }
@@ -3022,6 +3022,15 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             const onMoveMouse = (e) => {
                 if(!dragging) return;
                 const { maxScroll } = __getTimelineTracks();
+                if(maxScroll <= 0){
+                    __timelineHScroll.busy = true;
+                    bar.scrollLeft = 0;
+                    const { outers } = __getTimelineTracks();
+                    outers.forEach(o => { o.scrollLeft = 0; });
+                    __timelineHScroll.busy = false;
+                    updateTimelineHScrollThumb();
+                    return;
+                }
                 const rect = bar.getBoundingClientRect();
                 const trackW = rect.width || 1;
                 const thumbW = thumb.getBoundingClientRect().width || 1;
@@ -3059,6 +3068,15 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
 
                 const clientX = e.touches[0].clientX;
                 const { maxScroll } = __getTimelineTracks();
+                if(maxScroll <= 0){
+                    __timelineHScroll.busy = true;
+                    bar.scrollLeft = 0;
+                    const { outers } = __getTimelineTracks();
+                    outers.forEach(o => { o.scrollLeft = 0; });
+                    __timelineHScroll.busy = false;
+                    updateTimelineHScrollThumb();
+                    return;
+                }
                 const rect = bar.getBoundingClientRect();
                 const trackW = rect.width || 1;
                 const thumbW = thumb.getBoundingClientRect().width || 1;
