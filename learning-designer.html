@@ -397,7 +397,6 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
   
   #timeline-panel #timeline-activities{ overflow: visible !important; }
 
-
         .timeline-zoom-outer{
             overflow-x: auto !important;
             overflow-y: hidden !important;
@@ -408,12 +407,10 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             min-width: 100%;
         }
 
-
-/* --- Fix: keep "Visualisations des séquences" within viewport and aligned with "Paramètres" --- */
 #timelines-wrapper{
   width: 100%;
   max-width: 100%;
-  min-width: 0; /* prevent flex overflow */
+  min-width: 0; 
   box-sizing: border-box;
 }
 #timelines-wrapper .panel-content,
@@ -424,7 +421,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
   box-sizing: border-box;
 }
 #timelines-wrapper #timeline-panel{
-  overflow-x: hidden; /* prevent panel from expanding beyond screen */
+  overflow-x: hidden; 
 }
 #timelines-wrapper .timeline-track,
 #timelines-wrapper .timeline-track > *{
@@ -432,33 +429,31 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
   min-width: 0;
   box-sizing: border-box;
 }
-/* keep timeline bars scrollable internally without forcing the whole block wider */
+
 #timelines-wrapper .timeline-zoom-outer{
   max-width: 100%;
   overflow-x: auto !important;
   overflow-y: hidden !important;
 }
-/* allow alert/icons to remain visible vertically while preventing horizontal overflow */
+
 #timeline-panel #timeline-activities{
   overflow-x: hidden !important;
   overflow-y: visible !important;
 }
 
-
-/* --- Bottom horizontal scrollbar for "Visualisations des séquences" --- */
 #timeline-hscroll{
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 14px;           /* keeps the bar compact but usable */
+  height: 14px;           
   margin-top: 8px;
   border-radius: 9999px;
   background: transparent;
 }
 #timeline-hscroll-inner{
-  height: 1px;            /* minimal height; scrollbar still appears */
-  width: 0px;             /* set via JS */
+  height: 1px;            
+  width: 0px;             
 }
 </style>
 </head>
@@ -1342,7 +1337,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
         const currentLang = 'fr';
 
-        // --- Global confirm modal plumbing (single binding; prevents handler stacking) ---
+        
         let __confirmAction = null;
         (function initConfirmModalOnce() {
             const modal = document.getElementById('custom-confirm-modal');
@@ -1351,7 +1346,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
             if (!modal || !yesBtn || !noBtn) return;
 
-            // Prevent multiple bindings if this script is ever evaluated twice.
+            
             if (modal.dataset.bound === '1') return;
             modal.dataset.bound = '1';
 
@@ -1376,12 +1371,12 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 close();
             });
 
-            // Click outside the dialog closes it
+            
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) close();
             });
         })();
-        // --- Action button dispatcher (prevents cloned inline onclick mix-ups) ---
+        
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
@@ -1389,7 +1384,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             const action = btn.dataset.action;
             if (!action) return;
 
-            // Always prevent bubbling into other UI handlers.
+            
             e.preventDefault();
             e.stopPropagation();
 
@@ -1415,7 +1410,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             }
         });
 
-        // --- Outcomes: robust bindings (no inline handlers) ---
+        
         function showJsErrorBanner(message) {
             const el = document.getElementById('js-error-banner');
             if (!el) return;
@@ -1439,7 +1434,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         function safeAddOutcome() {
             const input = document.getElementById('new-outcome-input');
             try {
-                // Provide immediate feedback if empty (otherwise the click looks like it does nothing).
+                
                 if (input && !input.value.trim()) {
                     input.setCustomValidity("Saisissez un résultat avant d'ajouter.");
                     input.reportValidity();
@@ -1486,7 +1481,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             }
         })();
 
-        // Tooltip Helpers
+        
         function showTooltip(e, text) {
             tooltipEl.innerHTML = text;
             tooltipEl.classList.remove('hidden');
@@ -1501,7 +1496,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             const x = e.clientX + 15;
             const y = e.clientY + 15;
             
-            // Simple boundary check to prevent going off screen
+            
             const rect = tooltipEl.getBoundingClientRect();
             const winW = window.innerWidth;
             const winH = window.innerHeight;
@@ -1516,7 +1511,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             tooltipEl.style.top = `${finalY}px`;
         }
 
-        // Bloom's Data Structure
+        
         const BLOOM_TAXONOMY = {
             remember: ["cite", "define", "describe", "identify", "label", "list", "match", "name", "outline", "quote", "recall", "report", "reproduce", "retrieve", "show", "state", "tabulate", "tell"],
             understand: ["abstract", "arrange", "articulate", "associate", "categorize", "clarify", "classify", "compare", "compute", "conclude", "contrast", "defend", "diagram", "differentiate", "discuss", "distinguish", "estimate", "exemplify", "explain", "extend", "extrapolate", "generalize", "give examples of", "illustrate", "infer", "interpolate", "interpret", "match", "outline", "paraphrase", "predict", "rearrange", "reorder", "rephrase", "represent", "restate", "summarize", "transform", "translate"],
@@ -1539,7 +1534,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 grp_view: "Vue",
                 grp_actions: "Actions",
                 grp_help: "Aide",
-                // Export Translations FR
+                
                 btn_export_dropdown: "Exporter...",
                 title_export_dropdown: "Choisir le format d'export",
                 opt_md: "Markdown (IA)",
@@ -1688,12 +1683,12 @@ title_new_activity: "Ajouter un nouveau module",
                 bloom_sub_generating: "Générer",
                 bloom_sub_planning: "Planifier",
                 bloom_sub_producing: "Produire",
-                // Modal and Chart labels
+                
                 modal_confirm_title: "Confirmer l'action",
                 confirm_delete_activity: "Supprimer tout le module ?",
                 btn_cancel: "Annuler",
                 btn_delete: "Supprimer",
-                // Timeline Legends
+                
                 legend_grouping: "Plein : Classe • Rayé : Groupes",
                 legend_trainer: "Plein : Présent • Rayé : Absent",
                 legend_place: "Plein : Présentiel • Rayé : En ligne",
@@ -1702,7 +1697,7 @@ title_new_activity: "Ajouter un nouveau module",
                 btn_toggle_types: "Types d'appr.",
                 label_target: "Cible",
                 label_designed: "Conçu",
-                // Additional Bloom Translations
+                
                 bloom_sub_cite: "Citer",
                 bloom_sub_define: "Définir",
                 bloom_sub_describe: "Décrire",
@@ -1857,7 +1852,7 @@ title_new_activity: "Ajouter un nouveau module",
             production: '#bdea75'
         };
 
-        // Initialize Sortables
+        
         if (typeof Sortable !== 'undefined') {
             new Sortable(root, {
                 animation: 150,
@@ -1867,7 +1862,7 @@ title_new_activity: "Ajouter un nouveau module",
                 onEnd: () => { updateEmptyState(); }
             });
 
-            // Initialize Sortable for Outcomes
+            
             const outcomesListEl = document.getElementById('outcomes-list');
             if (outcomesListEl) {
                 new Sortable(outcomesListEl, {
@@ -1922,7 +1917,7 @@ function initSortableSteps(container) {
         function updateMomentIndexes(activityGroup) {
             if (!activityGroup) return;
 
-            // Module index is the activity index badge (kept in sync by updateEmptyState / drag-and-drop)
+            
             let moduleNum = '';
             const moduleBadge = activityGroup.querySelector('.activity-index');
             if (moduleBadge) moduleNum = String(moduleBadge.textContent || moduleBadge.innerText || '').trim();
@@ -1965,7 +1960,7 @@ function initSortableSteps(container) {
             updateStats();
         }
 
-        // --- Foldable Panel Logic ---
+        
 
         function getPanelDisplay(el) {
             if (!el) return 'block';
@@ -1982,13 +1977,13 @@ function initSortableSteps(container) {
             if (content.classList.contains('open')) {
                 content.classList.remove('open');
                 icon.classList.remove('open');
-                setTimeout(() => content.style.display = 'none', 300); // Standardize closing logic
+                setTimeout(() => content.style.display = 'none', 300); 
             } else {
-                content.style.display = getPanelDisplay(content); // Ensure visible for animation
+                content.style.display = getPanelDisplay(content); 
                 setTimeout(() => {
                     content.classList.add('open');
                     icon.classList.add('open');
-                    if(panelId === 'timeline-panel'){ setTimeout(updateTimelineHScroll, 0); }
+                    setTimeout(updateTimelineHScroll, 0);
                 }, 10);
             }
         }
@@ -2007,7 +2002,7 @@ function initSortableSteps(container) {
                 setTimeout(() => {
                     content.classList.add('open');
                     if (icon) icon.classList.add('open');
-                    if(panelId === 'timeline-panel'){ setTimeout(updateTimelineHScroll, 0); }
+                    setTimeout(updateTimelineHScroll, 0);
                 }, 10);
             }
         }
@@ -2040,7 +2035,7 @@ function initSortableSteps(container) {
                 }
             });
 
-            // Update main button state
+            
             const iconText = anyOpen ? 'unfold_more' : 'unfold_less';
             const labelKey = anyOpen ? 'btn_expand_all' : 'btn_collapse_all';
             
@@ -2062,7 +2057,7 @@ function initSortableSteps(container) {
             }
         }
 
-        // Foldable Activity
+        
         function toggleActivity(btn) {
             const activityGroup = btn.closest('.activity-group');
             const body = activityGroup.querySelector('.activity-body');
@@ -2094,8 +2089,7 @@ function initSortableSteps(container) {
             }
         }
 
-
-        // Foldable Step
+        
         function toggleStep(btn) {
             const stepCard = btn.closest('.step-card');
             const body = stepCard.querySelector('.step-body');
@@ -2125,7 +2119,7 @@ function initSortableSteps(container) {
             }
         }
 
-        // --- Bloom's Logic ---
+        
 
         function renderBloomOptions(selectElement, selectedValue = "") {
             const t = translations[currentLang];
@@ -2166,7 +2160,7 @@ function initSortableSteps(container) {
             renderBloomSubOptions(subSelect, levelSelect.value);
         }
 
-        // --- Outcome List Logic ---
+        
         function addOutcome(data = null) {
             let text = '';
             let level = '';
@@ -2200,12 +2194,12 @@ function initSortableSteps(container) {
             li.setAttribute("data-i18n-title", "title_remove_outcome");
             li.title = t.title_remove_outcome;
             
-            // Drag Handle
+            
             const dragHandle = document.createElement('div');
             dragHandle.className = "drag-handle-outcome drag-handle text-slate-300 hover:text-slate-500 cursor-grab mt-1 sm:mt-0";
             dragHandle.innerHTML = '<span class="material-icons-round text-base">drag_indicator</span>';
 
-            // Create Selects
+            
             const levelSelect = document.createElement('select');
             levelSelect.className = "outcome-bloom-level text-[9px] uppercase font-bold text-slate-500 border border-slate-200 rounded py-0.5 px-0.5 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-20";
             levelSelect.onchange = function() { updateOutcomeBloom(this); };
@@ -2213,7 +2207,7 @@ function initSortableSteps(container) {
 
             const subSelect = document.createElement('select');
             subSelect.className = "outcome-bloom-sub text-[9px] text-slate-500 border border-slate-200 rounded py-0.5 px-0.5 bg-white focus:ring-1 focus:ring-indigo-500 outline-none w-20";
-            renderBloomSubOptions(subSelect, level, sub); // Initialize sub options based on level
+            renderBloomSubOptions(subSelect, level, sub); 
 
             const span = document.createElement('span');
             span.className = "text-xs text-slate-700 outcome-text flex-1 min-w-[150px] break-words";
@@ -2244,7 +2238,7 @@ function initSortableSteps(container) {
             if (!data) {
                 input.value = '';
                 headerLevel.value = "";
-                renderBloomSubOptions(headerSub, ""); // Reset sub
+                renderBloomSubOptions(headerSub, ""); 
             }
             checkOutcomesEmpty();
         }
@@ -2266,11 +2260,11 @@ function initSortableSteps(container) {
             }
         }
 
-        // --- Save / Load Feature Logic ---
+        
 
         
         function saveProject() {
-            // Collect outcomes with their categories
+            
             const outcomes = [];
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 outcomes.push({
@@ -2291,7 +2285,7 @@ function initSortableSteps(container) {
                     dureeApprentissageValeur: document.getElementById('param-learning-val').value,
                     dureeApprentissageUnite: document.getElementById('param-learning-unit').value,
                     dureeConcueValeur: document.getElementById('param-designed-val').value,
-                    dureeConcueUnite: document.getElementById('param-learning-unit').value, // même unité
+                    dureeConcueUnite: document.getElementById('param-learning-unit').value, 
                     objectifs: document.getElementById('param-aims').value,
                     resultats: outcomes,
                     description: document.getElementById('param-description').value
@@ -2913,7 +2907,6 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             const z = clamp((parseFloat(timelineZoom) || 1) + delta, 0.5, 3);
             setTimelineZoom(parseFloat(z.toFixed(1)));
         }
-
 
         function initTimelineZoomControls() {
             try {
@@ -3833,7 +3826,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                         renderSteps(stepCards, momentPrefix);
                     });
                 } else {
-                    // Legacy designs (no moments)
+                    
                     const stepCards = act.querySelectorAll('.step-card');
                     const momentSecs = calcMomentSecs(stepCards);
                     const momentPrefix = `${aIdx + 1}.1`;
@@ -3869,7 +3862,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
             md += `- **${t.label_class_size}:** ${document.getElementById('global-class-size').value}\n`;
             md += `- **${t.label_total_time}:** ${fmtTotalDuration(data.totalSecs, t)}\n`;
             md += `- **${t.label_learning_time}:** ${document.getElementById('param-learning-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`;
-            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; // Use learning unit text directly
+            md += `- **${t.label_designed_time}:** ${document.getElementById('param-designed-val').value} ${document.getElementById('param-learning-unit').selectedOptions[0]?.innerText || ''}\n`; 
 md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             
             md += `## informations_clés\n`;
@@ -3975,7 +3968,7 @@ ${notes}
                         renderSteps(stepCards, momentPrefix);
                     });
                 } else {
-                    // Legacy designs (no moments): export as a single moment for a complete structure
+                    
                     const stepCards = activity.querySelectorAll('.step-card');
                     const momentSecs = calcMomentSecs(stepCards);
                     const momentPrefix = `${aIdx + 1}.1`;
@@ -4005,7 +3998,7 @@ ${notes}
 
         
 
-        // Palette: standard vs high-contrast (hc)
+        
         function isHighContrastEnabled() {
             return document.body.classList.contains('hc');
         }
@@ -4015,10 +4008,10 @@ ${notes}
             try {
                 localStorage.setItem('ld_palette', enabled ? 'hc' : 'standard');
             } catch (e) {
-                // ignore storage errors (private mode, etc.)
+                
             }
             updateContrastToggleUI();
-            // Timelines et étiquettes utilisent des couleurs calculées ; on re-rend pour cohérence.
+            
             updateStats();
 }
 
@@ -4043,13 +4036,13 @@ window.onload = () => {
 
             initTimelineZoomControls();
 
-            // Apply saved palette preference (defaults to current HTML body class)
+            
             try {
                 const pref = localStorage.getItem('ld_palette');
                 if (pref === 'standard') document.body.classList.remove('hc');
                 if (pref === 'hc') document.body.classList.add('hc');
             } catch (e) {
-                // ignore storage errors
+                
             }
             updateContrastToggleUI();
         };
