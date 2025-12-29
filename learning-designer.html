@@ -444,17 +444,73 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 #timeline-hscroll{
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
-  height: 14px;           
-  margin-top: 8px;
+  scrollbar-gutter: stable both-edges;
+  height: 28px;
+  margin-top: 10px;
   border-radius: 9999px;
-  background: transparent;
+  border: 1px solid rgba(148,163,184,0.70);
+  background: rgba(241,245,249,0.98);
+  box-sizing: border-box;
+  cursor: ew-resize;
 }
+
+/* Make the scrollbar clearly visible (Chrome/Safari/Edge) */
+#timeline-hscroll::-webkit-scrollbar{ height: 18px; }
+#timeline-hscroll::-webkit-scrollbar-track{
+  background: rgba(226,232,240,0.95);
+  border-radius: 9999px;
+}
+#timeline-hscroll::-webkit-scrollbar-thumb{
+  background: rgba(71,85,105,0.85);
+  border-radius: 9999px;
+  border: 4px solid rgba(226,232,240,0.95);
+}
+#timeline-hscroll::-webkit-scrollbar-thumb:hover{ background: rgba(51,65,85,0.95); }
+
+
+/* Firefox */
+#timeline-hscroll{ scrollbar-width: auto; scrollbar-color: rgba(71,85,105,0.85) rgba(226,232,240,0.95); }
+
 #timeline-hscroll-inner{
-  height: 1px;            
-  width: 0px;             
+  height: 1px;
+  width: 0px;
 }
+
+
+/* Hide per-line horizontal scrollbars inside timeline tracks (keep only the unified scrollbar at the bottom) */
+#timeline-panel .timeline-zoom-outer{
+  scrollbar-width: none; /* Firefox */
+}
+#timeline-panel .timeline-zoom-outer::-webkit-scrollbar{
+  height: 0px;
+  width: 0px;
+}
+
+
+/* Unified scrollbar: render a persistent, easy-to-grab custom thumb (macOS overlay scrollbars can be hard to grab) */
+#timeline-hscroll{ position: relative; }
+#timeline-hscroll-thumb{
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 18px;
+  width: 72px;
+  border-radius: 9999px;
+  background: rgba(71,85,105,0.85);
+  border: 4px solid rgba(226,232,240,0.95);
+  box-sizing: border-box;
+  cursor: grab;
+  z-index: 5;
+}
+#timeline-hscroll-thumb:active{ cursor: grabbing; }
+
+/* Hide the native scrollbar visuals; keep wheel/trackpad scrolling functional */
+#timeline-hscroll{ scrollbar-width: none; }
+#timeline-hscroll::-webkit-scrollbar{ height: 0px; width: 0px; }
+
 </style>
 </head>
 <body class="p-2 md:p-4 hide-types text-slate-900">
@@ -894,7 +950,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <div class="w-full h-9 relative mt-1 select-none pointer-events-none rounded-lg bg-white timeline-zoom-outer" id="timeline-ruler">
 <div class="timeline-inner" id="timeline-ruler-inner"></div>
 </div>
-<div aria-label="Défilement horizontal des visualisations" class="timeline-hscroll no-print" id="timeline-hscroll" role="scrollbar"><div id="timeline-hscroll-inner"></div></div></div>
+<div aria-label="Défilement horizontal des visualisations" class="timeline-hscroll no-print" id="timeline-hscroll" role="scrollbar"><div id="timeline-hscroll-inner"></div><div id="timeline-hscroll-thumb" aria-hidden="true"></div></div></div>
 </div>
 </div>
 <div class="mb-4 no-print flex justify-start">
@@ -2811,99 +2867,255 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
 
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-        // --- Unified horizontal scrollbar for the whole "Visualisations des séquences" block ---
-        let __timelineHScrollSync = { busy:false };
+        function setTimelineZoom(z){
+            timelineZoom = clamp(parseFloat(z) || 1, 0.5, 3);
+            applyTimelineZoom();
+        }
+
+        function applyTimelineZoom(){
+            const zr = document.getElementById('timeline-zoom-range');
+            const zv = document.getElementById('timeline-zoom-value');
+            if(zr) zr.value = String(timelineZoom);
+            if(zv) zv.textContent = `${Math.round(timelineZoom * 100)}%`;
+
+            // Preserve current relative scroll position when changing zoom
+            const before = __getTimelineTracks();
+            const beforeMax = before.maxScroll || 0;
+            const beforeLeft = before.outers[0] ? (before.outers[0].scrollLeft || 0) : 0;
+            const ratio = beforeMax > 0 ? (beforeLeft / beforeMax) : 0;
+
+            // Stretch the inner content to create real horizontal overflow
+            const pct = (timelineZoom * 100);
+            document.querySelectorAll('#timeline-panel .timeline-zoom-outer').forEach(outer => {
+                const inner = outer.querySelector(':scope > .timeline-inner');
+                if(inner){
+                    inner.style.minWidth = pct + '%';
+                    inner.style.width = pct + '%';
+                }
+            });
+
+            // Re-sync unified scrollbar after layout settles
+            requestAnimationFrame(() => {
+                const after = __getTimelineTracks();
+                const afterMax = after.maxScroll || 0;
+                const targetLeft = afterMax > 0 ? clamp(ratio * afterMax, 0, afterMax) : 0;
+
+                __timelineHScroll.busy = true;
+                const bar = document.getElementById('timeline-hscroll');
+                if(bar) bar.scrollLeft = targetLeft;
+                after.outers.forEach(o => { o.scrollLeft = targetLeft; });
+                __timelineHScroll.busy = false;
+
+                updateTimelineHScroll();
+            });
+        }
+
+        
+        const __timelineHScroll = { busy:false, ro:null };
+
+        function __getTimelineTracks(){
+            const outers = Array.from(document.querySelectorAll('#timeline-panel .timeline-zoom-outer'));
+            let maxScrollWidth = 0;
+            outers.forEach(o => { maxScrollWidth = Math.max(maxScrollWidth, o.scrollWidth); });
+            const viewportWidth = outers[0] ? outers[0].clientWidth : 0;
+            const maxScroll = Math.max(0, maxScrollWidth - viewportWidth);
+            return { outers, maxScrollWidth, viewportWidth, maxScroll };
+        }
+
+        function updateTimelineHScrollThumb(){
+            const bar = document.getElementById('timeline-hscroll');
+            const thumb = document.getElementById('timeline-hscroll-thumb');
+            if(!bar || !thumb) return;
+
+            const { maxScrollWidth, viewportWidth, maxScroll, outers } = __getTimelineTracks();
+            const trackW = bar.clientWidth || 0;
+
+            if(!trackW || !maxScrollWidth || !viewportWidth || !outers.length){
+                bar.classList.add('is-disabled');
+                thumb.style.width = Math.max(36, Math.round(trackW * 0.4)) + 'px';
+                thumb.style.left = '0px';
+                return;
+            }
+
+            const scrollLeft = outers[0].scrollLeft || 0;
+
+            if(maxScroll <= 1){
+                bar.classList.add('is-disabled');
+                const w = Math.max(36, Math.round((viewportWidth / maxScrollWidth) * trackW));
+                thumb.style.width = w + 'px';
+                thumb.style.left = '0px';
+                return;
+            }
+
+            bar.classList.remove('is-disabled');
+
+            const thumbW = Math.max(36, Math.round((viewportWidth / maxScrollWidth) * trackW));
+            const maxThumbX = Math.max(0, trackW - thumbW);
+            const x = maxThumbX * (scrollLeft / maxScroll);
+            thumb.style.width = thumbW + 'px';
+            thumb.style.left = Math.round(x) + 'px';
+        }
 
         function updateTimelineHScroll(){
             const bar = document.getElementById('timeline-hscroll');
             const inner = document.getElementById('timeline-hscroll-inner');
             if(!bar || !inner) return;
 
-            const outers = Array.from(document.querySelectorAll('#timeline-panel .timeline-zoom-outer'));
-            if(!outers.length) { inner.style.width = '0px'; return; }
+            const { outers, maxScrollWidth } = __getTimelineTracks();
+            if(!outers.length) { inner.style.width = '0px'; updateTimelineHScrollThumb(); return; }
 
-            // Determine the maximum scrollable width across all tracks
-            let maxScrollWidth = 0;
-            outers.forEach(o => { maxScrollWidth = Math.max(maxScrollWidth, o.scrollWidth); });
-
-            // Ensure the proxy has the same scroll range as the tracks
             inner.style.width = Math.max(maxScrollWidth, bar.clientWidth) + 'px';
 
-            // Keep the bar aligned with the first track's position
-            const ref = outers[0];
-            if(ref && Math.abs(bar.scrollLeft - ref.scrollLeft) > 1){
-                __timelineHScrollSync.busy = true;
-                bar.scrollLeft = ref.scrollLeft;
-                __timelineHScrollSync.busy = false;
+            if(!bar.dataset.bound){
+                bar.dataset.bound = '1';
+                bar.addEventListener('scroll', () => {
+                    if(__timelineHScroll.busy) return;
+                    const { outers } = __getTimelineTracks();
+                    if(!outers.length) return;
+
+                    __timelineHScroll.busy = true;
+                    const x = bar.scrollLeft;
+                    outers.forEach(o => { o.scrollLeft = x; });
+                    __timelineHScroll.busy = false;
+                    updateTimelineHScrollThumb();
+                }, { passive:true });
             }
-        }
 
-        function setupTimelineHScroll(){
-            const bar = document.getElementById('timeline-hscroll');
-            if(!bar) return;
-
-            const outers = Array.from(document.querySelectorAll('#timeline-panel .timeline-zoom-outer'));
-            if(!outers.length) return;
-
-            // Scroll bar -> tracks
-            bar.addEventListener('scroll', () => {
-                if(__timelineHScrollSync.busy) return;
-                __timelineHScrollSync.busy = true;
-                const x = bar.scrollLeft;
-                outers.forEach(o => { o.scrollLeft = x; });
-                __timelineHScrollSync.busy = false;
-            }, { passive:true });
-
-            // Any track -> scroll bar (keep in sync)
             outers.forEach(o => {
+                if(o.dataset.hscrollBound) return;
+                o.dataset.hscrollBound = '1';
                 o.addEventListener('scroll', () => {
-                    if(__timelineHScrollSync.busy) return;
-                    __timelineHScrollSync.busy = true;
+                    if(__timelineHScroll.busy) return;
+                    __timelineHScroll.busy = true;
                     bar.scrollLeft = o.scrollLeft;
-                    __timelineHScrollSync.busy = false;
+                    __timelineHScroll.busy = false;
+                    updateTimelineHScrollThumb();
                 }, { passive:true });
             });
 
-            // React to layout changes (zoom, resize, folding, etc.)
-            if(window.ResizeObserver){
-                const ro = new ResizeObserver(() => updateTimelineHScroll());
-                ro.observe(bar);
-                outers.forEach(o => ro.observe(o));
+            if(window.ResizeObserver && !__timelineHScroll.ro){
+                __timelineHScroll.ro = new ResizeObserver(() => updateTimelineHScroll());
+                __timelineHScroll.ro.observe(bar);
             }
-            window.addEventListener('resize', updateTimelineHScroll);
+            if(__timelineHScroll.ro){
+                outers.forEach(o => __timelineHScroll.ro.observe(o));
+            }
 
-            updateTimelineHScroll();
+            if(!window.__timelineHScrollWindowResizeBound){
+                window.__timelineHScrollWindowResizeBound = true;
+                window.addEventListener('resize', () => updateTimelineHScroll());
+            }
+
+            updateTimelineHScrollThumb();
         }
 
-        function applyTimelineZoom() {
-            const zoom = clamp(parseFloat(timelineZoom) || 1, 0.5, 3);
-            timelineZoom = zoom;
+        function initTimelineHScrollThumbDrag(){
+            const bar = document.getElementById('timeline-hscroll');
+            const thumb = document.getElementById('timeline-hscroll-thumb');
+            if(!bar || !thumb || thumb.dataset.bound) return;
+            thumb.dataset.bound = '1';
 
-            // Ajuste la largeur des contenus internes pour créer un scroll horizontal (zoom)
-            document.querySelectorAll('.timeline-zoom-outer').forEach(outer => {
-                const inner = outer.querySelector(':scope > .timeline-inner');
-                if (!inner) return;
-                const w = `${zoom * 100}%`;
-                inner.style.width = w;
-                inner.style.minWidth = w;
+            let dragging = false;
+            let startX = 0;
+            let startScrollLeft = 0;
+
+            const onMoveMouse = (e) => {
+                if(!dragging) return;
+                const { maxScroll } = __getTimelineTracks();
+                const rect = bar.getBoundingClientRect();
+                const trackW = rect.width || 1;
+                const thumbW = thumb.getBoundingClientRect().width || 1;
+                const maxThumbX = Math.max(1, trackW - thumbW);
+                const dx = e.clientX - startX;
+                const ratio = maxScroll / maxThumbX;
+                const target = clamp(startScrollLeft + (dx * ratio), 0, maxScroll);
+
+                __timelineHScroll.busy = true;
+                bar.scrollLeft = target;
+                const { outers } = __getTimelineTracks();
+                outers.forEach(o => { o.scrollLeft = target; });
+                __timelineHScroll.busy = false;
+                updateTimelineHScrollThumb();
+            };
+
+            const endMouse = () => {
+                dragging = false;
+                document.removeEventListener('mousemove', onMoveMouse);
+                document.removeEventListener('mouseup', endMouse);
+            };
+
+            thumb.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                dragging = true;
+                startX = e.clientX;
+                startScrollLeft = bar.scrollLeft || 0;
+                document.addEventListener('mousemove', onMoveMouse);
+                document.addEventListener('mouseup', endMouse);
             });
 
-            const range = document.getElementById('timeline-zoom-range');
-            const value = document.getElementById('timeline-zoom-value');
-            if (range) range.value = String(zoom);
-            if (value) value.textContent = `${Math.round(zoom * 100)}%`;
-        
+            const onMoveTouch = (e) => {
+                if(!dragging) return;
+                e.preventDefault();
 
-            // Keep unified scrollbar range in sync with zoom
-            updateTimelineHScroll();
-}
+                const clientX = e.touches[0].clientX;
+                const { maxScroll } = __getTimelineTracks();
+                const rect = bar.getBoundingClientRect();
+                const trackW = rect.width || 1;
+                const thumbW = thumb.getBoundingClientRect().width || 1;
+                const maxThumbX = Math.max(1, trackW - thumbW);
+                const dx = clientX - startX;
+                const ratio = maxScroll / maxThumbX;
+                const target = clamp(startScrollLeft + (dx * ratio), 0, maxScroll);
 
-        function setTimelineZoom(v) {
-            timelineZoom = clamp(parseFloat(v) || 1, 0.5, 3);
-            applyTimelineZoom();
+                __timelineHScroll.busy = true;
+                bar.scrollLeft = target;
+                const { outers } = __getTimelineTracks();
+                outers.forEach(o => { o.scrollLeft = target; });
+                __timelineHScroll.busy = false;
+                updateTimelineHScrollThumb();
+            };
+
+            const endTouch = () => {
+                dragging = false;
+                document.removeEventListener('touchmove', onMoveTouch);
+                document.removeEventListener('touchend', endTouch);
+            };
+
+            thumb.addEventListener('touchstart', (e) => {
+                dragging = true;
+                startX = e.touches[0].clientX;
+                startScrollLeft = bar.scrollLeft || 0;
+                document.addEventListener('touchmove', onMoveTouch, { passive:false });
+                document.addEventListener('touchend', endTouch);
+            }, { passive:true });
+
+            bar.addEventListener('mousedown', (e) => {
+                if(e.target === thumb) return;
+                const { maxScroll } = __getTimelineTracks();
+                if(maxScroll <= 0) return;
+
+                const rect = bar.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const thumbW = thumb.getBoundingClientRect().width || 1;
+                const trackW = bar.clientWidth || 0;
+                const maxThumbX = Math.max(1, trackW - thumbW);
+                const thumbX = clamp(clickX - (thumbW / 2), 0, maxThumbX);
+                const target = clamp((thumbX / maxThumbX) * maxScroll, 0, maxScroll);
+
+                __timelineHScroll.busy = true;
+                bar.scrollLeft = target;
+                const { outers } = __getTimelineTracks();
+                outers.forEach(o => { o.scrollLeft = target; });
+                __timelineHScroll.busy = false;
+                updateTimelineHScrollThumb();
+            });
         }
 
-        function bumpTimelineZoom(delta) {
+        function setupTimelineHScroll(){
+            initTimelineHScrollThumbDrag();
+            updateTimelineHScroll();
+        }
+function bumpTimelineZoom(delta) {
             const z = clamp((parseFloat(timelineZoom) || 1) + delta, 0.5, 3);
             setTimelineZoom(parseFloat(z.toFixed(1)));
         }
