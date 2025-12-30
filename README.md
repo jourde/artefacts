@@ -11,7 +11,7 @@
 ### Persona
   - https://jourde.github.io/artefacts/persona-guyane.html
 ### Learning Designer
-  - https://jourde.github.io/artefacts/learning-designer.html
+  - https://jourde.github.io/artefacts/learning-designer.html (vous pouvez aussi consulter le [guide basique d'utilisation](https://jourde.github.io/artefacts/learning-designer-guide.html)).
 
 --
 
