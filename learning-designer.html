@@ -1116,7 +1116,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </div>
 <div class="activity-moments-container ml-4 pl-4 space-y-3 min-h-[20px]"></div>
 <div class="mt-2 pt-1 flex justify-center gap-2 no-print border-t border-slate-100">
-<button class="text-sm font-semibold text-slate-500 hover:text-indigo-700 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" data-i18n-title="title_add_step" onclick="addStepToActivity(this)">
+<button class="text-sm font-semibold text-slate-500 hover:text-indigo-700 px-3 py-1 rounded transition-colors flex items-center gap-1 hover:bg-slate-50" data-i18n-title="title_add_step" onclick="addStepToActivity(this)" type="button">
 <span class="material-icons-round text-sm">
         add
        </span>
@@ -2698,23 +2698,41 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             updateEmptyState();
         }
 
-        function addStepToActivity(btn) {
-            const activityGroup = btn.closest('.activity-group');
-            ensureDefaultMoment(activityGroup);
+        function addStepToActivity(btnOrEvent) {
+            // Robust handler: accepts either a button element or a click event
+            const btn = (btnOrEvent && (btnOrEvent.currentTarget || btnOrEvent.target)) ? (btnOrEvent.currentTarget || btnOrEvent.target) : btnOrEvent;
 
+            const activityGroup = btn && btn.closest ? btn.closest('.activity-group') : null;
+            if (!activityGroup) return;
+
+            ensureDefaultMoment(activityGroup);
             const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
             const targetMoment = moments[moments.length - 1];
-            const container = targetMoment ? targetMoment.querySelector('.activity-steps-container') : activityGroup.querySelector('.activity-steps-container');
+            const container = targetMoment
+                ? targetMoment.querySelector('.activity-steps-container')
+                : activityGroup.querySelector('.activity-steps-container');
+
             if (!container) return;
 
             const clone = stepTemplate.content.cloneNode(true);
-            const currentClassSize = document.getElementById('global-class-size').value;
-            clone.querySelector('.step-group-size').value = currentClassSize;
             container.appendChild(clone);
+
             const newStep = container.lastElementChild;
-            const du = newStep ? newStep.querySelector('.duration-unit') : null;
-            if (du) du.value = 60;
-            applyTranslations();
+
+            // Default unit should be "min" (stored as 60 seconds)
+            const unitSelect = newStep ? newStep.querySelector('.duration-unit') : null;
+            if (unitSelect) unitSelect.value = 60;
+
+            // Ensure group-size reflects global cohort size at creation time
+            const groupSize = newStep ? newStep.querySelector('.step-group-size') : null;
+            const globalSize = document.getElementById('global-class-size');
+            if (groupSize && globalSize) groupSize.value = globalSize.value;
+
+            // Ensure Bloom dropdowns are correctly populated on newly-added steps
+            const outLevel = newStep ? newStep.querySelector('.outcome-bloom-level') : null;
+            if (outLevel) renderBloomOptions(outLevel, outLevel.value || "");
+
+            // Ensure UI updates
             updateStats();
         }
 
