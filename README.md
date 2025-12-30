@@ -12,3 +12,7 @@
   - https://jourde.github.io/artefacts/persona-guyane.html
 ### Learning Designer
   - https://jourde.github.io/artefacts/learning-designer.html
+
+--
+
+Sauf mention de propriété intellectuelle détenue par des tiers, les autres contenus de ce site sont proposés sous licence MIT.
