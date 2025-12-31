@@ -726,17 +726,16 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <label class="compact-label block" data-i18n="label_aims">
         Objectifs
        </label>
-<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" data-i18n-placeholder="ph_aims" id="param-aims" placeholder="Entrez les objectifs..." rows="1"></textarea>
+<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" data-i18n-placeholder="ph_aims" id="param-aims" placeholder="Entrez les objectifs..." rows="2"></textarea>
 </div>
-
 <div class="md:col-span-2 lg:col-span-3">
-<label class="compact-label block" data-i18n="label_outcomes">
+<label class="compact-label block" data-i18n="label_outcomes_text">
         Résultats d'apprentissage
        </label>
-<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" id="param-outcomes" placeholder="Entrez les résultats d'apprentissage..." rows="2"></textarea>
+<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" data-i18n-placeholder="ph_outcomes_text" id="param-outcomes-text" placeholder="Entrez les résultats d'apprentissage..." rows="2"></textarea>
 </div>
 <div class="md:col-span-2 lg:col-span-3">
-<label class="compact-label block" data-i18n="label_outcomes_bloom">
+<label class="compact-label block" data-i18n="label_outcomes">
         Résultats d'apprentissage (Bloom)
        </label>
 <div class="flex gap-1 mb-1 no-print flex-col sm:flex-row">
@@ -1689,9 +1688,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 opt_mode_other: "Autre",
                 label_aims: "Objectifs",
                 ph_aims: "Entrez les objectifs...",
-                label_outcomes: "Résultats d'apprentissage",
-                ph_outcomes: "Entrez les résultats d'apprentissage...",
-                label_outcomes_bloom: "Résultats d'apprentissage (Bloom)",
+                label_outcomes_text: "Résultats d'apprentissage",
+                ph_outcomes_text: "Entrez les résultats d'apprentissage...",
+                label_outcomes: "Résultats d'apprentissage (Bloom)",
                 ph_add_outcome: "Ajouter un résultat...",
                 text_no_outcomes: "Aucun résultat défini",
                 title_fold_all: "Tout replier / Tout déplier",
@@ -2352,7 +2351,7 @@ function initSortableSteps(container) {
                     dureeConcueValeur: document.getElementById('param-designed-val').value,
                     dureeConcueUnite: document.getElementById('param-learning-unit').value, 
                     objectifs: document.getElementById('param-aims').value,
-                    resultatsTexte: document.getElementById('param-outcomes')?.value || "",
+                    resultatsTexte: document.getElementById('param-outcomes-text')?.value || "",
                     resultats: outcomes,
                     description: document.getElementById('param-description').value
                 },
@@ -2476,7 +2475,7 @@ function initSortableSteps(container) {
                         document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
                         // Designed Time Unit is now synced with Learning Time Unit
                         document.getElementById('param-aims').value = project.keyParams.aims || "";
-                        document.getElementById('param-outcomes').value = project.keyParams.outcomesText || project.keyParams.outcomes || "";
+                        document.getElementById('param-outcomes-text').value = project.keyParams.outcomesText || "";
                         document.getElementById('param-description').value = project.keyParams.description || "";
                         
                         // Restore Outcomes
@@ -2498,7 +2497,7 @@ function initSortableSteps(container) {
                         document.getElementById('param-learning-unit').value = project.parametres.dureeApprentissageUnite || "mins";
                         document.getElementById('param-designed-val').value = project.parametres.dureeConcueValeur || "";
                         document.getElementById('param-aims').value = project.parametres.objectifs || "";
-                        document.getElementById('param-outcomes').value = project.parametres.resultatsTexte || "";
+                        document.getElementById('param-outcomes-text').value = project.parametres.resultatsTexte || "";
                         document.getElementById('param-description').value = project.parametres.description || "";
 
                         // Restore Outcomes (FR export)
@@ -3862,11 +3861,11 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 <h2>Informations clés</h2>
                 <h3>${t.label_aims}</h3>
                 <p>${document.getElementById('param-aims').value.replace(/\n/g, '<br>')}</p>
+
+                <h3>${t.label_outcomes_text}</h3>
+                <p>${(document.getElementById('param-outcomes-text')?.value || '').replace(/\n/g, '<br>')}</p>
                 
                 <h3>${t.label_outcomes}</h3>
-                <p>${(document.getElementById('param-outcomes')?.value || "").replace(/\n/g, '<br>')}</p>
-                
-                <h3>${t.label_outcomes_bloom}</h3>
                 <ul>`;
                 
             document.querySelectorAll('#outcomes-list li').forEach(li => {
@@ -3899,6 +3898,13 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 html += `<div class="activity-block">
                     <h3 style="color: #1e293b; font-size: 1.2em; border-bottom: 1px solid #cbd5e1; padding-bottom: 10px;">${modPrefix} ${aIdx + 1}: ${moduleTitle}</h3>
                     ${moduleDesc ? `<p><em>${moduleDesc}</em></p>` : ''}`;
+
+                const moduleTgtVal = (activity.querySelector('.activity-target-time')?.value || '').trim();
+                const moduleTgtUnitTxt = activity.querySelector('.activity-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                if (moduleTgtVal) {
+                    html += `<div style="font-size: 0.9em; color: #64748b; margin-top: 6px;"><strong>Durée cible :</strong> ${moduleTgtVal} ${moduleTgtUnitTxt}</div>`;
+                }
+
 
                 const momentEls = activity.querySelectorAll('.moment-group');
                 const hasMoments = momentEls && momentEls.length > 0;
@@ -3955,6 +3961,11 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
 
                         const momentPrefix = `${aIdx + 1}.${mIdx + 1}`;
                         html += `<h3 style="margin-top: 18px; color: #334155; font-size: 1.05em;">Moment ${momentPrefix}${momentTitle ? ` : ${momentTitle}` : ''} <span style="font-weight: normal; color:#64748b;">(${formatTimelineDuration(momentSecs)})</span></h3>`;
+                        const mTgtVal = (momentEl.querySelector('.moment-target-time')?.value || '').trim();
+                        const mTgtUnitTxt = momentEl.querySelector('.moment-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                        if (mTgtVal) {
+                            html += `<div style="font-size: 0.9em; color: #64748b; margin-top: 4px; margin-bottom: 6px;"><strong>Durée cible :</strong> ${mTgtVal} ${mTgtUnitTxt}</div>`;
+                        }
 
                         renderSteps(stepCards, momentPrefix);
                     });
@@ -3964,6 +3975,11 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                     const momentSecs = calcMomentSecs(stepCards);
                     const momentPrefix = `${aIdx + 1}.1`;
                     html += `<h3 style="margin-top: 18px; color: #334155; font-size: 1.05em;">Moment ${momentPrefix} <span style="font-weight: normal; color:#64748b;">(${formatTimelineDuration(momentSecs)})</span></h3>`;
+                    const mTgtVal0 = (activity.querySelector('.moment-target-time')?.value || '').trim();
+                    const mTgtUnitTxt0 = activity.querySelector('.moment-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                    if (mTgtVal0) {
+                        html += `<div style="font-size: 0.9em; color: #64748b; margin-top: 4px; margin-bottom: 6px;"><strong>Durée cible :</strong> ${mTgtVal0} ${mTgtUnitTxt0}</div>`;
+                    }
                     renderSteps(stepCards, momentPrefix);
                 }
 
@@ -4016,6 +4032,32 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
             });
             rtf += '\\par\n';
 
+// Informations clés
+const aimsText = (document.getElementById('param-aims')?.value || '').trim();
+const outcomesTextVal = (document.getElementById('param-outcomes-text')?.value || '').trim();
+const descText = (document.getElementById('param-description')?.value || '').trim();
+
+rtf += `\b ${escapeRtf('Informations clés')}\b0\par\n`;
+rtf += `\b ${escapeRtf(t.label_aims)}\b0\par\n${escapeRtf(aimsText)}\par\n\par\n`;
+rtf += `\b ${escapeRtf(t.label_outcomes_text)}\b0\par\n${escapeRtf(outcomesTextVal)}\par\n\par\n`;
+rtf += `\b ${escapeRtf(t.label_outcomes)}\b0\par\n`;
+
+document.querySelectorAll('#outcomes-list li').forEach(li => {
+    const text = li.querySelector('.outcome-text')?.innerText || '';
+    const level = li.querySelector('.outcome-bloom-level')?.value || '';
+    const sub = li.querySelector('.outcome-bloom-sub')?.value || '';
+    let tag = '';
+    if (level) {
+        tag = '[' + (t[`bloom_${level}`] || level.toUpperCase());
+        if (sub) tag += ' - ' + (t[`bloom_sub_${sub}`] || sub);
+        tag += '] ';
+    }
+    rtf += `${escapeRtf('- ' + tag + text)}\par\n`;
+});
+rtf += `\par\n`;
+
+rtf += `\b ${escapeRtf(t.label_description)}\b0\par\n${escapeRtf(descText)}\par\n\par\n`;
+
             const activities = document.querySelectorAll('.activity-group');
             activities.forEach((act, aIdx) => {
                 const title = (act.querySelector('.activity-title')?.value || '').trim() || `Module ${aIdx + 1}`;
@@ -4024,6 +4066,11 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 rtf += `\b ${escapeRtf('Module ' + (aIdx + 1) + ' : ' + title)}\b0\par
 `;
                 if (desc) rtf += `${escapeRtf(desc)}\par
+`;
+
+                const actTgtVal = (act.querySelector('.activity-target-time')?.value || '').trim();
+                const actTgtUnitTxt = act.querySelector('.activity-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                if (actTgtVal) rtf += `${escapeRtf('Durée cible : ' + actTgtVal + ' ' + actTgtUnitTxt)}\par
 `;
 
                 const calcMomentSecs = (stepCards) => {
@@ -4085,6 +4132,10 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
 
                         rtf += `\par\b ${escapeRtf('Moment ' + momentPrefix + (momentTitle ? ' : ' + momentTitle : ''))}\b0 (${escapeRtf('Durée conçue : ' + formatTimelineDuration(momentSecs))})\par
 `;
+                        const mTgtVal = (momentEl.querySelector('.moment-target-time')?.value || '').trim();
+                        const mTgtUnitTxt = momentEl.querySelector('.moment-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                        if (mTgtVal) rtf += `${escapeRtf('Durée cible : ' + mTgtVal + ' ' + mTgtUnitTxt)}\\par\n`;
+
 
                         renderSteps(stepCards, momentPrefix);
                     });
@@ -4130,9 +4181,8 @@ md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             
             md += `## informations_clés\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
+            md += `### ${t.label_outcomes_text}\n${document.getElementById('param-outcomes-text')?.value || ''}\n\n`;
             md += `### ${t.label_outcomes}\n`;
-            md += `${document.getElementById('param-outcomes')?.value || ''}\n\n`;
-            md += `### ${t.label_outcomes_bloom}\n`;
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 const text = li.querySelector('.outcome-text').innerText;
                 const level = li.querySelector('.outcome-bloom-level').value;
@@ -4162,6 +4212,15 @@ md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
                 if (moduleDesc) md += `> ${moduleDesc}
 
 `;
+
+                const moduleTgtVal = (activity.querySelector('.activity-target-time')?.value || '').trim();
+                const moduleTgtUnitTxt = activity.querySelector('.activity-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                if (moduleTgtVal) {
+                    md += `- **Durée cible :** ${moduleTgtVal} ${moduleTgtUnitTxt}
+`;
+                    md += `
+`;
+                }
 
                 const calcMomentSecs = (stepCards) => {
                     let secs = 0;
@@ -4227,6 +4286,13 @@ ${notes}
                         md += `#### MOMENT ${momentPrefix}${momentTitle ? ` : ${momentTitle}` : ''}
 `;
                         md += `- **Durée conçue :** ${formatTimelineDuration(momentSecs)}
+`;
+
+                        const mTgtVal = (momentEl.querySelector('.moment-target-time')?.value || '').trim();
+                        const mTgtUnitTxt = momentEl.querySelector('.moment-target-unit')?.selectedOptions?.[0]?.innerText || '';
+                        if (mTgtVal) md += `- **Durée cible :** ${mTgtVal} ${mTgtUnitTxt}
+`;
+                        md += `
 
 `;
 
