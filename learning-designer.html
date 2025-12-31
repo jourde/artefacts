@@ -726,11 +726,18 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <label class="compact-label block" data-i18n="label_aims">
         Objectifs
        </label>
-<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-none" data-i18n-placeholder="ph_aims" id="param-aims" placeholder="Entrez les objectifs..." rows="1"></textarea>
+<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" data-i18n-placeholder="ph_aims" id="param-aims" placeholder="Entrez les objectifs..." rows="1"></textarea>
 </div>
+
 <div class="md:col-span-2 lg:col-span-3">
 <label class="compact-label block" data-i18n="label_outcomes">
         Résultats d'apprentissage
+       </label>
+<textarea class="w-full px-2 py-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 outline-none resize-y" id="param-outcomes" placeholder="Entrez les résultats d'apprentissage..." rows="2"></textarea>
+</div>
+<div class="md:col-span-2 lg:col-span-3">
+<label class="compact-label block" data-i18n="label_outcomes_bloom">
+        Résultats d'apprentissage (Bloom)
        </label>
 <div class="flex gap-1 mb-1 no-print flex-col sm:flex-row">
 <div class="flex gap-1">
@@ -1683,6 +1690,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 label_aims: "Objectifs",
                 ph_aims: "Entrez les objectifs...",
                 label_outcomes: "Résultats d'apprentissage",
+                ph_outcomes: "Entrez les résultats d'apprentissage...",
+                label_outcomes_bloom: "Résultats d'apprentissage (Bloom)",
                 ph_add_outcome: "Ajouter un résultat...",
                 text_no_outcomes: "Aucun résultat défini",
                 title_fold_all: "Tout replier / Tout déplier",
@@ -2343,6 +2352,7 @@ function initSortableSteps(container) {
                     dureeConcueValeur: document.getElementById('param-designed-val').value,
                     dureeConcueUnite: document.getElementById('param-learning-unit').value, 
                     objectifs: document.getElementById('param-aims').value,
+                    resultatsTexte: document.getElementById('param-outcomes')?.value || "",
                     resultats: outcomes,
                     description: document.getElementById('param-description').value
                 },
@@ -2466,6 +2476,7 @@ function initSortableSteps(container) {
                         document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
                         // Designed Time Unit is now synced with Learning Time Unit
                         document.getElementById('param-aims').value = project.keyParams.aims || "";
+                        document.getElementById('param-outcomes').value = project.keyParams.outcomesText || project.keyParams.outcomes || "";
                         document.getElementById('param-description').value = project.keyParams.description || "";
                         
                         // Restore Outcomes
@@ -2487,6 +2498,7 @@ function initSortableSteps(container) {
                         document.getElementById('param-learning-unit').value = project.parametres.dureeApprentissageUnite || "mins";
                         document.getElementById('param-designed-val').value = project.parametres.dureeConcueValeur || "";
                         document.getElementById('param-aims').value = project.parametres.objectifs || "";
+                        document.getElementById('param-outcomes').value = project.parametres.resultatsTexte || "";
                         document.getElementById('param-description').value = project.parametres.description || "";
 
                         // Restore Outcomes (FR export)
@@ -3852,6 +3864,9 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 <p>${document.getElementById('param-aims').value.replace(/\n/g, '<br>')}</p>
                 
                 <h3>${t.label_outcomes}</h3>
+                <p>${(document.getElementById('param-outcomes')?.value || "").replace(/\n/g, '<br>')}</p>
+                
+                <h3>${t.label_outcomes_bloom}</h3>
                 <ul>`;
                 
             document.querySelectorAll('#outcomes-list li').forEach(li => {
@@ -4116,6 +4131,8 @@ md += `- **Horodatage d'export :** ${new Date().toISOString()}\n\n`;
             md += `## informations_clés\n`;
             md += `### ${t.label_aims}\n${document.getElementById('param-aims').value}\n\n`;
             md += `### ${t.label_outcomes}\n`;
+            md += `${document.getElementById('param-outcomes')?.value || ''}\n\n`;
+            md += `### ${t.label_outcomes_bloom}\n`;
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 const text = li.querySelector('.outcome-text').innerText;
                 const level = li.querySelector('.outcome-bloom-level').value;
