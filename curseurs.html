@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration Enseignement à Distance</title>
+    <title>Configuration Formation à Distance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Sortable Library for reordering dimensions -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -75,6 +75,27 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+    
+        /* Slider tooltip (appears on hover/move) */
+        .slider-tooltip {
+            position: absolute;
+            z-index: 30;
+            top: -10px;
+            left: 50%;
+            transform: translate(-50%, -120%);
+            pointer-events: none;
+            white-space: nowrap;
+            padding: 6px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+        }
+        .slider-tooltip.hidden { display: none; }
+
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -84,7 +105,13 @@
         <header class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div class="mb-2 md:mb-0">
                 <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Configuration Pédagogique</h1>
-                <p class="text-slate-500 mt-1">Définissez les dimensions de votre dispositif d'enseignement.</p>
+                <p class="text-slate-500 mt-1 whitespace-nowrap overflow-x-auto">Définissez les dimensions de votre dispositif de formation</p>
+
+                <!-- Formation field -->
+                <div class="mt-5">
+                    <label for="formationInput" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Formation :</label>
+                    <input id="formationInput" type="text" placeholder="Nom de la formation" class="mt-2 w-full md:w-[420px] bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300" />
+                </div>
             </div>
             
             <div class="flex flex-wrap gap-4 items-end">
@@ -107,6 +134,23 @@
                             <span class="text-sm font-semibold hidden md:inline">Analyse</span>
                             <span id="betaBadge" class="hidden md:inline-flex items-center justify-center bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-200 uppercase tracking-wide">Beta</span>
                         </button>
+
+
+<!-- Save / Load -->
+<button onclick="saveState()" class="text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Sauvegarder">
+    <span class="material-icons-round text-xl">save</span>
+    <span class="text-sm font-semibold hidden md:inline">Sauvegarde</span>
+</button>
+<button onclick="triggerLoad()" class="text-slate-600 hover:text-sky-600 hover:bg-sky-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Charger une sauvegarde">
+    <span class="material-icons-round text-xl">folder_open</span>
+    <span class="text-sm font-semibold hidden md:inline">Charger</span>
+</button>
+<button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-xl transition-colors flex items-center gap-2" title="Exporter en Markdown">
+    <span class="material-icons-round text-xl">description</span>
+    <span class="text-sm font-semibold hidden md:inline">Export MD</span>
+</button>
+
+<input id="loadFileInput" type="file" accept="application/json" class="hidden" onchange="loadStateFromFile(event)">
 
                         <div class="w-px bg-slate-200 h-6 mx-1"></div>
                         <button onclick="showResetModal()" class="text-slate-600 hover:text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Réinitialiser">
@@ -148,7 +192,7 @@
                 
                 <div class="space-y-4">
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        Cet outil permet de visualiser et d'équilibrer les 6 dimensions structurelles de votre dispositif pédagogique.
+                        Cet outil permet de visualiser et d'équilibrer les 6 dimensions structurelles de votre dispositif de formation.
                     </p>
                     <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
                         <p class="text-xs text-indigo-800 leading-relaxed italic">
@@ -221,22 +265,341 @@
         let alertsEnabled = false; // Default off (Experimental)
         
         const dimensions = [
-            { id: 0, leftTitle: "PRÉSENCE", rightTitle: "DISTANCE", leftDesc: "Unité de lieu et de temps.", rightDesc: "Flexibilité géographique.", value: 50 },
-            { id: 1, leftTitle: "PETIT GROUPE", rightTitle: "GRAND GROUPE", leftDesc: "Suivi individuel.", rightDesc: "Massification.", value: 50 },
-            { id: 2, leftTitle: "ASYNCHRONE", rightTitle: "SYNCHRONE", leftDesc: "Temps différé.", rightDesc: "Temps réel.", value: 50 },
-            { id: 3, leftTitle: "INDIVIDUEL", rightTitle: "COLLABORATIF", leftDesc: "Travaux personnels.", rightDesc: "Co-construction.", value: 50 },
-            { id: 4, leftTitle: "APPROPRIATION", rightTitle: "PRODUCTION", leftDesc: "Ressources.", rightDesc: "Création.", value: 50 },
-            { id: 5, leftTitle: "ACCOMPAGNEMENT", rightTitle: "SANS ACCOMPAGNEMENT", leftDesc: "Guidage fort.", rightDesc: "Autonomie.", value: 50 }
+            {
+                id: 0,
+                leftTitle: "PRÉSENCE",
+                rightTitle: "DISTANCE",
+                leftDesc: "Unité de lieu et de temps.",
+                rightDesc: "Flexibilité géographique.",
+                value: 50,
+                tickLabels: [
+                    "Présentiel",
+                    "Majoritairement présentiel",
+                    "Hybride",
+                    "Majoritairement à distance",
+                    "À distance"
+                ]
+            },
+            {
+                id: 1,
+                leftTitle: "PETIT GROUPE",
+                rightTitle: "GRAND GROUPE",
+                leftDesc: "Suivi individuel.",
+                rightDesc: "Massification.",
+                value: 50,
+                tickLabels: [
+                    "Petit groupe",
+                    "Groupe restreint",
+                    "Groupe moyen",
+                    "Groupe large",
+                    "Grand groupe"
+                ]
+            },
+            {
+                id: 2,
+                leftTitle: "ASYNCHRONE",
+                rightTitle: "SYNCHRONE",
+                leftDesc: "Temps différé.",
+                rightDesc: "Temps réel.",
+                value: 50,
+                tickLabels: [
+                    "Auto-rythmé",
+                    "Asynchrone guidé",
+                    "Mixte",
+                    "Synchrone ponctuel",
+                    "Synchrone"
+                ]
+            },
+            {
+                id: 3,
+                leftTitle: "INDIVIDUEL",
+                rightTitle: "COLLABORATIF",
+                leftDesc: "Travaux personnels.",
+                rightDesc: "Co-construction.",
+                value: 50,
+                tickLabels: [
+                    "Individuel",
+                    "Individuel + échanges",
+                    "Alterné",
+                    "Travail en équipe",
+                    "Collaboratif"
+                ]
+            },
+            {
+                id: 4,
+                leftTitle: "APPROPRIATION",
+                rightTitle: "PRODUCTION",
+                leftDesc: "Ressources.",
+                rightDesc: "Création.",
+                value: 50,
+                tickLabels: [
+                    "Appropriation",
+                    "Réutilisation",
+                    "Adaptation",
+                    "Création",
+                    "Production"
+                ]
+            },
+            {
+                id: 5,
+                leftTitle: "ACCOMPAGNEMENT",
+                rightTitle: "SANS ACCOMPAGNEMENT",
+                leftDesc: "Guidage fort.",
+                rightDesc: "Autonomie.",
+                value: 50,
+                tickLabels: [
+                    "Accompagnement fort",
+                    "Accompagnement régulier",
+                    "Accompagnement ponctuel",
+                    "Autonomie guidée",
+                    "Sans accompagnement"
+                ]
+            }
         ];
 
-        let currentOrder = [0, 1, 2, 3, 4, 5];
+        
+        function tickLabelsFor(dim) {
+            // 5 crans réguliers (0/25/50/75/100) avec libellés spécifiques à chaque dimension.
+            // Priorité au paramétrage explicite (dim.tickLabels). Repli sur une logique générique.
+            if (dim && Array.isArray(dim.tickLabels) && dim.tickLabels.length === 5) return dim.tickLabels;
 
-        // --- Core Functions ---
-
-        function getVal(id) { 
-            const dim = dimensions.find(d => d.id === id);
-            return dim ? dim.value : 50;
+            const left = dim?.leftTitle || "Gauche";
+            const right = dim?.rightTitle || "Droite";
+            return [left, `Intermédiaire (${left})`, "Équilibré", `Intermédiaire (${right})`, right];
         }
+
+let currentOrder = dimensions.map(d => d.id);
+
+        
+
+// --- Save / Load (local + fichier) ---
+const STORAGE_KEY = "config_pedagogique_state_v1";
+
+function buildState() {
+    const formation = (document.getElementById('formationInput')?.value || '').trim();
+    return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        formation,
+        alertsEnabled: !!alertsEnabled,
+        currentOrder: Array.isArray(currentOrder) ? currentOrder.slice() : dimensions.map(d => d.id),
+        dimensions: dimensions.map(d => ({ id: d.id, value: d.value }))
+    };
+}
+
+function applyState(state) {
+    if (!state || typeof state !== "object") return;
+
+    // Formation label
+    if (typeof state.formation === 'string') {
+        const input = document.getElementById('formationInput');
+        if (input) input.value = state.formation;
+    }
+
+    // Order
+    if (Array.isArray(state.currentOrder) && state.currentOrder.length === dimensions.length) {
+        const ids = new Set(dimensions.map(d => d.id));
+        const isValid = state.currentOrder.every(x => ids.has(x));
+        if (isValid) currentOrder = state.currentOrder.slice();
+    }
+
+    // Values
+    if (Array.isArray(state.dimensions)) {
+        state.dimensions.forEach(item => {
+            const dim = dimensions.find(d => d.id === item.id);
+            if (dim && Number.isFinite(parseInt(item.value))) {
+                const v = Math.max(0, Math.min(100, parseInt(item.value)));
+                dim.value = v;
+            }
+        });
+    }
+
+    // Alerts flag + UI
+    if (typeof state.alertsEnabled === "boolean") {
+        alertsEnabled = state.alertsEnabled;
+        setAlertsUI(alertsEnabled);
+    }
+
+    renderSliders();
+    checkAlerts();
+}
+
+function saveState() {
+    const state = buildState();
+
+    // 1) LocalStorage (simple reprise)
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+        console.warn("Impossible d'écrire dans localStorage :", e);
+    }
+
+    // 2) Téléchargement d'un fichier JSON (backup transportable)
+    try {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const dateTag = new Date().toISOString().slice(0,19).replace(/[:T]/g, "-");
+        a.href = url;
+        a.download = `configuration-formation_${dateTag}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.warn("Impossible de télécharger la sauvegarde :", e);
+    }
+}
+
+function exportMarkdown() {
+    const state = buildState();
+
+    // Dimensions affichées dans l'ordre courant
+    const orderedDims = (Array.isArray(state.currentOrder) ? state.currentOrder : dimensions.map(d => d.id))
+        .map(id => dimensions.find(d => d.id === id))
+        .filter(Boolean);
+
+    // Helpers
+    const clamp100 = (n) => {
+        const v = Number(n);
+        return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 50;
+    };
+
+    const nearestTickIndex = (value) => Math.round(value / 25); // 0..4
+    const safe = (v) => (v === null || v === undefined) ? "" : String(v);
+    const esc = (s) => safe(s).replace(/\|/g, "\\|").trim();
+
+    const getTickLabel = (dim, value) => {
+        const idx = nearestTickIndex(value);
+        if (Array.isArray(dim?.tickLabels) && dim.tickLabels.length) {
+            return safe(dim.tickLabels[idx] ?? dim.tickLabels[dim.tickLabels.length - 1] ?? "");
+        }
+        // Fallback: labels dérivés des titres gauche/droite
+        const left = safe(dim?.leftTitle);
+        const right = safe(dim?.rightTitle);
+        const derived = [
+            left,
+            left ? `Plutôt ${left}` : "",
+            "Équilibré",
+            right ? `Plutôt ${right}` : "",
+            right
+        ];
+        return derived[idx] || "";
+    };
+
+    const getDimensionName = (dim) => {
+        const title = safe(dim?.title).trim();
+        if (title) return title;
+
+        // Fallback: dériver un nom lisible à partir des deux pôles
+        const left = safe(dim?.leftTitle).trim();
+        const right = safe(dim?.rightTitle).trim();
+        if (left && right) return `${left}/${right}`;
+        if (left) return left;
+        if (right) return right;
+
+        return "—";
+    };
+
+    // Construire le Markdown
+    const now = new Date();
+    const lines = [];
+
+    lines.push(`# Dispositif de formation`);
+    lines.push(``);
+    lines.push(`## Informations`);
+    lines.push(`- **Formation :** ${state.formation ? esc(state.formation) : "—"}`);
+    lines.push(`- **Date :** ${now.toLocaleString('fr-FR')}`);
+    lines.push(``);
+    lines.push(`## Dimensions`);
+    lines.push(``);
+    lines.push(`| Dimension | Cran |`);
+    lines.push(`|---|---|`);
+
+    orderedDims.forEach((dim) => {
+        const value = clamp100(dim?.value);
+        const tickLabel = getTickLabel(dim, value);
+        const name = getDimensionName(dim);
+
+        const tickStr = tickLabel ? tickLabel : "—";
+        lines.push(`| **${esc(name)}** | ${esc(tickStr)} |`);
+    });
+
+
+    const md = lines.join('\n');
+
+    // Télécharger le fichier .md
+    try {
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+
+        const safeName = (state.formation || "dispositif-formation").toLowerCase()
+            .replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ\s-]/gi, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .slice(0, 60) || "dispositif-formation";
+
+        const dateTag = now.toISOString().slice(0,10); // YYYY-MM-DD
+        a.href = url;
+        a.download = `${safeName}_${dateTag}.md`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.warn("Impossible d’exporter en Markdown :", e);
+        alert("L’export Markdown a échoué sur ce navigateur.");
+    }
+}
+
+
+
+function triggerLoad() {
+    // Priorité au fichier (explicite), mais on tente aussi une restauration locale si le user annule.
+    const input = document.getElementById("loadFileInput");
+    if (input) {
+        input.value = "";
+        input.click();
+    }
+}
+
+function loadStateFromFile(event) {
+    const file = event?.target?.files?.[0];
+    if (!file) {
+        // User a annulé : tentative de reprise locale
+        loadStateFromLocal();
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function() {
+        try {
+            const state = JSON.parse(String(reader.result || ""));
+            applyState(state);
+            // On garde aussi en local pour la prochaine fois
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+        } catch (e) {
+            alert("Fichier de sauvegarde invalide.");
+            console.error(e);
+        }
+    };
+    reader.readAsText(file, "utf-8");
+}
+
+function loadStateFromLocal() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const state = JSON.parse(raw);
+        applyState(state);
+    } catch (e) {
+        console.warn("Impossible de charger la sauvegarde locale :", e);
+    }
+}
+
+// --- Core Functions ---
 
         function togglePanel(panelId) {
             const panel = document.getElementById(panelId);
@@ -250,34 +613,40 @@
             }
         }
 
-        function toggleAlerts() {
-            alertsEnabled = !alertsEnabled;
-            const btn = document.getElementById('btnAlerts');
-            const badge = document.getElementById('betaBadge');
-            
-            if (alertsEnabled) {
-                btn.classList.remove('text-slate-400');
-                btn.classList.add('text-amber-600', 'bg-amber-50');
-                // Active badge style
-                badge.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
-                badge.classList.add('bg-amber-100', 'text-amber-700', 'border-amber-200');
-                checkAlerts(); // Run check immediately
-            } else {
-                btn.classList.add('text-slate-400');
-                btn.classList.remove('text-amber-600', 'bg-amber-50');
-                // Inactive badge style
-                badge.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
-                badge.classList.remove('bg-amber-100', 'text-amber-700', 'border-amber-200');
-                document.getElementById('alertsContainer').classList.add('hidden');
-            }
-        }
+        
+function setAlertsUI(enabled) {
+    const btn = document.getElementById('btnAlerts');
+    const badge = document.getElementById('betaBadge');
+    const container = document.getElementById('alertsContainer');
+
+    if (!btn || !badge) return;
+
+    if (enabled) {
+        btn.classList.remove('text-slate-400');
+        btn.classList.add('text-amber-600', 'bg-amber-50');
+        badge.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        badge.classList.add('bg-amber-100', 'text-amber-700', 'border-amber-200');
+        checkAlerts();
+    } else {
+        btn.classList.add('text-slate-400');
+        btn.classList.remove('text-amber-600', 'bg-amber-50');
+        badge.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        badge.classList.remove('bg-amber-100', 'text-amber-700', 'border-amber-200');
+        if (container) container.classList.add('hidden');
+    }
+}
+
+function toggleAlerts() {
+    alertsEnabled = !alertsEnabled;
+    setAlertsUI(alertsEnabled);
+}
 
         function renderSliders() {
             const container = document.getElementById("slidersContainer");
             let html = "";
             
-            currentOrder.forEach(idx => {
-                const dim = dimensions[idx];
+            currentOrder.forEach(id => {
+                const dim = dimensions.find(d => d.id === id);
                 
                 html += `
                 <div id="slider-card-${dim.id}" class="slider-card bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-200 transition-all duration-300">
@@ -315,10 +684,13 @@
                         </div>
 
                         <!-- Input -->
-                        <input type="range" min="0" max="100" value="${dim.value}" id="range-${dim.id}"
+                        <input type="range" min="0" max="100" step="25" value="${dim.value}" id="range-${dim.id}"
                             class="w-full relative z-10 appearance-none bg-transparent" 
-                            oninput="updateVal(${dim.id}, this.value)">
-                    </div>
+                            oninput="updateVal(${dim.id}, this.value); showTooltip(${dim.id}, this, true)" onmousemove="showTooltip(${dim.id}, this)" onmouseenter="showTooltip(${dim.id}, this)" onmouseleave="hideTooltip(${dim.id})" ontouchstart="showTooltip(${dim.id}, this, true)" ontouchmove="showTooltip(${dim.id}, this, true)" ontouchend="hideTooltip(${dim.id})" onfocus="showTooltip(${dim.id}, this, true)" onblur="hideTooltip(${dim.id})">
+                    
+                        <!-- Tooltip (hover/move) -->
+                        <div id="tooltip-${dim.id}" class="slider-tooltip hidden"></div>
+</div>
                 </div>
                 `;
             });
@@ -328,12 +700,55 @@
         function updateVal(id, val) {
             const dim = dimensions.find(d => d.id === id);
             if (dim) {
-                dim.value = parseInt(val);
+                dim.value = parseInt(val, 10);
+
                 checkAlerts();
             }
         }
 
-        function resetDim(id) {
+        
+function showTooltip(id, inputEl, forceVisible = false) {
+    const dim = dimensions.find(d => d.id === id);
+    if (!dim || !inputEl) return;
+
+    // Determine label for current value (including during drag)
+    const value = parseInt(inputEl.value, 10);
+    const labels = tickLabelsFor(dim);
+    const idx = Math.max(0, Math.min(4, Math.round(value / 25)));
+    const label = labels[idx] ?? `${value}`;
+
+    const tooltip = document.getElementById(`tooltip-${id}`);
+    if (!tooltip) return;
+
+    tooltip.textContent = label;
+    tooltip.classList.remove('hidden');
+
+    // Position tooltip above the thumb using percentage
+    const min = parseInt(inputEl.min || "0", 10);
+    const max = parseInt(inputEl.max || "100", 10);
+    const pct = (value - min) / (max - min || 1);
+
+    // Use input width to set a pixel position inside the parent (relative container)
+    const inputRect = inputEl.getBoundingClientRect();
+    const parent = inputEl.parentElement; // relative container
+    const parentRect = parent.getBoundingClientRect();
+
+    const x = (inputRect.left - parentRect.left) + pct * inputRect.width;
+
+    tooltip.style.left = `${x}px`;
+
+    // On keyboard focus, we also show tooltip (forceVisible = true)
+    if (forceVisible) {
+        // keep visible; hide on blur/mouseleave
+    }
+}
+
+function hideTooltip(id) {
+    const tooltip = document.getElementById(`tooltip-${id}`);
+    if (tooltip) tooltip.classList.add('hidden');
+}
+
+function resetDim(id) {
             const dim = dimensions.find(d => d.id === id);
             if(dim) {
                 dim.value = 50;
@@ -369,7 +784,7 @@
             // 5: ACCOMP (L) / SANS ACCOMP (R)
 
             // Alert Rules
-            if (isR(2) && isR(5)) alerts.push("<strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence de l'enseignant·e pour animer et réguler.");
+            if (isR(2) && isR(5)) alerts.push("<strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence du/de la formateur·rice pour animer et réguler.");
             if (isR(3) && isL(2)) alerts.push("<strong>Collaboratif + Asynchrone :</strong> la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
             if (isR(4) && isR(5)) alerts.push("<strong>Production + Sans accompagnement :</strong> les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
             if (isR(2) && isR(4) && isR(3) && isR(5)) alerts.push("<strong>Synchrone + Production + Collaboratif + Sans accompagnement :</strong> configuration très exigeante qui demande beaucoup d'autonomie et de compétences aux étudiant·es.");
@@ -405,8 +820,8 @@
         function renderSortableList() {
             const list = document.getElementById("sortableList");
             list.innerHTML = "";
-            currentOrder.forEach(idx => {
-                const dim = dimensions[idx];
+            currentOrder.forEach(id => {
+                const dim = dimensions.find(d => d.id === id);
                 const li = document.createElement("li");
                 li.className = "flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 cursor-grab active:cursor-grabbing hover:border-indigo-300 transition-colors shadow-sm";
                 li.setAttribute("data-id", dim.id);
@@ -454,10 +869,16 @@
         }
 
         // --- Initial Load ---
-        window.onload = function() {
-            renderSliders();
-            checkAlerts();
-        };
+        // Rendu robuste : ne dépend pas de window.onload (qui peut être écrasé par d'autres scripts)
+        // et tolère les erreurs de lecture localStorage.
+        document.addEventListener('DOMContentLoaded', () => {
+            // Démarrage en position neutre : les curseurs restent au milieu par défaut (50%)
+            // Aucun chargement automatique depuis le navigateur afin d’éviter de réinjecter une ancienne configuration.
+            try { renderSliders(); } catch (e) { console.error(e); }
+
+            try { setAlertsUI(alertsEnabled); } catch (e) {}
+            try { checkAlerts(); } catch (e) {}
+        });
     </script>
 </body>
 </html>
