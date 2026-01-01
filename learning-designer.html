@@ -1461,43 +1461,6 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
         
         let __confirmAction = null;
-        (function initConfirmModalOnce() {
-            const modal = document.getElementById('custom-confirm-modal');
-            const yesBtn = document.getElementById('custom-confirm-yes');
-            const noBtn = document.getElementById('custom-confirm-no');
-
-            if (!modal || !yesBtn || !noBtn) return;
-
-            
-            if (modal.dataset.bound === '1') return;
-            modal.dataset.bound = '1';
-
-            const close = () => {
-                __confirmAction = null;
-                modal.classList.add('hidden');
-            };
-
-            yesBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                try {
-                    if (typeof __confirmAction === 'function') __confirmAction();
-                } finally {
-                    close();
-                }
-            });
-
-            noBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                close();
-            });
-
-            
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) close();
-            });
-        })();
         
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
@@ -1571,37 +1534,6 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
             }
         }
 
-        (function bindOutcomesOnce() {
-            const btn = document.getElementById('btn-add-outcome');
-            const input = document.getElementById('new-outcome-input');
-            const level = document.getElementById('new-bloom-level');
-
-            if (btn && btn.dataset.bound !== '1') {
-                btn.dataset.bound = '1';
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    safeAddOutcome();
-                });
-            }
-
-            if (input && input.dataset.bound !== '1') {
-                input.dataset.bound = '1';
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        safeAddOutcome();
-                    }
-                });
-            }
-
-            if (level && level.dataset.bound !== '1') {
-                level.dataset.bound = '1';
-                level.addEventListener('change', () => {
-                    try { updateHeaderBloomSub(); } catch (err) { console.error(err); }
-                });
-            }
-        })();
 
         
         function showTooltip(e, text) {
@@ -1733,9 +1665,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 panel_timelines_title: "Visualisations des séquences",
                 label_course_name: "Nom de la formation",
                 ph_course_name: "Entrez le nom de la formation...",
-                label_topic: "Sujet",
-                ph_topic: "Entrez le sujet...",
-                label_learning_time: "Temps d'Apprentissage (Cible)",
+label_learning_time: "Temps d'Apprentissage (Cible)",
                 label_designed_time: "Temps Conçu (Planifié)",
                 label_hours: "h",
                 label_minutes: "m",
@@ -2382,14 +2312,7 @@ function initSortableSteps(container) {
             }
         }
 
-        function handleOutcomeEnter(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addOutcome();
-            }
-        }
-
-        
+                
 
         
         function saveProject() {
@@ -2719,19 +2642,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
             updateStepType(stepEl.querySelector('.learning-type-select'));
         }
 
-        function addStepToActivityFromData(btn, data) {
-            const activityGroup = btn.closest('.activity-group');
-            ensureDefaultMoment(activityGroup);
-
-            const moments = activityGroup.querySelectorAll('.activity-moments-container .moment-group');
-            const targetMoment = moments[moments.length - 1];
-            const container = targetMoment ? targetMoment.querySelector('.activity-steps-container') : activityGroup.querySelector('.activity-steps-container');
-
-            addStepToContainerFromData(container, data);
-            applyTranslations();
-        }
-
-        // --- Core Application Logic ---
+                // --- Core Application Logic ---
 
         function applyTranslations() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -3314,9 +3225,7 @@ function formatTimelineDuration(secs) {
         function el(id) { return document.getElementById(id); }
         function val(id) { return el(id)?.value || ''; }
         function txt(id) { return el(id)?.innerText || ''; }
-        function selTxt(id) { return el(id)?.selectedOptions?.[0]?.innerText || ''; }
-
-        function fmtTotalDuration(totalSecs, t) {
+                function fmtTotalDuration(totalSecs, t) {
             const secs = Math.max(0, Number(totalSecs || 0));
             if (!secs) return `0 ${t.unit_mins}`;
             if (secs >= 604800) return `${(secs / 604800).toFixed(1)} ${t.unit_weeks}`;
@@ -4441,18 +4350,6 @@ document.addEventListener('DOMContentLoaded', setupTimelineHScroll);
 }
 
 // Count occurrences (kept for potential future use)
-function tally(selector) {
-  const counts = new Map();
-  document.querySelectorAll(selector).forEach((el) => {
-    if (!el) return;
-    const val = (el.value ?? '').toString().trim();
-    if (!val) return;
-    const label = (el.tagName === 'SELECT') ? getSelectedLabel(el) : val;
-    counts.set(label, (counts.get(label) || 0) + 1);
-  });
-  return counts;
-}
-
 // Sum designed duration (seconds) by a select's chosen label, using the enclosing step card duration.
 function tallyDuration(selector) {
   const sums = new Map();
@@ -4537,30 +4434,7 @@ function getHistogramBarMeta(kind, val) {
     ctx.clearRect(0, 0, w, h);
   }
 
-  function drawLegend(ctx, items, x, yTop, yBottom) {
-    // Keep legend aligned to the pie height and never overlapping the pie.
-    const availH = Math.max(10, (yBottom - yTop));
-    const n = Math.max(1, items.length);
-    // Scale line height to available space so the legend fits within the pie height.
-    // Allow slightly smaller lines/fonts when there are many categories.
-    let lineH = Math.min(14, Math.max(9, availH / n));
-    const fontSize = Math.min(11, Math.max(9, Math.floor(lineH - 1)));
-
-    ctx.font = `${fontSize}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-    ctx.textBaseline = 'middle';
-
-    const startY = yTop + lineH / 2;
-    items.forEach((it, i) => {
-      const yy = startY + i * lineH;
-      if (yy > yBottom) return;
-      ctx.fillStyle = it.color;
-      ctx.fillRect(x, yy - 5, 10, 10);
-      ctx.fillStyle = '#334155';
-      ctx.fillText(`${it.label} (${it.valueStr ?? it.value})`, x + 14, yy);
-    });
-  }
-
-  function palette(n) {
+    function palette(n) {
     // deterministic greys-to-blues palette
     const cols = [];
     for (let i = 0; i < n; i++) {
