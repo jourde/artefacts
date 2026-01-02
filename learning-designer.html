@@ -511,6 +511,17 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 #timeline-hscroll{ scrollbar-width: none; }
 #timeline-hscroll::-webkit-scrollbar{ height: 0px; width: 0px; }
 
+
+/* --- Added: Timeline↔Editor navigation highlight + Focus mode --- */
+.temp-highlight {
+  outline: 3px solid rgba(245, 158, 11, 0.9);
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
+body.focus-mode .activity-group { display: none; }
+body.focus-mode .activity-group.focus-active { display: block; }
+
 </style>
 </head>
 <body class="p-2 md:p-4 hide-types text-slate-900">
@@ -1169,6 +1180,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
         content_copy
        </span>
 </button>
+<button class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" data-i18n-title="title_focus_module" title="Mode focus" type="button" onclick="toggleFocusModule(this)" aria-pressed="false">
+<span class="material-icons-round text-lg focus-toggle-icon">center_focus_strong</span>
+</button>
 <button class="text-slate-400 hover:text-red-500 p-1 transition-colors" data-action="delete-module" data-i18n-title="title_delete_activity" title="Supprimer ce module" type="button">
 <span class="material-icons-round text-lg">
         delete_outline
@@ -1594,11 +1608,24 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
 
         
-        function showTooltip(e, text) {
-            tooltipEl.textContent = text;
-            tooltipEl.classList.remove('hidden');
-            updateTooltipPos(e);
-        }
+        function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function showTooltip(e, content, isHtml = false) {
+    if (isHtml) {
+        tooltipEl.innerHTML = content;
+    } else {
+        tooltipEl.textContent = content;
+    }
+    tooltipEl.classList.remove('hidden');
+    updateTooltipPos(e);
+}
 
         function hideTooltip() {
             tooltipEl.classList.add('hidden');
@@ -1753,6 +1780,8 @@ label_learning_time: "Temps d'Apprentissage (Cible)",
                 btn_expand_all: "Tout déplier",
                 title_duplicate_activity: "Dupliquer ce module",
                 title_delete_activity: "Supprimer ce module",
+                title_focus_module: "Mode focus",
+                title_exit_focus: "Quitter le mode focus",
                 title_duplicate_step: "Dupliquer cette activité",
                 title_delete_step: "Supprimer cette activité",
                 title_save_project: "Enregistrer le projet dans un fichier",
@@ -2276,6 +2305,97 @@ function initSortableSteps(container) {
         }
 
         
+
+        // --- Added: Timeline ↔ Editor synced navigation ---
+        function flashHighlight(el) {
+            if (!el) return;
+            el.classList.add('temp-highlight');
+            setTimeout(() => el.classList.remove('temp-highlight'), 1600);
+        }
+
+        function scrollToEditor(moduleIndex, stepIndex = null) {
+            const modules = Array.from(document.querySelectorAll('.activity-group'));
+            const moduleEl = modules[moduleIndex];
+            if (!moduleEl) return;
+
+            // Ensure module is expanded
+            const moduleBody = moduleEl.querySelector('.activity-body');
+            if (moduleBody && moduleBody.classList.contains('collapsed')) {
+                moduleBody.classList.remove('collapsed');
+            }
+
+            let targetEl = moduleEl;
+
+            if (stepIndex !== null && stepIndex !== undefined) {
+                const steps = Array.from(moduleEl.querySelectorAll('.step-card'));
+                const stepEl = steps[stepIndex];
+                if (stepEl) {
+                    targetEl = stepEl;
+
+                    // Ensure the parent moment is expanded (if applicable)
+                    const momentGroup = stepEl.closest('.moment-group');
+                    const momentBody = momentGroup ? momentGroup.querySelector('.moment-body') : null;
+                    if (momentBody && momentBody.classList.contains('collapsed')) {
+                        momentBody.classList.remove('collapsed');
+                    }
+                }
+            }
+
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            flashHighlight(targetEl);
+        }
+
+        // --- Added: Focus mode (per module) ---
+        function updateFocusButtons() {
+            const t = translations[currentLang] || translations.fr;
+            const focusTitle = t.title_focus_module || 'Mode focus';
+            const exitTitle = t.title_exit_focus || 'Quitter le mode focus';
+
+            document.querySelectorAll('button[onclick="toggleFocusModule(this)"]').forEach(btn => {
+                const icon = btn.querySelector('.focus-toggle-icon');
+                const moduleEl = btn.closest('.activity-group');
+                const active = document.body.classList.contains('focus-mode') && moduleEl && moduleEl.classList.contains('focus-active');
+
+                if (icon) icon.textContent = active ? 'close_fullscreen' : 'center_focus_strong';
+                btn.title = active ? exitTitle : focusTitle;
+                btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+            });
+        }
+
+        function exitFocusMode() {
+            document.body.classList.remove('focus-mode');
+            document.querySelectorAll('.activity-group').forEach(el => el.classList.remove('focus-active'));
+            updateFocusButtons();
+        }
+
+        function toggleFocusModule(btn) {
+            const moduleEl = btn.closest('.activity-group');
+            if (!moduleEl) return;
+
+            const isActive = document.body.classList.contains('focus-mode') && moduleEl.classList.contains('focus-active');
+
+            if (isActive) {
+                exitFocusMode();
+                return;
+            }
+
+            document.body.classList.add('focus-mode');
+            document.querySelectorAll('.activity-group').forEach(el => el.classList.remove('focus-active'));
+            moduleEl.classList.add('focus-active');
+
+            moduleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            flashHighlight(moduleEl);
+            updateFocusButtons();
+        }
+
+        // ESC exits focus mode
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.body.classList.contains('focus-mode')) {
+                exitFocusMode();
+            }
+        });
+
+
         function toggleStep(btn) {
             const stepCard = btn.closest('.step-card');
             const body = stepCard.querySelector('.step-body');
@@ -2436,8 +2556,9 @@ function initSortableSteps(container) {
                 
 
         
-        function saveProject() {
-            
+        
+        function buildExportProjectData() {
+            // Build a complete, portable representation of the current design (used for file save and autosave)
             const outcomes = [];
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 outcomes.push({
@@ -2461,7 +2582,7 @@ function initSortableSteps(container) {
                     dureeApprentissageValeur: document.getElementById('param-learning-val').value,
                     dureeApprentissageUnite: document.getElementById('param-learning-unit').value,
                     dureeConcueValeur: document.getElementById('param-designed-val').value,
-                    dureeConcueUnite: document.getElementById('param-learning-unit').value, 
+                    dureeConcueUnite: document.getElementById('param-learning-unit').value,
                     objectifs: document.getElementById('param-aims').value,
                     resultatsTexte: document.getElementById('param-outcomes-text')?.value || "",
                     resultats: outcomes,
@@ -2487,6 +2608,7 @@ function initSortableSteps(container) {
                     momentEls.forEach(momentEl => {
                         const momentData = {
                             titre: momentEl.querySelector('.moment-title')?.value || "",
+                            description: momentEl.querySelector('.moment-description')?.value || "",
                             dureeCible: momentEl.querySelector('.moment-target-time')?.value,
                             uniteDureeCible: momentEl.querySelector('.moment-target-unit')?.value || getDefaultDurationUnitSecs(),
                             activites: []
@@ -2535,6 +2657,12 @@ function initSortableSteps(container) {
                 exportProject.modules.push(moduleData);
             });
 
+            return exportProject;
+        }
+
+function saveProject() {
+            const exportProject = buildExportProjectData();
+
             const blob = new Blob([JSON.stringify(exportProject, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2560,126 +2688,132 @@ function initSortableSteps(container) {
             document.getElementById('load-file-input').click();
         }
 
-        function loadProject(event) {
+        
+        function loadProjectFromObject(project) {
+            // Support multiple saved-file shapes (legacy / FR / wrapper objects)
+            if (project && typeof project === 'object') {
+                project = project.project || project.data || project.conception || project.learningDesign || project;
+            }
+            const rootEl = document.getElementById('activities-root') || root;
+            if (rootEl) rootEl.innerHTML = '';
+
+            // Restore Key Params
+            if (project.keyParams) {
+                document.getElementById('param-name').value = project.keyParams.name || "";
+                { const __el=document.getElementById('param-topic'); if(__el){ __el.value = project.keyParams.topic || ""; } }
+                document.getElementById('param-authors').value = project.keyParams.authors || "";
+                document.getElementById('param-level').value = project.keyParams.level || 'unspecified';
+                document.getElementById('param-target-audience').value = project.keyParams.targetAudience || "";
+                document.getElementById('param-prerequisites').value = project.keyParams.prerequisites || "";
+                document.getElementById('param-mode').value = project.keyParams.mode || "";
+                document.getElementById('global-class-size').value = project.keyParams.cohortSize || 30;
+                document.getElementById('param-learning-val').value = project.keyParams.learningTimeVal || "";
+                document.getElementById('param-learning-unit').value = project.keyParams.learningTimeUnit || "mins";
+                document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
+                // Designed Time Unit is now synced with Learning Time Unit
+                document.getElementById('param-aims').value = project.keyParams.aims || "";
+                document.getElementById('param-outcomes-text').value = project.keyParams.outcomesText || "";
+                document.getElementById('param-description').value = project.keyParams.description || "";
+
+                // Restore Outcomes
+                document.getElementById('outcomes-list').innerHTML = '';
+                if (project.keyParams.outcomes && Array.isArray(project.keyParams.outcomes)) {
+                    project.keyParams.outcomes.forEach(out => addOutcome(out));
+                }
+                checkOutcomesEmpty();
+            } else if (project.parametres) {
+                document.getElementById('param-name').value = project.parametres.nom || "";
+                { const __el=document.getElementById('param-topic'); if(__el){ __el.value = project.parametres.theme || ""; } }
+                document.getElementById('param-authors').value = project.parametres.auteurs || "";
+                document.getElementById('param-level').value = project.parametres.niveau || 'unspecified';
+                document.getElementById('param-target-audience').value = project.parametres.publicCible || "";
+                document.getElementById('param-prerequisites').value = project.parametres.prerequis || "";
+                document.getElementById('param-mode').value = project.parametres.modalite || "";
+                document.getElementById('global-class-size').value = project.parametres.tailleCohorte || 30;
+                document.getElementById('param-learning-val').value = project.parametres.dureeApprentissageValeur || "";
+                document.getElementById('param-learning-unit').value = project.parametres.dureeApprentissageUnite || "mins";
+                document.getElementById('param-designed-val').value = project.parametres.dureeConcueValeur || "";
+                document.getElementById('param-aims').value = project.parametres.objectifs || "";
+                document.getElementById('param-outcomes-text').value = project.parametres.resultatsTexte || "";
+                document.getElementById('param-description').value = project.parametres.description || "";
+
+                // Restore Outcomes (FR export)
+                document.getElementById('outcomes-list').innerHTML = '';
+                if (project.parametres.resultats && Array.isArray(project.parametres.resultats)) {
+                    project.parametres.resultats.forEach(out => addOutcome({
+                        text: out.texte ?? out.text,
+                        level: out.niveau ?? out.level,
+                        sub: out.sousNiveau ?? out.sub
+                    }));
+                }
+                checkOutcomesEmpty();
+            } else if (project.cohortSize) {
+                document.getElementById('global-class-size').value = project.cohortSize;
+            }
+
+            applyTranslations();
+
+            const loadedActivitiesRaw = Array.isArray(project.activities)
+                ? project.activities
+                : (Array.isArray(project.modules)
+                    ? project.modules
+                    : (Array.isArray(project) ? project : []));
+
+            const normaliseStep = (s) => ({
+                title: s?.title ?? s?.titre ?? "",
+                type: s?.type ?? "",
+                duration: s?.duration ?? s?.duree ?? "",
+                unit: s?.unit ?? s?.unite ?? "",
+                groupMode: s?.groupMode ?? s?.regroupement ?? "Classe entière",
+                groupCount: s?.groupCount ?? s?.nombreGroupes ?? "",
+                groupSize: s?.groupSize ?? s?.tailleGroupe ?? "",
+                trainer: s?.trainer ?? s?.formateur ?? "",
+                place: s?.place ?? s?.lieu ?? "",
+                time: s?.time ?? s?.temps ?? "",
+                objective: s?.objective ?? s?.objectifActivite ?? "",
+                tasks: s?.tasks ?? s?.aFaire ?? "",
+                notes: s?.notes ?? ""
+            });
+
+            const normaliseMoment = (m) => ({
+                title: m?.title ?? m?.titre ?? "",
+                description: m?.description ?? "",
+                targetTime: m?.targetTime ?? m?.dureeCible ?? "",
+                targetUnit: m?.targetUnit ?? m?.uniteDureeCible ?? (document.getElementById('param-learning-unit')?.value || "mins"),
+                steps: Array.isArray(m?.steps) ? m.steps.map(normaliseStep) : (Array.isArray(m?.activites) ? m.activites.map(normaliseStep) : [])
+            });
+
+            const normaliseActivity = (a) => ({
+                title: a?.title ?? a?.titre ?? "",
+                description: a?.description ?? "",
+                targetTime: a?.targetTime ?? a?.dureeCible ?? "",
+                targetUnit: a?.targetUnit ?? a?.uniteDureeCible ?? "60",
+                moments: Array.isArray(a?.moments) ? a.moments.map(normaliseMoment) : [],
+                steps: Array.isArray(a?.steps) ? a.steps.map(normaliseStep) : (Array.isArray(a?.activites) ? a.activites.map(normaliseStep) : [])
+            });
+
+            loadedActivitiesRaw.forEach(actData => {
+                addActivityFromData(normaliseActivity(actData));
+            });
+
+            // If nothing was restored, keep a minimal empty state consistent with default behaviour
+            if (!loadedActivitiesRaw.length) {
+                addActivity();
+            }
+
+            updateEmptyState();
+            updateStats();
+        }
+
+function loadProject(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    let project = JSON.parse(e.target.result);
-                    // Support multiple saved-file shapes (legacy / FR / wrapper objects)
-                    if (project && typeof project === 'object') {
-                        project = project.project || project.data || project.conception || project.learningDesign || project;
-                    }
-                    const rootEl = document.getElementById('activities-root') || root;
-                    if (rootEl) rootEl.innerHTML = '';
-
-// Restore Key Params
-                    if (project.keyParams) {
-                        document.getElementById('param-name').value = project.keyParams.name || "";
-                        { const __el=document.getElementById('param-topic'); if(__el){ __el.value = project.keyParams.topic || ""; } }
-                        document.getElementById('param-authors').value = project.keyParams.authors || "";
-                        document.getElementById('param-level').value = project.keyParams.level || 'unspecified';
-                        document.getElementById('param-target-audience').value = project.keyParams.targetAudience || "";
-                        document.getElementById('param-prerequisites').value = project.keyParams.prerequisites || "";
-                        document.getElementById('param-mode').value = project.keyParams.mode || "";
-                        document.getElementById('global-class-size').value = project.keyParams.cohortSize || 30;
-                        document.getElementById('param-learning-val').value = project.keyParams.learningTimeVal || "";
-                        document.getElementById('param-learning-unit').value = project.keyParams.learningTimeUnit || "mins";
-                        document.getElementById('param-designed-val').value = project.keyParams.designedTimeVal || "";
-                        // Designed Time Unit is now synced with Learning Time Unit
-                        document.getElementById('param-aims').value = project.keyParams.aims || "";
-                        document.getElementById('param-outcomes-text').value = project.keyParams.outcomesText || "";
-                        document.getElementById('param-description').value = project.keyParams.description || "";
-                        
-                        // Restore Outcomes
-                        document.getElementById('outcomes-list').innerHTML = '';
-                        if (project.keyParams.outcomes && Array.isArray(project.keyParams.outcomes)) {
-                            // Handles both legacy (array of strings) and new (array of objects)
-                            project.keyParams.outcomes.forEach(out => addOutcome(out));
-                        }
-                        checkOutcomesEmpty();
-
-                    
-                    } else if (project.parametres) {
-                        document.getElementById('param-name').value = project.parametres.nom || "";
-                        { const __el=document.getElementById('param-topic'); if(__el){ __el.value = project.parametres.theme || ""; } }
-                        document.getElementById('param-authors').value = project.parametres.auteurs || "";
-                        document.getElementById('param-level').value = project.parametres.niveau || 'unspecified';
-                        document.getElementById('param-target-audience').value = project.parametres.publicCible || "";
-                        document.getElementById('param-prerequisites').value = project.parametres.prerequis || "";
-                        document.getElementById('param-mode').value = project.parametres.modalite || "";
-                        document.getElementById('global-class-size').value = project.parametres.tailleCohorte || 30;
-                        document.getElementById('param-learning-val').value = project.parametres.dureeApprentissageValeur || "";
-                        document.getElementById('param-learning-unit').value = project.parametres.dureeApprentissageUnite || "mins";
-                        document.getElementById('param-designed-val').value = project.parametres.dureeConcueValeur || "";
-                        document.getElementById('param-aims').value = project.parametres.objectifs || "";
-                        document.getElementById('param-outcomes-text').value = project.parametres.resultatsTexte || "";
-                        document.getElementById('param-description').value = project.parametres.description || "";
-
-                        // Restore Outcomes (FR export)
-                        document.getElementById('outcomes-list').innerHTML = '';
-                        if (project.parametres.resultats && Array.isArray(project.parametres.resultats)) {
-                            project.parametres.resultats.forEach(out => addOutcome({
-                                text: out.texte ?? out.text,
-                                level: out.niveau ?? out.level,
-                                sub: out.sousNiveau ?? out.sub
-                            }));
-                        }
-                        checkOutcomesEmpty();
-} else if (project.cohortSize) {
-                        document.getElementById('global-class-size').value = project.cohortSize;
-                    }
-
-                    applyTranslations();
-
-                    
-                    // Backward/forward compatible: tolerate alternative keys (FR/EN) or legacy array format
-                    const loadedActivitiesRaw = Array.isArray(project.activities)
-                        ? project.activities
-                        : (Array.isArray(project.modules)
-                            ? project.modules
-                            : (Array.isArray(project) ? project : []));
-
-                    const normaliseStep = (s) => ({
-                        title: s?.title ?? s?.titre ?? "",
-                        type: s?.type ?? "",
-                        duration: s?.duration ?? s?.duree ?? "",
-                        unit: s?.unit ?? s?.unite ?? "",
-                        groupMode: s?.groupMode ?? s?.regroupement ?? "Classe entière",
-                        groupCount: s?.groupCount ?? s?.nombreGroupes ?? "",
-                        groupSize: s?.groupSize ?? s?.tailleGroupe ?? "",
-                        trainer: s?.trainer ?? s?.formateur ?? "",
-                        place: s?.place ?? s?.lieu ?? "",
-                        time: s?.time ?? s?.temps ?? "",
-                        objective: s?.objective ?? s?.objectifActivite ?? "",
-                        tasks: s?.tasks ?? s?.aFaire ?? "",
-                        notes: s?.notes ?? ""
-                    });
-
-                    const normaliseMoment = (m) => ({
-                        title: m?.title ?? m?.titre ?? "",
-                        targetTime: m?.targetTime ?? m?.dureeCible ?? "",
-                        targetUnit: m?.targetUnit ?? m?.uniteDureeCible ?? (document.getElementById('param-learning-unit')?.value || "mins"),
-                        steps: Array.isArray(m?.steps) ? m.steps.map(normaliseStep) : (Array.isArray(m?.activites) ? m.activites.map(normaliseStep) : [])
-                    });
-
-                    const normaliseActivity = (a) => ({
-                        title: a?.title ?? a?.titre ?? "",
-                        description: a?.description ?? "",
-                        targetTime: a?.targetTime ?? a?.dureeCible ?? "",
-                        targetUnit: a?.targetUnit ?? a?.uniteDureeCible ?? "60",
-                        moments: Array.isArray(a?.moments) ? a.moments.map(normaliseMoment) : [],
-                        steps: Array.isArray(a?.steps) ? a.steps.map(normaliseStep) : (Array.isArray(a?.activites) ? a.activites.map(normaliseStep) : [])
-                    });
-
-                    loadedActivitiesRaw.forEach(actData => {
-                        addActivityFromData(normaliseActivity(actData));
-                    });
-
-                    updateEmptyState();
-                    updateStats();
+                    const project = JSON.parse(e.target.result);
+                    loadProjectFromObject(project);
                     event.target.value = '';
                 } catch (err) {
 
@@ -3360,9 +3494,39 @@ function formatTimelineDuration(secs) {
         }
 
         function escapeRtf(s) {
-            return String(s ?? '')
-                .replace(/[\\{}]/g, '\\$&')
-                .replace(/\r?\n/g, '\\par ');
+            // RTF-safe text with robust Unicode support (accents, non‑ASCII, etc.)
+            // - Escapes control characters \, {, }
+            // - Normalises newlines to \par
+            // - Encodes any non-ASCII character using \uN? (Unicode escape with fallback)
+            const str = String(s ?? '');
+            let out = '';
+            for (let i = 0; i < str.length; i++) {
+                let ch = str[i];
+
+                // Handle surrogate pairs (code points > U+FFFF)
+                const code = str.codePointAt(i);
+                if (code > 0xFFFF) {
+                    i++; // advance extra for surrogate pair
+                }
+
+                if (ch === '\\' || ch === '{' || ch === '}') {
+                    out += '\\' + ch;
+                    continue;
+                }
+                if (ch === '\r') continue;
+                if (ch === '\n') { out += '\\par '; continue; }
+
+                if (code <= 0x7F) {
+                    // ASCII
+                    out += String.fromCharCode(code);
+                } else {
+                    // RTF \u expects a signed 16-bit integer
+                    let signed = code;
+                    if (signed > 0x7FFF) signed = signed - 0x10000;
+                    out += `\\u${signed}?`;
+                }
+            }
+            return out;
         }
 
         
@@ -3521,16 +3685,17 @@ function updateStats() {
 
                             let tooltipText;
                             if (activity.targetSecs > 0) {
-                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span>`;
+                                tooltipText = `<strong>${escapeHtml(activity.title)}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span>`;
                             } else if (activity.isEstimated) {
-                                tooltipText = `<strong>${activity.title}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span><br><span class="opacity-80">${'Cible non renseignée'}</span>`;
+                                tooltipText = `<strong>${escapeHtml(activity.title)}</strong><br><span class="text-slate-300">${durationMins} ${translations[currentLang].unit_mins}</span><br><span class="opacity-80">${'Cible non renseignée'}</span>`;
                             } else {
-                                tooltipText = `<strong>${activity.title}</strong><br><span class="opacity-80">${'Durée cible à définir'}</span>`;
+                                tooltipText = `<strong>${escapeHtml(activity.title)}</strong><br><span class="opacity-80">${'Durée cible à définir'}</span>`;
                             }
 
-                            actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                            actEl.onmouseenter = (e) => showTooltip(e, tooltipText, true);
                             actEl.onmousemove = (e) => updateTooltipPos(e);
                             actEl.onmouseleave = () => hideTooltip();
+                        actEl.onclick = () => scrollToEditor(index);
 
                             let durationStr = `${durationMins}m`;
                             if (durationMins >= 60) {
@@ -3553,7 +3718,7 @@ function updateStats() {
                             labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
 
                             if (actWidthPct > 5) {
-                                labelEl.innerText = `${activity.title}`;
+                                labelEl.innerText = `${escapeHtml(activity.title)}`;
                                 labelEl.title = activity.title;
                             } else {
                                 labelEl.innerText = '.';
@@ -3606,10 +3771,11 @@ function updateStats() {
                             overEl.style.display = 'none';
                         }
 
-const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
-                        actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+const tooltipText = `<strong>${escapeHtml(planned.title)}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
+                        actEl.onmouseenter = (e) => showTooltip(e, tooltipText, true);
                         actEl.onmousemove = (e) => updateTooltipPos(e);
                         actEl.onmouseleave = () => hideTooltip();
+                        actEl.onclick = () => scrollToEditor(index);
 
                         const innerLabel = document.createElement('div');
                         innerLabel.className = 'timeline-duration-label text-[10px] font-bold text-white pointer-events-none select-none truncate px-1 opacity-90 group-hover:opacity-100 transition-opacity relative z-10';
@@ -3630,7 +3796,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                         labelEl.className = 'px-1 truncate text-center border-r border-transparent last:border-0';
 
                         if (actWidthPct > 5) {
-                            labelEl.innerText = `${planned.title}`;
+                            labelEl.innerText = `${escapeHtml(planned.title)}`;
                             labelEl.title = planned.title;
                         } else {
                             labelEl.innerText = '.';
@@ -3664,14 +3830,15 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 };
 
                 // Helper to create simple blocks with patterns (for Regroupement / Formateur / Lieu / Temps).
-                const createBlock = (widthPct, bgColor, patternClass, tooltip) => {
+                const createBlock = (widthPct, bgColor, patternClass, tooltip, onClick) => {
                     const el = document.createElement('div');
                     el.style.width = `${widthPct}%`;
                     el.style.backgroundColor = bgColor;
                     el.className = `h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer ${patternClass}`;
-                    el.onmouseenter = (e) => showTooltip(e, tooltip);
+                    el.onmouseenter = (e) => showTooltip(e, tooltip, true);
                     el.onmousemove = (e) => updateTooltipPos(e);
                     el.onmouseleave = () => hideTooltip();
+                    if (typeof onClick === 'function') el.onclick = onClick;
                     return el;
                 };
 
@@ -3717,8 +3884,8 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                         iconsEl.style.display = 'none';
                     }
 
-                    const tooltipTextModule = `<strong>${planned.title}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
-                    stepsWrap.onmouseenter = (e) => showTooltip(e, tooltipTextModule);
+                    const tooltipTextModule = `<strong>${escapeHtml(planned.title)}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
+                    stepsWrap.onmouseenter = (e) => showTooltip(e, tooltipTextModule, true);
                     stepsWrap.onmousemove = (e) => updateTooltipPos(e);
                     stepsWrap.onmouseleave = () => hideTooltip();
 
@@ -3735,7 +3902,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
 
                     // When there is no designed time, we still append empty wrappers to preserve alignment.
                     if (activity && Array.isArray(activity.steps) && activity.steps.length && designedSecs > 0) {
-                        activity.steps.forEach(step => {
+                        activity.steps.forEach((step, stepIdx) => {
                             if (!(step && step.duration > 0)) return;
                             const stepPctWithinDesigned = (step.duration / designedSecs) * 100;
 
@@ -3746,8 +3913,8 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                             stepEl.className = 'h-full border-r border-white/20 last:border-0 hover:brightness-90 transition-all relative group cursor-pointer';
 
                             const sDur = Math.round(step.duration / 60);
-                            const tooltipText = `<strong>${step.title}</strong><br><span class="text-slate-300">${step.learningTypeLabel}</span><br><span class="text-slate-300">${sDur}m</span>`;
-                            stepEl.onmouseenter = (e) => showTooltip(e, tooltipText);
+                            const tooltipText = `<strong>${escapeHtml(step.title)}</strong><br><span class="text-slate-300">${escapeHtml(step.learningTypeLabel)}</span><br><span class="text-slate-300">${sDur}m</span>`;
+                            stepEl.onmouseenter = (e) => showTooltip(e, tooltipText, true);
                             stepEl.onmousemove = (e) => updateTooltipPos(e);
                             stepEl.onmouseleave = () => hideTooltip();
                             stepsFill.appendChild(stepEl);
@@ -3756,25 +3923,25 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                             const grpColor = step.groupMode === 'class' ? greySolid : greyStriped;
                             const grpPattern = step.groupMode === 'groups' ? 'pattern-stripes' : '';
                             const grpLabel = step.groupMode === 'groups' ? t.opt_groups : (step.groupMode === 'individual' ? t.opt_individual : t.opt_whole_class);
-                            groupingFill.appendChild(createBlock(stepPctWithinDesigned, grpColor, grpPattern, `<strong>${grpLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
+                            groupingFill.appendChild(createBlock(stepPctWithinDesigned, grpColor, grpPattern, `<strong>${grpLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`, () => scrollToEditor(index, stepIdx)));
 
                             // Trainer (Stripes for Absent)
                             const trainerColor = step.trainer === 'present' ? greySolid : greyStriped;
                             const trainerPattern = step.trainer === 'absent' ? 'pattern-stripes' : '';
                             const trainerLabel = step.trainer === 'present' ? t.opt_present : t.opt_absent;
-                            trainerFill.appendChild(createBlock(stepPctWithinDesigned, trainerColor, trainerPattern, `<strong>${trainerLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
+                            trainerFill.appendChild(createBlock(stepPctWithinDesigned, trainerColor, trainerPattern, `<strong>${trainerLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`, () => scrollToEditor(index, stepIdx)));
 
                             // Place (Stripes for Online / Hybrid)
                             const placeLabel = (step.place === 'situ') ? t.opt_insitu : (step.place === 'online') ? t.opt_online : t.opt_hybrid;
                             const placeColor = (step.place === 'situ') ? greySolid : greyStriped;
                             const placePattern = (step.place === 'situ') ? '' : 'pattern-stripes';
-                            placeFill.appendChild(createBlock(stepPctWithinDesigned, placeColor, placePattern, `<strong>${placeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
+                            placeFill.appendChild(createBlock(stepPctWithinDesigned, placeColor, placePattern, `<strong>${placeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`, () => scrollToEditor(index, stepIdx)));
 
                             // Time (Stripes for Asynchronous)
                             const timeLabel = (step.time === 'sync') ? t.opt_sync : t.opt_async;
                             const timeColor = (step.time === 'sync') ? greySolid : greyStriped;
                             const timePattern = (step.time === 'sync') ? '' : 'pattern-stripes';
-                            timeFill.appendChild(createBlock(stepPctWithinDesigned, timeColor, timePattern, `<strong>${timeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`));
+                            timeFill.appendChild(createBlock(stepPctWithinDesigned, timeColor, timePattern, `<strong>${timeLabel}</strong><br><span class="text-slate-300">${sDur}m</span>`, () => scrollToEditor(index, stepIdx)));
                         });
                     }
 
@@ -3890,7 +4057,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                                     el.style.width = `${pct}%`;
                                     el.style.backgroundColor = TYPE_COLORS[step.type];
                                     el.className = 'h-full hover:brightness-90 transition-all border-r border-white/20 last:border-0';
-                                    el.title = `${step.title}: ${Math.round(step.duration/60)}m (${step.learningTypeLabel})`;
+                                    el.title = `${escapeHtml(step.title)}: ${Math.round(step.duration/60)}m (${escapeHtml(step.learningTypeLabel)})`;
                                     bar.appendChild(el);
                                 }
                             });
@@ -3898,6 +4065,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                     }
                 }
             });
+            updateFocusButtons();
         }
         
         function handleExport(select) {
@@ -6991,19 +7159,51 @@ document.querySelectorAll('#outcomes-list li').forEach(li => {
         }
 
         function exportRTF() {
-            const t = translations[currentLang];
+            const t = translations[currentLang] || translations.fr;
             const totals = getTotals();
             const totalDuration = fmtTotalDuration(totals.totalSecs, t);
-
             const courseName = (document.getElementById('param-name')?.value || '').trim();
 
-            function readDurationSecs(card) {
-                const val = parseFloat(card.querySelector('.duration-input')?.value || '0');
-                const unit = card.querySelector('.duration-unit')?.value || 'min';
-                return toSeconds(val, unit);
-            }
+            const readDurationSecs = (card) => {
+                const v = parseFloat(card.querySelector('.duration-input')?.value || '0');
+                const unit = parseFloat(card.querySelector('.duration-unit')?.value || 60);
+                const secs = (Number.isFinite(v) ? v : 0) * (Number.isFinite(unit) ? unit : 60);
+                return secs;
+            };
 
-            let rtf = '{\\rtf1\\ansi\\deff0' +
+            const fmtTarget = (timeEl, unitEl) => {
+                const v = (timeEl?.value || '').toString().trim();
+                const u = unitEl?.selectedOptions?.[0]?.innerText || '';
+                if (!v) return '';
+                return `${v} ${u}`.trim();
+            };
+
+            const getSelectedText = (selectEl) => {
+                const opt = selectEl && selectEl.selectedOptions ? selectEl.selectedOptions[0] : null;
+                return opt ? (opt.innerText || opt.textContent || '').trim() : '';
+            };
+
+            const getGroupingText = (stepEl) => {
+                const modeEl = stepEl.querySelector('.step-group-mode');
+                const modeVal = modeEl ? modeEl.value : '';
+                const modeTxt = getSelectedText(modeEl);
+                const sizeVal = (stepEl.querySelector('.step-group-size')?.value || '').toString().trim();
+                const detailsVal = (stepEl.querySelector('.step-group-details')?.value || '').toString().trim();
+
+                let txt = modeTxt;
+                if (modeVal === 'groups' && sizeVal) txt = `${modeTxt} (${sizeVal})`;
+                if (detailsVal) txt = txt ? `${txt} — ${detailsVal}` : detailsVal;
+                return txt.trim();
+            };
+
+            const sumStepsToSecs = (stepCards) => {
+                let secs = 0;
+                stepCards.forEach(step => { secs += readDurationSecs(step); });
+                return secs;
+            };
+
+            // RTF header: use ANSI for compatibility but encode all non-ASCII via \uN? (escapeRtf)
+            let rtf = '{\\rtf1\\ansi\\ansicpg1252\\uc1\\deff0' +
                 '{\\fonttbl{\\f0 Segoe UI;}{\\f1 Arial;}}' +
                 '\\fs28\\b ' + escapeRtf(t.rtf_title) + '\\b0\\par\\par' +
 
@@ -7011,12 +7211,12 @@ document.querySelectorAll('#outcomes-list li').forEach(li => {
                 '\\fs20 ' +
                 '\\b ' + escapeRtf(t.label_course_name) + ':\\b0 ' + escapeRtf(courseName) + '\\par' +
                 '\\b ' + escapeRtf(t.label_authors) + ':\\b0 ' + escapeRtf(document.getElementById('param-authors')?.value || '') + '\\par' +
-                '\\b ' + escapeRtf(t.label_mode) + ':\\b0 ' + escapeRtf(document.getElementById('param-mode')?.selectedOptions[0]?.innerText || '') + '\\par' +
-                '\\b ' + escapeRtf(t.label_level) + ':\\b0 ' + escapeRtf(document.getElementById('param-level')?.selectedOptions[0]?.innerText || '') + '\\par' +
+                '\\b ' + escapeRtf(t.label_mode) + ':\\b0 ' + escapeRtf(document.getElementById('param-mode')?.selectedOptions?.[0]?.innerText || '') + '\\par' +
+                '\\b ' + escapeRtf(t.label_level) + ':\\b0 ' + escapeRtf(document.getElementById('param-level')?.selectedOptions?.[0]?.innerText || '') + '\\par' +
                 '\\b ' + escapeRtf(t.label_class_size) + ':\\b0 ' + escapeRtf(document.getElementById('global-class-size')?.value || '') + '\\par' +
                 '\\b ' + escapeRtf(t.label_total_time) + ':\\b0 ' + escapeRtf(totalDuration) + '\\par' +
-                '\\b ' + escapeRtf(t.label_learning_time) + ':\\b0 ' + escapeRtf((document.getElementById('param-learning-val')?.value || '') + ' ' + (document.getElementById('param-learning-unit')?.selectedOptions[0]?.innerText || '')) + '\\par' +
-                '\\b ' + escapeRtf(t.label_designed_time) + ':\\b0 ' + escapeRtf((document.getElementById('param-designed-val')?.value || '') + ' ' + (document.getElementById('param-learning-unit')?.selectedOptions[0]?.innerText || '')) + '\\par\\par' +
+                '\\b ' + escapeRtf(t.label_learning_time) + ':\\b0 ' + escapeRtf(((document.getElementById('param-learning-val')?.value || '').toString().trim()) + ' ' + (document.getElementById('param-learning-unit')?.selectedOptions?.[0]?.innerText || '')) + '\\par' +
+                '\\b ' + escapeRtf(t.label_designed_time) + ':\\b0 ' + escapeRtf(((document.getElementById('param-designed-val')?.value || '').toString().trim()) + ' ' + (document.getElementById('param-learning-unit')?.selectedOptions?.[0]?.innerText || '')) + '\\par\\par' +
 
                 '\\fs24\\b ' + escapeRtf('Informations clés') + '\\b0\\par' +
                 '\\fs20 ' +
@@ -7027,6 +7227,7 @@ document.querySelectorAll('#outcomes-list li').forEach(li => {
                 '\\b ' + escapeRtf(t.label_outcomes_text) + ':\\b0\\par ' + escapeRtf(document.getElementById('param-outcomes-text')?.value || '') + '\\par\\par' +
                 '\\b ' + escapeRtf(t.label_outcomes) + ':\\b0\\par ';
 
+            // Outcomes list
             document.querySelectorAll('#outcomes-list li').forEach(li => {
                 const text = li.querySelector('.outcome-text')?.innerText || '';
                 const level = li.querySelector('.outcome-bloom-level')?.value || '';
@@ -7042,61 +7243,84 @@ document.querySelectorAll('#outcomes-list li').forEach(li => {
 
             rtf += '\\par\\fs24\\b ' + escapeRtf('Structure pédagogique') + '\\b0\\par\\fs20 ';
 
-            const moduleCards = document.querySelectorAll('#modules-container .module-card');
-            moduleCards.forEach((moduleCard, mIdx) => {
-                const mTitle = moduleCard.querySelector('.module-title')?.value || `Module ${mIdx+1}`;
-                rtf += '\\par\\b ' + escapeRtf(`MODULE ${mIdx+1} — `) + escapeRtf(mTitle) + '\\b0\\par ';
+            // Modules designed (current structure)
+            let moduleIdx = 0;
+            document.querySelectorAll('.activity-group').forEach((moduleEl) => {
+                moduleIdx += 1;
+                const moduleTitle = (moduleEl.querySelector('.activity-title')?.value || '').trim() || `${t.md_module} ${moduleIdx}`;
+                const moduleDesc = (moduleEl.querySelector('.activity-description')?.value || '').trim();
+                const moduleTarget = fmtTarget(moduleEl.querySelector('.activity-target-time'), moduleEl.querySelector('.activity-target-unit'));
 
-                const actCards = moduleCard.querySelectorAll('.activity-card');
-                actCards.forEach((actCard, aIdx) => {
-                    const aTitle = actCard.querySelector('.activity-title')?.value || `Activité ${aIdx+1}`;
-                    const aDesc = actCard.querySelector('.activity-description')?.value || '';
-                    const aTgtVal = actCard.querySelector('.activity-target-time')?.value || '';
-                    const aTgtUnit = actCard.querySelector('.activity-target-unit')?.selectedOptions[0]?.innerText || '';
+                rtf += '\\par\\b ' + escapeRtf(`MODULE ${moduleIdx} — `) + escapeRtf(moduleTitle) + '\\b0\\par ';
+                if (moduleTarget) rtf += escapeRtf(`Durée cible : ${moduleTarget}`) + '\\par ';
+                if (moduleDesc) rtf += escapeRtf(`Description : ${moduleDesc}`) + '\\par ';
 
-                    rtf += '\\par\\b ' + escapeRtf(`  Activité ${mIdx+1}.${aIdx+1} — `) + escapeRtf(aTitle) + '\\b0\\par ';
-                    if (aDesc.trim()) rtf += escapeRtf('  ' + aDesc) + '\\par ';
-                    if (String(aTgtVal).trim()) rtf += escapeRtf(`  Durée cible : ${aTgtVal} ${aTgtUnit}`) + '\\par ';
+                const momentEls = moduleEl.querySelectorAll('.moment-group');
+                const hasMoments = momentEls && momentEls.length > 0;
 
-                    const moments = actCard.querySelectorAll('.moment-card');
-                    moments.forEach((momentCard, moIdx) => {
-                        const moTitle = momentCard.querySelector('.moment-title')?.value || `Moment ${moIdx+1}`;
-                        const moTgtVal = momentCard.querySelector('.moment-target-time')?.value || '';
-                        const moTgtUnit = momentCard.querySelector('.moment-target-unit')?.selectedOptions[0]?.innerText || '';
-                        const stepCards = momentCard.querySelectorAll('.step-card');
-                        const momentSecs = sumDurationCardsToSecs(stepCards);
+                const renderSteps = (stepCards, prefix) => {
+                    stepCards.forEach((stepEl, sIdx) => {
+                        const stepTitle = (stepEl.querySelector('.step-input-title')?.value || '').trim() || `${t.md_step} ${sIdx + 1}`;
+                        const objective = (stepEl.querySelector('.step-input-objective')?.value || '').trim();
+                        const tasks = (stepEl.querySelector('.step-input-tasks')?.value || '').trim();
+                        const notes = (stepEl.querySelector('.step-input-notes')?.value || '').trim();
 
-                        rtf += '\\par\\b ' + escapeRtf(`    Moment ${mIdx+1}.${aIdx+1}.${moIdx+1} — `) + escapeRtf(moTitle) + '\\b0\\par ';
-                        rtf += escapeRtf(`    Durée conçue : ${formatTimelineDuration(momentSecs)}`) + '\\par ';
-                        if (String(moTgtVal).trim()) rtf += escapeRtf(`    Durée cible : ${moTgtVal} ${moTgtUnit}`) + '\\par ';
+                        const sSecs = readDurationSecs(stepEl);
+                        const lt = getSelectedText(stepEl.querySelector('.learning-type-select'));
+                        const grouping = getGroupingText(stepEl);
+                        const place = getSelectedText(stepEl.querySelector('.place-select'));
+                        const time = getSelectedText(stepEl.querySelector('.time-select'));
+                        const trainer = getSelectedText(stepEl.querySelector('.trainer-select'));
 
-                        stepCards.forEach((stepCard, sIdx) => {
-                            const sTitle = stepCard.querySelector('.step-input-title')?.value || `Étape ${sIdx+1}`;
-                            const sObjective = stepCard.querySelector('.step-input-objective')?.value || '';
-                            const sTasks = stepCard.querySelector('.step-input-tasks')?.value || '';
-                            const sNotes = stepCard.querySelector('.step-input-notes')?.value || '';
-                            const sSecs = readDurationSecs(stepCard);
-
-                            const lt = stepCard.querySelector('.learning-type-select')?.selectedOptions[0]?.innerText || '';
-                            const grpMode = stepCard.querySelector('.step-group-mode')?.selectedOptions[0]?.innerText || '';
-                            const place = stepCard.querySelector('.place-select')?.selectedOptions[0]?.innerText || '';
-                            const time = stepCard.querySelector('.time-select')?.selectedOptions[0]?.innerText || '';
-                            const trainer = stepCard.querySelector('.trainer-select')?.selectedOptions[0]?.innerText || '';
-
-                            rtf += '\\par\\b ' + escapeRtf(`      Étape ${mIdx+1}.${aIdx+1}.${moIdx+1}.${sIdx+1} — `) + escapeRtf(sTitle) + '\\b0\\par ';
-                            rtf += escapeRtf(`      Durée conçue : ${formatTimelineDuration(sSecs)}`) + '\\par ';
-                            if (lt) rtf += escapeRtf(`      Type d'apprentissage : ${lt}`) + '\\par ';
-                            if (grpMode) rtf += escapeRtf(`      Regroupement : ${grpMode}`) + '\\par ';
-                            if (place) rtf += escapeRtf(`      Lieu : ${place}`) + '\\par ';
-                            if (time) rtf += escapeRtf(`      Temps : ${time}`) + '\\par ';
-                            if (trainer) rtf += escapeRtf(`      Présence formateur : ${trainer}`) + '\\par ';
-
-                            if (sObjective.trim()) rtf += escapeRtf('      Objectif : ' + sObjective) + '\\par ';
-                            if (sTasks.trim()) rtf += escapeRtf('      Tâches : ' + sTasks) + '\\par ';
-                            if (sNotes.trim()) rtf += escapeRtf('      Notes : ' + sNotes) + '\\par ';
-                        });
+                        const stepPrefix = `${prefix}.${sIdx + 1}`;
+                        rtf += '\\par\\b ' + escapeRtf(`      Activité ${stepPrefix} — `) + escapeRtf(stepTitle) + '\\b0\\par ';
+                        rtf += escapeRtf(`      Durée conçue : ${formatTimelineDuration(sSecs)}`) + '\\par ';
+                        if (lt) rtf += escapeRtf(`      Type d'apprentissage : ${lt}`) + '\\par ';
+                        if (grouping) rtf += escapeRtf(`      Regroupement : ${grouping}`) + '\\par ';
+                        if (trainer || place || time) {
+                            const parts = [];
+                            if (trainer) parts.push(`Présence formateur : ${trainer}`);
+                            if (place) parts.push(`Lieu : ${place}`);
+                            if (time) parts.push(`Temps : ${time}`);
+                            rtf += escapeRtf(`      Modalité : ${parts.join(' | ')}`) + '\\par ';
+                        }
+                        if (objective) rtf += escapeRtf(`      Objectif : ${objective}`) + '\\par ';
+                        if (tasks) rtf += escapeRtf(`      Tâches : ${tasks}`) + '\\par ';
+                        if (notes) rtf += escapeRtf(`      Notes : ${notes}`) + '\\par ';
                     });
-                });
+                };
+
+                if (hasMoments) {
+                    momentEls.forEach((momentEl, moIdx) => {
+                        const momentTitle = (momentEl.querySelector('.moment-title')?.value || '').trim();
+                        const momentDesc = (momentEl.querySelector('.moment-description')?.value || '').trim();
+                        const momentTarget = fmtTarget(momentEl.querySelector('.moment-target-time'), momentEl.querySelector('.moment-target-unit'));
+
+                        const stepCards = momentEl.querySelectorAll('.step-card');
+                        const momentSecs = sumStepsToSecs(stepCards);
+                        const momentPrefix = `${moduleIdx}.${moIdx + 1}`;
+
+                        rtf += '\\par\\b ' + escapeRtf(`  Moment ${momentPrefix}`) + escapeRtf(momentTitle ? ` — ${momentTitle}` : '') + '\\b0\\par ';
+                        rtf += escapeRtf(`  Durée conçue : ${formatTimelineDuration(momentSecs)}`) + '\\par ';
+                        if (momentTarget) rtf += escapeRtf(`  Durée cible : ${momentTarget}`) + '\\par ';
+                        if (momentDesc) rtf += escapeRtf(`  Description : ${momentDesc}`) + '\\par ';
+
+                        renderSteps(stepCards, momentPrefix);
+                    });
+                } else {
+                    // Legacy designs (no moments): export as a single moment for completeness
+                    const stepCards = moduleEl.querySelectorAll('.step-card');
+                    const momentSecs = sumStepsToSecs(stepCards);
+                    const momentPrefix = `${moduleIdx}.1`;
+
+                    rtf += '\\par\\b ' + escapeRtf(`  Moment ${momentPrefix}`) + '\\b0\\par ';
+                    rtf += escapeRtf(`  Durée conçue : ${formatTimelineDuration(momentSecs)}`) + '\\par ';
+
+                    const legacyTarget = fmtTarget(moduleEl.querySelector('.moment-target-time'), moduleEl.querySelector('.moment-target-unit'));
+                    if (legacyTarget) rtf += escapeRtf(`  Durée cible : ${legacyTarget}`) + '\\par ';
+
+                    renderSteps(stepCards, momentPrefix);
+                }
             });
 
             rtf += '}';
@@ -7310,9 +7534,99 @@ ${notes}
             if (evt) { evt.preventDefault(); evt.stopPropagation(); }
             setHighContrastEnabled(!isHighContrastEnabled());
         }
+
+/* --- Autosave (LocalStorage) --- */
+const AUTOSAVE_KEY = 'ld_autosave_project_v1';
+let __autosaveTimer = null;
+let __autosaveSuspended = false;
+
+function scheduleAutosave() {
+    if (__autosaveSuspended) return;
+    // Ignore changes during print, etc. Keep lightweight.
+    if (__autosaveTimer) clearTimeout(__autosaveTimer);
+    __autosaveTimer = setTimeout(() => {
+        try {
+            const project = buildExportProjectData();
+            const payload = {
+                savedAt: new Date().toISOString(),
+                project
+            };
+            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(payload));
+        } catch (e) {
+            // If storage is unavailable/quota exceeded, fail silently (no UI change).
+        }
+    }, 2000);
+}
+
+function hasAutosave() {
+    try { return !!localStorage.getItem(AUTOSAVE_KEY); } catch (e) { return false; }
+}
+
+function getAutosavePayload() {
+    try {
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function clearAutosave() {
+    try { localStorage.removeItem(AUTOSAVE_KEY); } catch (e) {}
+}
+
+function isLikelyEmptyProject() {
+    const hasModules = document.querySelectorAll('.activity-group').length > 0;
+    const hasAnyStep = document.querySelectorAll('.step-card').length > 0;
+    const name = (document.getElementById('param-name')?.value || '').trim();
+    const desc = (document.getElementById('param-description')?.value || '').trim();
+    // If the tool auto-creates an empty module, treat it as empty unless there is any meaningful content.
+    return (!hasAnyStep) && (!name) && (!desc);
+}
+
+function maybeRestoreAutosave() {
+    const payload = getAutosavePayload();
+    if (!payload || !payload.project) return false;
+
+    const t = translations[currentLang] || translations.fr || {};
+    const savedAt = payload.savedAt ? new Date(payload.savedAt) : null;
+    const savedAtTxt = savedAt && !isNaN(savedAt.getTime())
+        ? savedAt.toLocaleString()
+        : (payload.savedAt || '');
+
+    // Use browser-native confirm to avoid any interface changes.
+    const msg = (t.autosave_restore_prompt || "Une sauvegarde automatique a été trouvée ({{date}}). Voulez-vous la restaurer ?")
+        .replace('{{date}}', savedAtTxt || '—');
+
+    const restore = window.confirm(msg);
+    if (!restore) return false;
+
+    __autosaveSuspended = true;
+    try {
+        loadProjectFromObject(payload.project);
+    } finally {
+        // Re-enable autosave after the restore batch has settled
+        setTimeout(() => { __autosaveSuspended = false; }, 0);
+    }
+    return true;
+}
+
+function initAutosaveWatchers() {
+    // Input-level changes
+    document.addEventListener('input', scheduleAutosave, true);
+    document.addEventListener('change', scheduleAutosave, true);
+
+    // Structural changes (add/remove/reorder)
+    const watchRoot = document.getElementById('activities-root') || document.body;
+    try {
+        const mo = new MutationObserver(() => scheduleAutosave());
+        mo.observe(watchRoot, { childList: true, subtree: true });
+    } catch (e) {
+        // no-op
+    }
+}
 window.onload = () => {
             applyTranslations();
-            addActivity();
             renderBloomOptions(document.getElementById('new-bloom-level'));
 
             initTimelineZoomControls();
@@ -7325,7 +7639,19 @@ window.onload = () => {
             } catch (e) {
                 
             }
-            updateContrastToggleUI();
+            
+            // Autosave: offer restore if available; otherwise start with a fresh module
+            let restored = false;
+            if (hasAutosave()) {
+                // If the page starts empty, restore without additional checks; otherwise still allow restore.
+                restored = maybeRestoreAutosave();
+            }
+            if (!restored) {
+                addActivity();
+            }
+
+            initAutosaveWatchers();
+updateContrastToggleUI();
         };
   
 document.addEventListener('DOMContentLoaded', setupTimelineHScroll);
