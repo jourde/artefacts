@@ -2008,7 +2008,11 @@ title_new_activity: "Ajouter un nouveau module",
                 handle: '.drag-handle-activity',
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
-                onEnd: () => { updateEmptyState(); }
+                onStart: () => { __pendingDragSnapshot = snapshotProject(); },
+                onEnd: () => {
+                    if (__pendingDragSnapshot) { pushUndoSnapshot(__pendingDragSnapshot); __pendingDragSnapshot = null; }
+                    updateEmptyState();
+                }
             });
 
             
@@ -2033,7 +2037,11 @@ function initSortableSteps(container) {
                 handle: '.drag-handle-step',
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
-                onEnd: () => { updateStats(); }
+                onStart: () => { __pendingDragSnapshot = snapshotProject(); },
+                onEnd: () => {
+                    if (__pendingDragSnapshot) { pushUndoSnapshot(__pendingDragSnapshot); __pendingDragSnapshot = null; }
+                    updateStats();
+                }
             });
         }
 
@@ -2046,7 +2054,9 @@ function initSortableSteps(container) {
                 handle: '.drag-handle-moment',
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
+                onStart: () => { __pendingDragSnapshot = snapshotProject(); },
                 onEnd: (evt) => {
+                    if (__pendingDragSnapshot) { pushUndoSnapshot(__pendingDragSnapshot); __pendingDragSnapshot = null; }
                     // Re-index both source and destination modules after cross-module moves
                     const fromModule = evt?.from?.closest?.('.activity-group');
                     const toModule = evt?.to?.closest?.('.activity-group');
@@ -2109,6 +2119,7 @@ function initSortableSteps(container) {
         }
 
         function deleteMoment(btn) {
+            historyCaptureNow();
             // Direct deletion (no confirmation). Kept for internal calls.
             const moment = btn.closest('.moment-group');
             if (!moment) return;
@@ -2149,6 +2160,7 @@ function initSortableSteps(container) {
             msg.innerText = (translations[currentLang] && translations[currentLang].confirm_delete_moment) || 'Supprimer ce moment ?';
 
             __confirmAction = () => {
+                historyCaptureNow();
                 moment.remove();
                 ensureDefaultMoment(activityGroup);
                 updateMomentIndexes(activityGroup);
@@ -2934,6 +2946,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
         }
 
         function addActivity() {
+            historyCaptureNow();
             const clone = activityTemplate.content.cloneNode(true);
             root.appendChild(clone);
             const lastActivity = root.lastElementChild;
@@ -2950,6 +2963,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
         }
 
         function addStepToActivity(btnOrEvent) {
+            historyCaptureNow();
             // Robust handler: accepts either a button element or a click event
             const btn = (btnOrEvent && (btnOrEvent.currentTarget || btnOrEvent.target)) ? (btnOrEvent.currentTarget || btnOrEvent.target) : btnOrEvent;
 
@@ -3001,6 +3015,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
 
         // RENAMED TO AVOID CONFLICTS
         function cloneModule(btn) {
+            historyCaptureNow();
             const original = btn.closest('.activity-group');
             const clone = original.cloneNode(true);
             original.after(clone);
@@ -3021,6 +3036,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
 
         // RENAMED TO AVOID CONFLICTS
         function cloneStep(btn) {
+            historyCaptureNow();
             const original = btn.closest('.step-card');
             const clone = original.cloneNode(true);
             original.after(clone);
@@ -3059,6 +3075,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
 
             // Set the *single* pending confirm action. This prevents stacked handlers (which can cause duplication).
             __confirmAction = () => {
+                historyCaptureNow();
                 activityGroup.remove();
                 updateEmptyState();
             };
@@ -3067,6 +3084,7 @@ const stepsContainer = momentEl.querySelector('.activity-steps-container');
         }
         // RENAMED TO AVOID CONFLICTS
         function trashStep(btn) {
+            historyCaptureNow();
             btn.closest('.step-card').remove();
             updateStats();
         }
@@ -7625,6 +7643,134 @@ function initAutosaveWatchers() {
         // no-op
     }
 }
+
+/* --- Undo/Redo (History Snapshots) --- */
+const HISTORY_LIMIT = 50;
+let __undoStack = [];
+let __redoStack = [];
+let __historyDebounce = null;
+let __isApplyingHistory = false;
+let __pendingDragSnapshot = null;
+
+function snapshotProject() {
+    try { return JSON.stringify(buildExportProjectData()); } catch (e) { return null; }
+}
+
+function pushUndoSnapshot(snapshot) {
+    if (!snapshot) return;
+    const last = __undoStack.length ? __undoStack[__undoStack.length - 1] : null;
+    if (snapshot === last) return;
+    __undoStack.push(snapshot);
+    if (__undoStack.length > HISTORY_LIMIT) __undoStack.shift();
+    // Any new user change invalidates redo history
+    __redoStack = [];
+}
+
+function historyCaptureNow() {
+    if (__isApplyingHistory) return;
+    pushUndoSnapshot(snapshotProject());
+}
+
+function scheduleHistoryCapture() {
+    if (__isApplyingHistory) return;
+    if (__historyDebounce) clearTimeout(__historyDebounce);
+    __historyDebounce = setTimeout(() => {
+        __historyDebounce = null;
+        historyCaptureNow();
+    }, 2000);
+}
+
+function applySnapshot(snapshotStr) {
+    if (!snapshotStr) return;
+    let obj = null;
+    try { obj = JSON.parse(snapshotStr); } catch (e) { return; }
+    __isApplyingHistory = true;
+    try {
+        loadProjectFromObject(obj);
+        updateEmptyState();
+        updateStats();
+        scheduleAutosave(); // keep autosave consistent with restored state
+    } finally {
+        // let DOM settle before re-enabling capture (avoids MutationObserver noise)
+        setTimeout(() => { __isApplyingHistory = false; }, 0);
+    }
+}
+
+function undo() {
+    if (__undoStack.length <= 1) return; // keep at least initial state
+    const current = __undoStack.pop();
+    __redoStack.push(current);
+    const previous = __undoStack[__undoStack.length - 1];
+    applySnapshot(previous);
+}
+
+function redo() {
+    if (!__redoStack.length) return;
+    const next = __redoStack.pop();
+    __undoStack.push(next);
+    applySnapshot(next);
+}
+
+function isEditableTarget(el) {
+    if (!el) return false;
+    const t = (el.tagName || '').toLowerCase();
+    if (t === 'input' || t === 'textarea' || t === 'select') return true;
+    return !!el.isContentEditable;
+}
+
+function initHistoryWatchers() {
+    // Capture text/field changes after inactivity (debounced)
+    document.addEventListener('input', scheduleHistoryCapture, true);
+    document.addEventListener('change', scheduleHistoryCapture, true);
+
+    // Structural mutations: capture after debounce (covers programmatic edits)
+    const watchRoot = document.getElementById('activities-root') || document.body;
+    try {
+        const mo = new MutationObserver(() => scheduleHistoryCapture());
+        mo.observe(watchRoot, { childList: true, subtree: true });
+    } catch (e) {
+        // no-op
+    }
+
+    // Keyboard shortcuts (avoid overriding native text undo in inputs/textarea)
+    document.addEventListener('keydown', (e) => {
+        const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
+        const mod = isMac ? e.metaKey : e.ctrlKey;
+        if (!mod) return;
+
+        const key = (e.key || '').toLowerCase();
+        const editable = isEditableTarget(document.activeElement);
+
+        // Ctrl/Cmd+Z => undo (only when not editing a field)
+        if (key === 'z' && !e.shiftKey && !editable) {
+            e.preventDefault();
+            undo();
+            return;
+        }
+
+        // Ctrl/Cmd+Shift+Z => redo (common on macOS)
+        if (key === 'z' && e.shiftKey && !editable) {
+            e.preventDefault();
+            redo();
+            return;
+        }
+
+        // Ctrl/Cmd+Y => redo (common on Windows)
+        if (key === 'y' && !editable) {
+            e.preventDefault();
+            redo();
+            return;
+        }
+    }, true);
+}
+
+function initHistory() {
+    __undoStack = [];
+    __redoStack = [];
+    historyCaptureNow(); // initial state
+}
+/* --- End Undo/Redo --- */
+
 window.onload = () => {
             applyTranslations();
             renderBloomOptions(document.getElementById('new-bloom-level'));
@@ -7651,6 +7797,8 @@ window.onload = () => {
             }
 
             initAutosaveWatchers();
+            initHistory();
+            initHistoryWatchers();
 updateContrastToggleUI();
         };
   
