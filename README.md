@@ -5,11 +5,11 @@
 --
 
 ## Artefacts pour la conception pédagogique et la formation
-### Curseurs
+### Curseurs - interface de paramétrage de dimensions pédagogiques
   - https://jourde.github.io/artefacts/curseurs.html
-### Persona
+### Personas - interface de conception de personas
   - https://jourde.github.io/artefacts/persona-guyane.html
-### Learning Designer
+### Learning Designer - interface de conception pédagogique
   - https://jourde.github.io/artefacts/learning-designer.html (vous pouvez aussi consulter le [guide basique d'utilisation](https://jourde.github.io/artefacts/learning-designer-guide.html)).
 
 --
