@@ -1,4 +1,4 @@
-**Essais d'applications**
+# Essais d'applications
 Je propose ici des applications "Single Page" (SPA) codées avec l'aide de l'IA générative.
 
 --
