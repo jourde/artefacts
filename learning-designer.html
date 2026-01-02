@@ -625,7 +625,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </div>
 </header>
 <div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-<button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px] rounded-lg border border-slate-200" data-i18n-title="title_toggle_panel" onclick="togglePanel('key-params-panel')">
+<button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px] rounded-lg border border-slate-200 rounded-lg border border-slate-200" data-i18n-title="title_toggle_panel" onclick="togglePanel('key-params-panel')">
 <div class="flex items-center gap-1.5">
 <span class="material-icons-round text-slate-500 text-sm">
        tune
@@ -637,7 +637,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <span class="material-icons-round text-slate-400 rotate-icon text-sm" id="key-params-panel-icon">
       expand_more
      </span>
-</button>
+</button><div class="panel-content" id="key-params-panel" style="display: none;">
 <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 <div>
 <label class="compact-label block" data-i18n="label_course_name">
@@ -679,7 +679,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
          </span>
 </div>
 </div></div>
-<div class="panel-content" id="key-params-panel" style="display: none;">
+
 <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"><div>
 <label class="compact-label block" data-i18n="label_mode">
        Modalité
@@ -780,8 +780,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </div>
 </div>
 </div>
-<div class="mb-3 no-print flex flex-col md:flex-row gap-2">
-<div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col justify-center" id="timelines-wrapper">
+<div class="mb-3 no-print flex flex-col gap-3">
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col justify-center" id="timelines-wrapper">
 <button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px] rounded-lg border border-slate-200" data-i18n-title="title_toggle_panel" onclick="togglePanel('timeline-panel')">
 <div class="flex items-center gap-1.5">
 <span class="material-icons-round text-slate-500 text-sm">
@@ -795,11 +795,11 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
        expand_more
       </span>
 </button>
-<div class="flex justify-end mt-2">
-<span class="text-slate-400 text-[10px] italic" data-i18n="status_calculating" id="stats-update-info">
-</span>
-</div>
 <div class="panel-content w-full flex flex-col gap-2 mt-2 p-2 rounded-xl border border-slate-200 bg-slate-50" id="timeline-panel" style="display: none;">
+<div class="flex justify-end">
+<span class="text-slate-400 text-[10px] italic" data-i18n="status_calculating" id="stats-update-info"></span>
+</div>
+
 <div class="bg-white rounded-xl border border-slate-200 p-1.5 flex items-center justify-start gap-3 flex-wrap">
 <div class="flex items-center gap-1.5">
 <span aria-hidden="true" class="material-icons-round text-slate-500 text-base">zoom_in</span>
@@ -963,8 +963,8 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <div aria-label="Défilement horizontal des visualisations" class="timeline-hscroll no-print" id="timeline-hscroll" role="scrollbar"><div id="timeline-hscroll-inner"></div><div aria-hidden="true" id="timeline-hscroll-thumb"></div></div></div>
 </div>
 </div>
-<div class="mb-3 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col justify-center">
-<button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px]" onclick="togglePanel('charts-panel')" title="title_toggle_panel">
+<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden w-full flex flex-col justify-center">
+<button class="w-full px-3 py-2 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors no-print h-[32px] rounded-lg border border-slate-200" onclick="togglePanel('charts-panel')" title="title_toggle_panel">
 <div class="flex items-center gap-1.5">
 <span class="material-icons-round text-slate-500 text-sm">pie_chart</span>
 <span class="font-bold text-slate-700 uppercase text-xs tracking-wide">Graphiques d'analyse</span>
@@ -1018,16 +1018,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </div>
 </div>
 </div>
-<div class="mb-4 no-print flex justify-start">
-<button class="bg-white border border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded font-bold shadow-sm flex items-center gap-1.5 transition-all text-xs" data-i18n-title="title_new_activity" onclick="addActivity()">
-<span class="material-icons-round text-lg">
-      add_circle
-     </span>
-<span data-i18n="btn_new_activity">
-      Nouveau Module
-     </span>
-</button>
-</div>
+
 <div id="view-designer">
 <div class="flex justify-end mb-2 no-print">
 <button class="text-slate-500 hover:text-indigo-600 text-xs font-medium flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-slate-100" id="btn-toggle-all-main" onclick="toggleAllActivities()">
@@ -1057,6 +1048,17 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
       </span>
 </button>
 </div>
+</div>
+
+<div class="mt-6 mb-4 no-print flex justify-start">
+<button class="bg-white border border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded font-bold shadow-sm flex items-center gap-1.5 transition-all text-xs" data-i18n-title="title_new_activity" onclick="addActivity()">
+<span class="material-icons-round text-lg">
+      add_circle
+     </span>
+<span data-i18n="btn_new_activity">
+      Nouveau Module
+     </span>
+</button>
 </div>
 <footer class="mt-8 mb-4 text-center text-[10px] text-slate-400 no-print">
 <p>
@@ -1138,6 +1140,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </select>
 </div>
 </div>
+<span class="module-time-compare text-xs font-bold bg-transparent mx-1 select-none" aria-hidden="true">=</span>
 <div class="flex flex-col items-end">
 <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">
          Conçu
@@ -1228,7 +1231,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 </div>
 </div>
 </div>
-<button aria-expanded="false" class="no-print text-xs font-semibold text-slate-500 hover:text-indigo-700 px-2 py-1 rounded transition-colors hover:bg-slate-50" onclick="toggleMomentDescription(this)" title="Afficher / masquer la description" type="button">Afficher la description</button>
+<button aria-expanded="false" class="no-print text-slate-400 hover:text-indigo-500 p-1 transition-colors" data-i18n-title="title_toggle_description" onclick="toggleMomentDescription(this)" title="Afficher/Masquer la description" type="button"><span class="material-icons-round text-lg">description</span></button>
 <button aria-expanded="true" class="no-print text-slate-400 hover:text-slate-700 transition-colors" onclick="toggleMoment(this)" title="Replier / déplier ce moment" type="button">
 <span class="material-icons-round text-lg rotate-icon-moment" style="transform: rotate(180deg);">expand_more</span>
 </button>
@@ -1960,11 +1963,20 @@ function initSortableSteps(container) {
         function initSortableMoments(container) {
             if (typeof Sortable === 'undefined' || !container) return;
             new Sortable(container, {
+                // Shared group enables moving moments between modules
+                group: 'shared-moments',
                 animation: 150,
                 handle: '.drag-handle-moment',
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
-                onEnd: () => { updateMomentIndexes(container.closest('.activity-group')); updateStats(); }
+                onEnd: (evt) => {
+                    // Re-index both source and destination modules after cross-module moves
+                    const fromModule = evt?.from?.closest?.('.activity-group');
+                    const toModule = evt?.to?.closest?.('.activity-group');
+                    if (fromModule) updateMomentIndexes(fromModule);
+                    if (toModule && toModule !== fromModule) updateMomentIndexes(toModule);
+                    updateStats();
+                }
             });
         }
 
@@ -2167,11 +2179,9 @@ function initSortableSteps(container) {
             const isHidden = wrap.classList.contains('hidden');
             if (isHidden) {
                 wrap.classList.remove('hidden');
-                btn.textContent = 'Masquer la description';
                 btn.setAttribute('aria-expanded', 'true');
             } else {
                 wrap.classList.add('hidden');
-                btn.textContent = 'Afficher la description';
                 btn.setAttribute('aria-expanded', 'false');
             }
         }
@@ -2234,12 +2244,6 @@ function initSortableSteps(container) {
                 options += `<option value="${sub}" ${selectedValue === sub ? 'selected' : ''}>${t['bloom_sub_' + sub] || sub}</option>`;
             });
             subSelectElement.innerHTML = options;
-        }
-
-        function updateHeaderBloomSub() {
-            const levelSelect = document.getElementById('new-bloom-level');
-            const subSelect = document.getElementById('new-bloom-sub');
-            renderBloomSubOptions(subSelect, levelSelect.value);
         }
 
         function updateOutcomeBloom(levelSelect) {
@@ -3760,6 +3764,7 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
 	                    const designedBadge = group.querySelector('.activity-designed-badge');
 	                    const targetVal = group.querySelector('.activity-target-time');
 	                    const targetUnitSel = group.querySelector('.activity-target-unit');
+	                    const compareEl = group.querySelector('.module-time-compare');
                     
                     if (bar && label) {
                         bar.innerHTML = '';
@@ -3781,6 +3786,19 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
 	                          const targetSecs = (isNaN(tv) ? 0 : tv) * (isNaN(tu) ? 60 : tu);
 	                          if (targetSecs > 0 && Math.round(actData.duration) !== Math.round(targetSecs)) {
 	                            designedBadge.classList.add('duration-alert-light');
+	                          }
+	                          // Comparison symbol between target and designed at module level
+	                          if (compareEl) {
+	                            if (targetSecs > 0) {
+	                              const a = Math.round(targetSecs);
+	                              const b = Math.round(actData.duration);
+	                              const sym = (a === b) ? '=' : (a < b ? '<' : '>');
+				      compareEl.textContent = sym;
+				      compareEl.classList.toggle('text-red-600', sym === '<' || sym === '>');
+				    } else {
+				      compareEl.textContent = '';
+				      compareEl.classList.remove('text-red-600');
+				    }
 	                          }
 	                        }
 
