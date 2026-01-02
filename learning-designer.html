@@ -560,6 +560,9 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <option data-i18n="opt_md" value="markdown">
            Markdown
           </option>
+<option data-i18n="opt_csv" value="csv">
+           CSV
+          </option>
 <option data-i18n="opt_pdf" value="pdf">
            PDF
           </option>
@@ -1592,9 +1595,11 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
                 btn_export_dropdown: "Exporter...",
                 title_export_dropdown: "Choisir le format d'export",
                 opt_md: "Markdown (IA)",
+                opt_csv: "CSV (modules/moments/activités)",
                 opt_pdf: "PDF (Imprimer)",
                 opt_rtf: "Texte Riche (HTML)",
                 opt_real_rtf: "Texte (.rtf)",
+                csv_synthetic_moment: "Moment (auto)",
                 title_export_term: "Exporter le tableau de traduction",
                 info_export_genai: "Le format d'exportation est le design pédagogique au format Markdown pour un traitement facilité par un chatbot d'IA générative.",
                 label_total_time: "Chronologie",
@@ -3787,9 +3792,193 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                 exportRichText();
             } else if (value === 'rtf') {
                 exportRTF();
+            } else if (value === 'csv') {
+                exportCSV();
             }
         }
         
+
+
+        function exportCSV() {
+            // Conservative CSV export: modules, moments and activities only.
+            // It intentionally ignores detailed step sub-fields beyond the main activity-level selectors.
+            const t = translations[currentLang] || translations.fr;
+
+            const lines = [];
+            const header = [
+                'Module #',
+                'Module titre',
+                'Module durée cible',
+                'Moment #',
+                'Moment titre',
+                'Moment durée cible',
+                "Activité #",
+                "Activité titre",
+                "Activité durée (min)",
+                "Type d'apprentissage",
+                "Regroupement",
+                "Taille groupe",
+                "Lieu",
+                "Temps",
+                "Présence formateur"
+            ];
+            lines.push(header);
+
+            const esc = (v) => {
+                const s = (v === null || v === undefined) ? '' : String(v);
+                const needs = /[",\n\r]/.test(s);
+                const q = s.replace(/"/g, '""');
+                return needs ? `"${q}"` : q;
+            };
+
+            const fmtTarget = (valEl, unitEl) => {
+                const v = (valEl?.value || '').toString().trim();
+                if (!v) return '';
+                const u = unitEl?.selectedOptions?.[0]?.innerText || '';
+                return `${v} ${u}`.trim();
+            };
+
+            const getActivitySecs = (stepCard) => {
+                if (!stepCard) return 0;
+                const v = Math.max(0, parseFloat(stepCard.querySelector('.duration-input')?.value) || 0);
+                const u = Math.max(0, parseFloat(stepCard.querySelector('.duration-unit')?.value) || 0);
+                const secs = v * (u || 60); // unit values are seconds-per-unit
+                return Number.isFinite(secs) ? secs : 0;
+            };
+
+            const getSelectedText = (selectEl) => {
+                const opt = selectEl && selectEl.selectedOptions ? selectEl.selectedOptions[0] : null;
+                return opt ? (opt.innerText || opt.textContent || '').trim() : '';
+            };
+
+            let moduleIdx = 0;
+            document.querySelectorAll('.activity-group').forEach((moduleEl) => {
+                moduleIdx += 1;
+                const moduleTitle = (moduleEl.querySelector('.activity-title')?.value || '').trim();
+                const moduleTarget = fmtTarget(moduleEl.querySelector('.activity-target-time'), moduleEl.querySelector('.activity-target-unit'));
+
+                const moments = moduleEl.querySelectorAll('.moment-group');
+                if (moments && moments.length) {
+                    let momentIdx = 0;
+                    moments.forEach((momentEl) => {
+                        momentIdx += 1;
+                        const momentTitle = (momentEl.querySelector('.moment-title')?.value || '').trim();
+                        const momentTarget = fmtTarget(momentEl.querySelector('.moment-target-time'), momentEl.querySelector('.moment-target-unit'));
+
+                        const steps = momentEl.querySelectorAll('.step-card');
+                        let activityIdx = 0;
+
+                        steps.forEach((stepEl) => {
+                            activityIdx += 1;
+
+                            const aTitle = (stepEl.querySelector('.step-input-title')?.value || '').trim();
+                            const mins = Math.round((getActivitySecs(stepEl) || 0) / 60);
+
+                            const typeTxt = getSelectedText(stepEl.querySelector('.learning-type-select'));
+                            const groupingTxt = getSelectedText(stepEl.querySelector('.step-group-mode'));
+                            const groupSize = (stepEl.querySelector('.step-group-size')?.value || '').toString().trim();
+
+                            const placeTxt = getSelectedText(stepEl.querySelector('.place-select'));
+                            const timeTxt = getSelectedText(stepEl.querySelector('.time-select'));
+                            const trainerTxt = getSelectedText(stepEl.querySelector('.trainer-select'));
+
+                            const row = [
+                                moduleIdx,
+                                moduleTitle,
+                                moduleTarget,
+                                `${moduleIdx}.${momentIdx}`,
+                                momentTitle,
+                                momentTarget,
+                                `${moduleIdx}.${momentIdx}.${activityIdx}`,
+                                aTitle,
+                                mins || '',
+                                typeTxt,
+                                groupingTxt,
+                                groupSize,
+                                placeTxt,
+                                timeTxt,
+                                trainerTxt
+                            ];
+                            lines.push(row);
+                        });
+
+                        if (!steps || steps.length === 0) {
+                            lines.push([
+                                moduleIdx,
+                                moduleTitle,
+                                moduleTarget,
+                                `${moduleIdx}.${momentIdx}`,
+                                momentTitle,
+                                momentTarget,
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                '',
+                                ''
+                            ]);
+                        }
+                    });
+                } else {
+                    // Legacy: module without moments → export using a synthetic moment 1
+                    const steps = moduleEl.querySelectorAll('.step-card');
+                    const momentKey = `${moduleIdx}.1`;
+                    const momentTitle = t.csv_synthetic_moment || 'Moment (auto)';
+                    const momentTarget = '';
+                    let activityIdx = 0;
+
+                    steps.forEach((stepEl) => {
+                        activityIdx += 1;
+
+                        const aTitle = (stepEl.querySelector('.step-input-title')?.value || '').trim();
+                        const mins = Math.round((getActivitySecs(stepEl) || 0) / 60);
+
+                        const typeTxt = getSelectedText(stepEl.querySelector('.learning-type-select'));
+                        const groupingTxt = getSelectedText(stepEl.querySelector('.step-group-mode'));
+                        const groupSize = (stepEl.querySelector('.step-group-size')?.value || '').toString().trim();
+
+                        const placeTxt = getSelectedText(stepEl.querySelector('.place-select'));
+                        const timeTxt = getSelectedText(stepEl.querySelector('.time-select'));
+                        const trainerTxt = getSelectedText(stepEl.querySelector('.trainer-select'));
+
+                        lines.push([
+                            moduleIdx,
+                            moduleTitle,
+                            moduleTarget,
+                            momentKey,
+                            momentTitle,
+                            momentTarget,
+                            `${momentKey}.${activityIdx}`,
+                            aTitle,
+                            mins || '',
+                            typeTxt,
+                            groupingTxt,
+                            groupSize,
+                            placeTxt,
+                            timeTxt,
+                            trainerTxt
+                        ]);
+                    });
+
+                    if (!steps || steps.length === 0) {
+                        lines.push([moduleIdx, moduleTitle, moduleTarget, momentKey, momentTitle, momentTarget, '', '', '', '', '', '', '', '', '']);
+                    }
+                }
+            });
+
+            const csv = lines.map((row) => row.map(esc).join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'profil_conception_pedagogique.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         function exportRichText() {
              const t = translations[currentLang];
             const totals = getTotals();
