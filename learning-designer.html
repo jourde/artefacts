@@ -1235,7 +1235,7 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 <button aria-expanded="true" class="no-print text-slate-400 hover:text-slate-700 transition-colors" onclick="toggleMoment(this)" title="Replier / déplier ce moment" type="button">
 <span class="material-icons-round text-lg rotate-icon-moment" style="transform: rotate(180deg);">expand_more</span>
 </button>
-<button class="no-print text-slate-400 hover:text-rose-600 transition-colors" onclick="deleteMoment(this)" title="Supprimer ce moment" type="button">
+<button class="no-print text-slate-400 hover:text-rose-600 transition-colors" onclick="trashMoment(this)" title="Supprimer ce moment" type="button">
 <span class="material-icons-round text-lg">delete_outline</span>
 </button>
 </div>
@@ -1472,6 +1472,53 @@ body.hc #timeline-ruler .timeline-ruler-label { border-color: #94a3b8; backgroun
 
         
         let __confirmAction = null;
+
+        // Wire the custom confirmation modal buttons (Annuler / Supprimer)
+        // so they reliably trigger the pending action set by trashModule().
+        (function initCustomConfirmModal() {
+            const modal = document.getElementById('custom-confirm-modal');
+            const btnNo = document.getElementById('custom-confirm-no');
+            const btnYes = document.getElementById('custom-confirm-yes');
+            if (!modal || !btnNo || !btnYes) return;
+
+            const close = () => {
+                modal.classList.add('hidden');
+            };
+
+            btnNo.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                __confirmAction = null;
+                close();
+            });
+
+            btnYes.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const action = __confirmAction;
+                __confirmAction = null;
+                close();
+                if (typeof action === 'function') action();
+            });
+
+            // Optional: click outside the dialog cancels
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    __confirmAction = null;
+                    close();
+                }
+            });
+
+            // Optional: Escape closes the modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    __confirmAction = null;
+                    close();
+                }
+            });
+        })();
         
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-action]');
@@ -1758,6 +1805,7 @@ title_new_activity: "Ajouter un nouveau module",
                 
                 modal_confirm_title: "Confirmer l'action",
                 confirm_delete_activity: "Supprimer tout le module ?",
+                confirm_delete_moment: "Supprimer ce moment ?",
                 btn_cancel: "Annuler",
                 btn_delete: "Supprimer",
                 
@@ -2032,6 +2080,7 @@ function initSortableSteps(container) {
         }
 
         function deleteMoment(btn) {
+            // Direct deletion (no confirmation). Kept for internal calls.
             const moment = btn.closest('.moment-group');
             if (!moment) return;
             const activityGroup = moment.closest('.activity-group');
@@ -2040,6 +2089,46 @@ function initSortableSteps(container) {
             updateMomentIndexes(activityGroup);
             updateStats();
         }
+
+        function trashMoment(evtOrBtn, maybeBtn) {
+            const evt = (evtOrBtn && typeof evtOrBtn === 'object' && 'preventDefault' in evtOrBtn) ? evtOrBtn : null;
+            const btn = evt ? maybeBtn : evtOrBtn;
+
+            if (!btn) return;
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+
+            const moment = btn.closest('.moment-group');
+            if (!moment) return;
+
+            const activityGroup = moment.closest('.activity-group');
+
+            const modal = document.getElementById('custom-confirm-modal');
+            const msg = document.getElementById('custom-confirm-msg');
+
+            // Fallback: if modal is missing for any reason, delete directly.
+            if (!modal || !msg) {
+                moment.remove();
+                ensureDefaultMoment(activityGroup);
+                updateMomentIndexes(activityGroup);
+                updateStats();
+                return;
+            }
+
+            msg.innerText = (translations[currentLang] && translations[currentLang].confirm_delete_moment) || 'Supprimer ce moment ?';
+
+            __confirmAction = () => {
+                moment.remove();
+                ensureDefaultMoment(activityGroup);
+                updateMomentIndexes(activityGroup);
+                updateStats();
+            };
+
+            modal.classList.remove('hidden');
+        }
+
 
         
 
@@ -3517,15 +3606,6 @@ function updateStats() {
                             overEl.style.display = 'none';
                         }
 
-                        // Alert badge when designed differs from planned (Trop court / Trop long)
-                        const iconsEl = document.createElement('div');
-                        iconsEl.className = 'timeline-alert-icons';
-                        if (plannedSecs > 0 && designedSecs !== plannedSecs) {
-                          iconsEl.innerText = (designedSecs < plannedSecs) ? 'Trop court !' : 'Trop long !';
-                        } else {
-                          iconsEl.style.display = 'none';
-                        }
-
 const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slate-300">${formatTimelineDuration(designedSecs)}</span>`;
                         actEl.onmouseenter = (e) => showTooltip(e, tooltipText);
                         actEl.onmousemove = (e) => updateTooltipPos(e);
@@ -3538,7 +3618,6 @@ const tooltipText = `<strong>${planned.title}</strong><br><span class="text-slat
                         actEl.appendChild(missingEl);
                         actEl.appendChild(fillEl);
                         actEl.appendChild(overEl);
-                        actEl.appendChild(iconsEl);
 
                         if (actWidthPct > 4) {
                             actEl.appendChild(innerLabel);
