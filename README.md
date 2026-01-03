@@ -9,7 +9,7 @@ Je propose ici des applications "Single Page" (SPA) codées de manière conversa
 ### Personas - interface de conception de personas
   - https://jourde.github.io/artefacts/persona-guyane.html
 ### Learning Designer - interface de conception pédagogique
-  - https://jourde.github.io/artefacts/learning-designer.html (vous pouvez aussi consulter le [guide basique d'utilisation](https://github.com/jourde/artefacts/blob/main/learning-designer-guide.md)).
+  - https://jourde.github.io/artefacts/learning-designer.html (vous pouvez aussi consulter le [guide basique d'utilisation](https://github.com/jourde/artefacts/wiki/Concepteur-p%C3%A9dagogique)).
 
 --
 
