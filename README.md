@@ -1,5 +1,5 @@
 # Essais d'applications
-Je propose ici des applications "Single Page" (SPA) codées avec l'aide de l'IA générative.
+Je propose ici des applications "Single Page" (SPA) codées de manière conversationnelle avec l'IA générative.
 
 --
 
