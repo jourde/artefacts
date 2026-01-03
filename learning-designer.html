@@ -523,21 +523,75 @@ body.focus-mode .activity-group { display: none; }
 body.focus-mode .activity-group.focus-active { display: block; }
 
 </style>
+<script>
+/* Modèles: stubs globaux disponibles dès le chargement (évite les clics "inerte" avant l'initialisation).
+   Les vraies implémentations sont branchées plus bas dans le fichier. */
+(function(){
+  window.__pendingTemplateModal = null;
+
+  function callOrQueue(which){
+    const fn = (which === 'export') ? window.__realOpenTemplateExport : window.__realOpenTemplateImport;
+    if (typeof fn === 'function') return fn();
+    window.__pendingTemplateModal = which;
+  }
+
+  window.openTemplateExportModal = function(){ return callOrQueue('export'); };
+  window.openTemplateImportModal = function(){ return callOrQueue('import'); };
+
+  // Sécurisation clic: déclenchement immédiat même si un overlay capte l'évènement.
+  // On ne déclenche QUE si le point de clic tombe dans la zone exacte des boutons "Modèles".
+  (function(){
+    function hitTestRect(el, x, y){
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    }
+    function handlePointer(e){
+      // uniquement clic primaire / toucher
+      if (e.type === 'mousedown' && e.button !== 0) return;
+      const x = e.clientX, y = e.clientY;
+      const expBtn = document.getElementById('btn-template-export');
+      const impBtn = document.getElementById('btn-template-import');
+      const hitExport = hitTestRect(expBtn, x, y);
+      const hitImport = hitTestRect(impBtn, x, y);
+      if (!hitExport && !hitImport) return;
+
+      // Empêche tout routeur global de détourner / retarder l'action
+      try { e.preventDefault(); } catch(_){}
+      try { e.stopImmediatePropagation(); } catch(_){}
+      try { e.stopPropagation(); } catch(_){}
+
+      if (hitExport) window.openTemplateExportModal();
+      else window.openTemplateImportModal();
+    }
+
+    // Capture le plus tôt possible
+    window.addEventListener('pointerdown', handlePointer, true);
+    window.addEventListener('mousedown', handlePointer, true);
+    window.addEventListener('touchstart', handlePointer, { capture: true, passive: false });
+  })();
+
+
+  // flush appelé une fois que les vraies fonctions sont disponibles
+  window.__flushPendingTemplateModal = function(){
+    const w = window.__pendingTemplateModal;
+    if (!w) return;
+    window.__pendingTemplateModal = null;
+    const fn = (w === 'export') ? window.__realOpenTemplateExport : window.__realOpenTemplateImport;
+    if (typeof fn === 'function') fn();
+  };
+})();
+</script>
 </head>
 <body class="p-2 md:p-4 hide-types text-slate-900">
 <div class="max-w-7xl mx-auto">
-<header class="flex flex-col xl:flex-row xl:items-end justify-between mb-3 gap-3">
-<div class="mb-1 xl:mb-0">
-<h1 class="text-2xl font-bold text-slate-900 leading-tight" data-i18n="app_title">
-      Concepteur Pédagogique
-     </h1>
-<p class="text-sm text-slate-500" data-i18n="app_subtitle">
-      Design Pédagogique &amp; Analytique
-     </p>
-</div>
-<div class="flex flex-wrap gap-3 no-print items-end">
-<div class="flex flex-col gap-0.5">
-<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_project">
+<header class="mb-3">
+<h1 class="text-2xl font-bold text-slate-900 leading-tight">
+    Concepteur Pédagogique - Design Pédagogique &amp; Analytique
+  </h1>
+<div class="mt-2 flex flex-wrap gap-x-3 gap-y-3 no-print items-start content-start">
+<div class="flex flex-col relative gap-0.5 bg-slate-50 border border-slate-200 rounded-lg p-1">
+<span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider pl-1" data-i18n="grp_project">
        Projet
       </span>
 <div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-0.5 shadow-sm h-[34px]">
@@ -592,8 +646,22 @@ body.focus-mode .activity-group.focus-active { display: block; }
 <input accept=".json" class="hidden" id="load-file-input" onchange="loadProject(event)" type="file"/>
 </div>
 </div>
-<div class="flex flex-col gap-0.5">
-<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_view">
+<div class="flex flex-col relative gap-0.5 shrink-0 bg-slate-50 border border-slate-200 rounded-lg p-1">
+<span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider pl-1">Modèles</span>
+<div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-1 shadow-sm h-[34px] min-w-max">
+<button class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center gap-1.5" id="btn-template-export" onclick="openTemplateExportModal()" title="Exporter un modèle (module, moment ou activité)" type="button">
+<span class="material-icons-round text-lg">upload_file</span>
+<span class="text-xs font-medium hidden md:inline">Exporter</span>
+</button>
+<button class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center gap-1.5" id="btn-template-import" onclick="openTemplateImportModal()" title="Importer un modèle dans la conception existante" type="button">
+<span class="material-icons-round text-lg">download_for_offline</span>
+<span class="text-xs font-medium hidden md:inline">Importer</span>
+</button>
+<input accept=".json" class="hidden" id="template-file-input" type="file"/>
+</div>
+</div>
+<div class="flex flex-col relative gap-0.5 bg-slate-50 border border-slate-200 rounded-lg p-1">
+<span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider pl-1" data-i18n="grp_view">
        Vue
       </span>
 <div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-1 shadow-sm h-[34px]">
@@ -624,13 +692,6 @@ body.focus-mode .activity-group.focus-active { display: block; }
 </button>
 <div class="w-px h-5 bg-slate-200">
 </div>
-</div>
-</div>
-<div aria-hidden="true" class="flex flex-col gap-0.5" style="visibility:hidden; pointer-events:none;">
-<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider pl-1" data-i18n="grp_help">
-       Aide
-      </span>
-<div class="flex items-center bg-white border border-slate-200 rounded-md p-0.5 gap-1 shadow-sm h-[34px]">
 </div>
 </div>
 </div>
@@ -690,7 +751,6 @@ body.focus-mode .activity-group.focus-active { display: block; }
          </span>
 </div>
 </div></div>
-
 <div class="p-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"><div>
 <label class="compact-label block" data-i18n="label_mode">
        Modalité
@@ -810,7 +870,6 @@ body.focus-mode .activity-group.focus-active { display: block; }
 <div class="flex justify-end">
 <span class="text-slate-400 text-[10px] italic" data-i18n="status_calculating" id="stats-update-info"></span>
 </div>
-
 <div class="bg-white rounded-xl border border-slate-200 p-1.5 flex items-center justify-start gap-3 flex-wrap">
 <div class="flex items-center gap-1.5">
 <span aria-hidden="true" class="material-icons-round text-slate-500 text-base">zoom_in</span>
@@ -1029,7 +1088,6 @@ body.focus-mode .activity-group.focus-active { display: block; }
 </div>
 </div>
 </div>
-
 <div id="view-designer">
 <div class="flex justify-end mb-2 no-print">
 <button class="text-slate-500 hover:text-indigo-600 text-xs font-medium flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-slate-100" id="btn-toggle-all-main" onclick="toggleAllActivities()">
@@ -1060,7 +1118,6 @@ body.focus-mode .activity-group.focus-active { display: block; }
 </button>
 </div>
 </div>
-
 <div class="mt-6 mb-4 no-print flex justify-start">
 <button class="bg-white border border-slate-300 hover:border-indigo-500 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded font-bold shadow-sm flex items-center gap-1.5 transition-all text-xs" data-i18n-title="title_new_activity" onclick="addActivity()">
 <span class="material-icons-round text-lg">
@@ -1079,9 +1136,54 @@ body.focus-mode .activity-group.focus-active { display: block; }
      </a>
      (UCL Knowledge Lab).
     </p>
-<p class="mt-1" data-i18n="footer_disclaimer">
-     Cette page n'utilise pas de cookies de suivi ou de session. Elle n’utilise aucune base de données, ne stocke et ne traite pas de données personnelles. Toutes les données sont traitées dans le navigateur de l'utilisateur·rice (aucune donnée n'est traitée en ligne).
-    </p>
+
+<details class="mt-1 inline-block text-left max-w-3xl mx-auto px-3">
+<summary class="cursor-pointer no-underline hover:text-slate-500 select-none bg-transparent hover:bg-transparent focus:bg-transparent active:bg-transparent" style="background: transparent;">Mentions légales / Confidentialité</summary>
+<div class="mt-2 text-slate-500 leading-relaxed">
+<div class="font-semibold text-slate-400">Mentions Légales et Politique de Confidentialité</div>
+<ol class="mt-2 space-y-2">
+<li>
+<div class="font-semibold text-slate-400">1. Éditeur et Hébergement</div>
+<div><span class="font-semibold">Éditeur :</span> L'application Concepteur pédagogique est éditée par François Jourde.</div>
+<div><span class="font-semibold">Hébergement :</span> Ce site est hébergé par GitHub Inc. Adresse : 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, United States.</div>
+</li>
+<li>
+<div class="font-semibold text-slate-400">2. Fonctionnement de l'application et Données personnelles</div>
+<div>Cette application a été conçue selon une approche « Privacy by design » (respect de la vie privée par défaut).</div>
+<div class="mt-1"><span class="font-semibold">Absence de collecte de données :</span> L'application fonctionne entièrement en mode « côté client » (client-side) sur votre navigateur web.</div>
+<ul class="list-disc ml-5 mt-1 space-y-1">
+<li>Aucune donnée saisie ou manipulée dans l'application n'est transmise à l'éditeur.</li>
+<li>Aucune donnée n'est stockée sur un serveur distant (base de données cloud).</li>
+</ul>
+<div class="mt-1">Toutes les informations restent strictement confinées à votre appareil (ordinateur ou smartphone).</div>
+</li>
+<li>
+<div class="font-semibold text-slate-400">3. Utilisation du Stockage Local (Local Storage)</div>
+<div>Pour permettre le fonctionnement de l'application (ex : sauvegarder vos préférences ou votre avancement), nous utilisons la technologie du <span class="font-semibold">localStorage</span> ou <span class="font-semibold">sessionStorage</span> de votre navigateur.</div>
+<ul class="list-disc ml-5 mt-1 space-y-1">
+<li>Ces données sont stockées uniquement sur votre appareil.</li>
+<li>Elles ne sont accessibles par personne d'autre que vous.</li>
+<li>Ces mécanismes sont purement techniques et fonctionnels, ils sont donc exemptés de consentement préalable (pas de bandeau cookies nécessaire).</li>
+</ul>
+<div class="mt-1">Vous pouvez à tout moment supprimer ces données en vidant le cache de votre navigateur.</div>
+</li>
+<li>
+<div class="font-semibold text-slate-400">4. Données techniques (Logs serveur)</div>
+<div>Bien que l'éditeur ne collecte aucune donnée, l'infrastructure d'hébergement (GitHub Pages) peut collecter des données techniques standards lors de votre connexion (telles que votre adresse IP et le type de navigateur) dans des journaux de connexion (logs) à des fins de sécurité et de fiabilité du service.</div>
+<div class="mt-1">L'éditeur de ce site n'a pas accès à ces données brutes. Pour plus d'informations, vous pouvez consulter la Déclaration de confidentialité de GitHub.</div>
+</li>
+<li>
+<div class="font-semibold text-slate-400">5. Services Tiers</div>
+<div>Ce site peut charger des ressources techniques (polices d'écriture, librairies JavaScript) depuis des serveurs tiers (ex : Google Fonts, CDNJ). Ces services peuvent techniquement avoir accès à votre adresse IP lors du chargement de ces ressources.</div>
+</li>
+<li>
+<div class="font-semibold text-slate-400">6. Contact</div>
+<div>Pour toute question relative à l'application, vous pouvez contacter l'éditeur via <a class="underline hover:text-slate-600" href="https://github.com/jourde" rel="noopener" target="_blank">https://github.com/jourde</a>.</div>
+</li>
+</ol>
+</div>
+</details>
+
 </footer>
 </div>
 <div class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-50 flex items-center justify-center p-4" id="custom-confirm-modal">
@@ -1151,7 +1253,7 @@ body.focus-mode .activity-group.focus-active { display: block; }
 </select>
 </div>
 </div>
-<span class="module-time-compare text-xs font-bold bg-transparent mx-1 select-none self-center" aria-hidden="true">=</span>
+<span aria-hidden="true" class="module-time-compare text-xs font-bold bg-transparent mx-1 select-none self-center">=</span>
 <div class="flex flex-col items-end">
 <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider leading-none mb-0.5" data-i18n="label_designed">
          Conçu
@@ -1180,7 +1282,7 @@ body.focus-mode .activity-group.focus-active { display: block; }
         content_copy
        </span>
 </button>
-<button class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" data-i18n-title="title_focus_module" title="Mode focus" type="button" onclick="toggleFocusModule(this)" aria-pressed="false">
+<button aria-pressed="false" class="text-slate-400 hover:text-indigo-500 p-1 transition-colors" data-i18n-title="title_focus_module" onclick="toggleFocusModule(this)" title="Mode focus" type="button">
 <span class="material-icons-round text-lg focus-toggle-icon">center_focus_strong</span>
 </button>
 <button class="text-slate-400 hover:text-red-500 p-1 transition-colors" data-action="delete-module" data-i18n-title="title_delete_activity" title="Supprimer ce module" type="button">
@@ -4473,6 +4575,10 @@ document.querySelectorAll('#outcomes-list li').forEach(li => {
             });
 
             html += `
+
+<!-- Modèles : Export -->
+
+
 </body></html>`;
 
             const blob = new Blob([html], { type: 'text/html' });
@@ -8290,6 +8396,563 @@ function updateCharts() {
 })();
 
 
+
+// =========================
+// Modèles (templates) - Export / Import
+// =========================
+(function initTemplatesFeature() {
+  const $ = (id) => document.getElementById(id);
+
+  const root = document.getElementById('activities-root');
+
+  let loadedTemplate = null; // {type, payload}
+
+  function ensureInBody(el) {
+    if (!el) return;
+    try {
+      if (!document.body.contains(el)) document.body.appendChild(el);
+    } catch (_) {}
+  }
+
+  function show(el) {
+    if (!el) return;
+    ensureInBody(el);
+    el.classList.remove('hidden');
+    // Force visible display immediately (avoid "affichage retardé" sur certains WebView)
+    const disp = el.dataset && el.dataset.display ? el.dataset.display : (el.classList.contains('items-center') ? 'flex' : 'block');
+    el.style.display = disp;
+    el.style.visibility = 'visible';
+    el.style.pointerEvents = 'auto';
+    // Force reflow to commit styles before returning
+    void el.offsetHeight;
+  }
+
+  function hide(el) {
+    if (!el) return;
+    el.classList.add('hidden');
+    el.style.display = 'none';
+  }
+  function setError(id, msg) {
+    const el = $(id);
+    if (!el) return;
+    if (msg) { el.textContent = msg; show(el); } else { el.textContent = ''; hide(el); }
+  }
+
+  function safeText(v, fallback) {
+    const s = (v ?? '').toString().trim();
+    return s ? s : fallback;
+  }
+
+  function listModules() {
+    return Array.from(document.querySelectorAll('.activity-group'));
+  }
+
+  function listMoments() {
+    const modules = listModules();
+    const out = [];
+    modules.forEach((modEl, mi) => {
+      const mt = safeText(modEl.querySelector('.activity-title')?.value, `Module ${mi + 1}`);
+      const moments = Array.from(modEl.querySelectorAll('.moment-group'));
+      moments.forEach((momEl, mosi) => {
+        const tt = safeText(momEl.querySelector('.moment-title')?.value, `Moment ${mosi + 1}`);
+        out.push({ modIndex: mi, momentIndex: mosi, modTitle: mt, momentTitle: tt, el: momEl, moduleEl: modEl });
+      });
+    });
+    return out;
+  }
+
+  function listActivities() {
+    const moments = listMoments();
+    const out = [];
+    moments.forEach((m) => {
+      const steps = Array.from(m.el.querySelectorAll('.step-card'));
+      steps.forEach((stepEl, si) => {
+        const st = safeText(stepEl.querySelector('.step-input-title')?.value, `Activité ${si + 1}`);
+        out.push({
+          modIndex: m.modIndex, momentIndex: m.momentIndex, stepIndex: si,
+          label: `${m.modTitle} — ${m.momentTitle} — ${st}`,
+          el: stepEl, momentEl: m.el, moduleEl: m.moduleEl
+        });
+      });
+    });
+    return out;
+  }
+
+  function buildStepDataFromEl(stepEl) {
+    return {
+      title: stepEl.querySelector('.step-input-title')?.value || "",
+      type: stepEl.querySelector('.learning-type-select')?.value || "acquisition",
+      duration: parseFloat(stepEl.querySelector('.duration-input')?.value || "0") || 0,
+      unit: stepEl.querySelector('.duration-unit')?.value || getDefaultDurationUnitKey?.() || "60"
+    };
+  }
+
+  function buildMomentDataFromEl(momentEl) {
+    const stepsContainer = momentEl.querySelector('.activity-steps-container');
+    const stepEls = stepsContainer ? Array.from(stepsContainer.querySelectorAll('.step-card')) : [];
+    return {
+      title: momentEl.querySelector('.moment-title')?.value || "",
+      description: momentEl.querySelector('.moment-description')?.value || "",
+      targetTime: momentEl.querySelector('.moment-target-time')?.value || "",
+      targetUnit: momentEl.querySelector('.moment-target-unit')?.value || (typeof getDefaultDurationUnitSecs === 'function' ? getDefaultDurationUnitSecs() : "60"),
+      steps: stepEls.map(buildStepDataFromEl)
+    };
+  }
+
+  function buildModuleDataFromEl(modEl) {
+    const momentsRoot = modEl.querySelector('.activity-moments-container');
+    const momentEls = momentsRoot ? Array.from(momentsRoot.querySelectorAll('.moment-group')) : [];
+    return {
+      title: modEl.querySelector('.activity-title')?.value || "",
+      description: modEl.querySelector('.activity-description')?.value || "",
+      targetTime: modEl.querySelector('.activity-target-time')?.value || "",
+      targetUnit: modEl.querySelector('.activity-target-unit')?.value || (typeof getDefaultDurationUnitKey === 'function' ? getDefaultDurationUnitKey() : "60"),
+      moments: momentEls.map(buildMomentDataFromEl)
+    };
+  }
+
+  function downloadJSON(filename, obj) {
+    const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  }
+
+  function populateExportItems() {
+    const type = $('template-export-type')?.value || 'module';
+    const sel = $('template-export-item');
+    if (!sel) return;
+    sel.innerHTML = '';
+    if (type === 'module') {
+      const mods = listModules();
+      mods.forEach((modEl, i) => {
+        const label = safeText(modEl.querySelector('.activity-title')?.value, `Module ${i + 1}`);
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ modIndex: i });
+        opt.textContent = label;
+        sel.appendChild(opt);
+      });
+    } else if (type === 'moment') {
+      const moms = listMoments();
+      moms.forEach((m) => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ modIndex: m.modIndex, momentIndex: m.momentIndex });
+        opt.textContent = `${m.modTitle} — ${m.momentTitle}`;
+        sel.appendChild(opt);
+      });
+    } else {
+      const acts = listActivities();
+      acts.forEach((a) => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ modIndex: a.modIndex, momentIndex: a.momentIndex, stepIndex: a.stepIndex });
+        opt.textContent = a.label;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
+  function openExport() {
+    setError('template-export-error', '');
+    populateExportItems();
+    show($('template-export-modal'));
+  }
+  function closeExport() { hide($('template-export-modal')); }
+
+  function openImport() {
+    setError('template-import-error', '');
+    const _tplLab = $('template-import-filelabel');
+    if (_tplLab) _tplLab.textContent = '';
+    loadedTemplate = null;
+    hide($('template-import-placements'));
+    hide($('tpl-place-module')); hide($('tpl-place-moment')); hide($('tpl-place-activity'));
+    show($('template-import-modal'));
+  }
+  function closeImport() { hide($('template-import-modal')); }
+
+  // API publique (utilisée par les attributs onclick des boutons "Modèles")
+  // On expose volontairement des wrappers stables afin d'éviter toute dépendance au routeur global.
+  function openTemplateExportModal() { return openExport(); }
+  function openTemplateImportModal() { return openImport(); }
+  window.__realOpenTemplateExport = openTemplateExportModal;
+  window.__realOpenTemplateImport = openTemplateImportModal;
+  if (typeof window.__flushPendingTemplateModal === 'function') window.__flushPendingTemplateModal();
+
+
+  function exportTemplateNow() {
+    setError('template-export-error', '');
+    const type = $('template-export-type')?.value || 'module';
+    const itemVal = $('template-export-item')?.value;
+    if (!itemVal) { setError('template-export-error', "Aucun élément sélectionné."); return; }
+
+    let path;
+    try { path = JSON.parse(itemVal); } catch { setError('template-export-error', "Sélection invalide."); return; }
+
+    let payload;
+    try {
+      if (type === 'module') {
+        const modEl = listModules()[path.modIndex];
+        if (!modEl) throw new Error("Module introuvable.");
+        payload = buildModuleDataFromEl(modEl);
+      } else if (type === 'moment') {
+        const modEl = listModules()[path.modIndex];
+        const momentEl = modEl?.querySelectorAll('.moment-group')?.[path.momentIndex];
+        if (!momentEl) throw new Error("Moment introuvable.");
+        payload = buildMomentDataFromEl(momentEl);
+      } else {
+        const modEl = listModules()[path.modIndex];
+        const momentEl = modEl?.querySelectorAll('.moment-group')?.[path.momentIndex];
+        const stepEl = momentEl?.querySelectorAll('.step-card')?.[path.stepIndex];
+        if (!stepEl) throw new Error("Activité introuvable.");
+        payload = buildStepDataFromEl(stepEl);
+      }
+    } catch (e) {
+      setError('template-export-error', e?.message || "Erreur lors de l’export.");
+      return;
+    }
+
+    const tpl = {
+      templateVersion: "1.0",
+      exportedAt: new Date().toISOString(),
+      type,
+      payload
+    };
+    const fn = `modele_${type}_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+    downloadJSON(fn, tpl);
+    closeExport();
+  }
+
+  function populateModuleAfterSelect() {
+    const sel = $('tpl-module-after');
+    if (!sel) return;
+    sel.innerHTML = '';
+    listModules().forEach((modEl, i) => {
+      const label = safeText(modEl.querySelector('.activity-title')?.value, `Module ${i + 1}`);
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+  }
+
+  function populateMomentPlacement() {
+    const modSel = $('tpl-moment-module');
+    const afterSel = $('tpl-moment-after');
+    if (!modSel || !afterSel) return;
+
+    modSel.innerHTML = '';
+    listModules().forEach((modEl, i) => {
+      const label = safeText(modEl.querySelector('.activity-title')?.value, `Module ${i + 1}`);
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = label;
+      modSel.appendChild(opt);
+    });
+
+    const fillAfter = () => {
+      afterSel.innerHTML = '';
+      const mi = parseInt(modSel.value || "0", 10);
+      const modEl = listModules()[mi];
+      const moments = modEl ? Array.from(modEl.querySelectorAll('.moment-group')) : [];
+      moments.forEach((momEl, j) => {
+        const label = safeText(momEl.querySelector('.moment-title')?.value, `Moment ${j + 1}`);
+        const opt = document.createElement('option');
+        opt.value = String(j);
+        opt.textContent = label;
+        afterSel.appendChild(opt);
+      });
+    };
+    modSel.onchange = fillAfter;
+    fillAfter();
+  }
+
+  function populateActivityPlacement() {
+    const modSel = $('tpl-act-module');
+    const momSel = $('tpl-act-moment');
+    const afterSel = $('tpl-act-after');
+    if (!modSel || !momSel || !afterSel) return;
+
+    modSel.innerHTML = '';
+    listModules().forEach((modEl, i) => {
+      const label = safeText(modEl.querySelector('.activity-title')?.value, `Module ${i + 1}`);
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = label;
+      modSel.appendChild(opt);
+    });
+
+    const fillMoments = () => {
+      momSel.innerHTML = '';
+      const mi = parseInt(modSel.value || "0", 10);
+      const modEl = listModules()[mi];
+      const moments = modEl ? Array.from(modEl.querySelectorAll('.moment-group')) : [];
+      moments.forEach((momEl, j) => {
+        const label = safeText(momEl.querySelector('.moment-title')?.value, `Moment ${j + 1}`);
+        const opt = document.createElement('option');
+        opt.value = String(j);
+        opt.textContent = label;
+        momSel.appendChild(opt);
+      });
+      fillAfter();
+    };
+
+    const fillAfter = () => {
+      afterSel.innerHTML = '';
+      const mi = parseInt(modSel.value || "0", 10);
+      const mosi = parseInt(momSel.value || "0", 10);
+      const modEl = listModules()[mi];
+      const momEl = modEl ? Array.from(modEl.querySelectorAll('.moment-group'))[mosi] : null;
+      const steps = momEl ? Array.from(momEl.querySelectorAll('.step-card')) : [];
+      steps.forEach((stepEl, k) => {
+        const label = safeText(stepEl.querySelector('.step-input-title')?.value, `Activité ${k + 1}`);
+        const opt = document.createElement('option');
+        opt.value = String(k);
+        opt.textContent = label;
+        afterSel.appendChild(opt);
+      });
+    };
+
+    modSel.onchange = fillMoments;
+    momSel.onchange = fillAfter;
+    fillMoments();
+  }
+
+  function applyPlacementUI(type) {
+    const _tplType = $('template-import-type');
+    if (_tplType) _tplType.textContent = type === 'module' ? 'Module' : (type === 'moment' ? 'Moment' : 'Activité');
+
+    hide($('tpl-place-module')); hide($('tpl-place-moment')); hide($('tpl-place-activity'));
+
+    if (type === 'module') {
+      populateModuleAfterSelect();
+      show($('tpl-place-module'));
+    } else if (type === 'moment') {
+      populateMomentPlacement();
+      show($('tpl-place-moment'));
+    } else {
+      populateActivityPlacement();
+      show($('tpl-place-activity'));
+    }
+
+    show($('template-import-placements'));
+  }
+
+  function readTemplateFile(file) {
+    setError('template-import-error', '');
+    if (!file) return;
+    const label = $('template-import-filelabel');
+    if (label) label.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const obj = JSON.parse(reader.result);
+        if (!obj || typeof obj !== 'object') throw new Error("Fichier invalide.");
+        if (!obj.type || !obj.payload) throw new Error("Modèle invalide (type/payload manquants).");
+        if (!['module', 'moment', 'activity'].includes(obj.type)) throw new Error("Type de modèle inconnu.");
+        loadedTemplate = { type: obj.type, payload: obj.payload };
+        applyPlacementUI(obj.type);
+      } catch (e) {
+        loadedTemplate = null;
+        hide($('template-import-placements'));
+        setError('template-import-error', e?.message || "Impossible de lire le modèle.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function insertModule(payload, position, afterIndex) {
+    if (typeof addActivityFromData !== 'function') throw new Error("Fonction d’ajout de module introuvable.");
+    addActivityFromData(payload);
+    const newEl = root?.lastElementChild;
+    if (!newEl) return;
+
+    const modules = listModules();
+    const targetIndex = (() => {
+      if (position === 'start') return 0;
+      if (position === 'end') return modules.length - 1; // already end
+      if (position === 'after') return Math.min((afterIndex ?? 0) + 1, modules.length - 1);
+      return modules.length - 1;
+    })();
+
+    // If already at end and target is end, nothing to do
+    if (position === 'end') return;
+
+    const ref = root.children[targetIndex];
+    if (ref && ref !== newEl) root.insertBefore(newEl, ref);
+  }
+
+  function insertMoment(payload, moduleIndex, position, afterMomentIndex) {
+    const modules = listModules();
+    const modEl = modules[moduleIndex];
+    if (!modEl) throw new Error("Module cible introuvable.");
+    const momentsRoot = modEl.querySelector('.activity-moments-container');
+    if (!momentsRoot) throw new Error("Conteneur de moments introuvable.");
+    if (!window.momentTemplate) {
+      // momentTemplate is a const in the outer scope, but in some builds it is not global; fallback to DOM lookup
+    }
+    const tpl = document.getElementById('moment-template');
+    if (!tpl) throw new Error("Template de moment introuvable.");
+    const clone = tpl.content.cloneNode(true);
+    const momentEl = clone.querySelector('.moment-group') || clone.firstElementChild;
+    // Fill fields
+    momentEl.querySelector('.moment-title').value = payload.title || "";
+    momentEl.querySelector('.moment-description').value = payload.description || "";
+    momentEl.querySelector('.moment-target-time').value = payload.targetTime || "";
+    const unitSel = momentEl.querySelector('.moment-target-unit');
+    if (unitSel) unitSel.value = payload.targetUnit || (typeof getDefaultDurationUnitSecs === 'function' ? getDefaultDurationUnitSecs() : "60");
+
+    const stepsContainer = momentEl.querySelector('.activity-steps-container');
+    if (stepsContainer) {
+      stepsContainer.innerHTML = '';
+      if (Array.isArray(payload.steps)) {
+        payload.steps.forEach(s => {
+          if (typeof addStepToContainerFromData === 'function') addStepToContainerFromData(stepsContainer, s);
+        });
+      }
+      if (typeof initSortableSteps === 'function') initSortableSteps(stepsContainer);
+    }
+
+    // Insert at right place
+    const existing = Array.from(momentsRoot.querySelectorAll('.moment-group'));
+    if (position === 'start') {
+      momentsRoot.insertBefore(momentEl, existing[0] || null);
+    } else if (position === 'after') {
+      const ref = existing[afterMomentIndex] || null;
+      if (ref && ref.nextSibling) momentsRoot.insertBefore(momentEl, ref.nextSibling);
+      else momentsRoot.appendChild(momentEl);
+    } else {
+      momentsRoot.appendChild(momentEl);
+    }
+
+    if (typeof updateMomentIndexes === 'function') updateMomentIndexes(modEl);
+  }
+
+  function insertActivity(payload, moduleIndex, momentIndex, position, afterStepIndex) {
+    const modules = listModules();
+    const modEl = modules[moduleIndex];
+    if (!modEl) throw new Error("Module cible introuvable.");
+    const momentEl = Array.from(modEl.querySelectorAll('.moment-group'))[momentIndex];
+    if (!momentEl) throw new Error("Moment cible introuvable.");
+    const stepsContainer = momentEl.querySelector('.activity-steps-container');
+    if (!stepsContainer) throw new Error("Conteneur d’activités introuvable.");
+
+    const tpl = document.getElementById('step-template');
+    if (!tpl) throw new Error("Template d’activité introuvable.");
+    const clone = tpl.content.cloneNode(true);
+    const stepEl = clone.querySelector('.step-card') || clone.firstElementChild;
+
+    stepEl.querySelector('.step-input-title').value = payload.title || "";
+    stepEl.querySelector('.learning-type-select').value = payload.type || "acquisition";
+    stepEl.querySelector('.duration-input').value = payload.duration || 0;
+    stepEl.querySelector('.duration-unit').value = payload.unit || (typeof getDefaultDurationUnitKey === 'function' ? getDefaultDurationUnitKey() : "60");
+
+    const existing = Array.from(stepsContainer.querySelectorAll('.step-card'));
+    if (position === 'start') {
+      stepsContainer.insertBefore(stepEl, existing[0] || null);
+    } else if (position === 'after') {
+      const ref = existing[afterStepIndex] || null;
+      if (ref && ref.nextSibling) stepsContainer.insertBefore(stepEl, ref.nextSibling);
+      else stepsContainer.appendChild(stepEl);
+    } else {
+      stepsContainer.appendChild(stepEl);
+    }
+
+    if (typeof initSortableSteps === 'function') initSortableSteps(stepsContainer);
+    if (typeof updateMomentIndexes === 'function') updateMomentIndexes(modEl);
+  }
+
+  function doImport() {
+    setError('template-import-error', '');
+    if (!loadedTemplate) { setError('template-import-error', "Aucun modèle chargé."); return; }
+
+    try {
+      if (loadedTemplate.type === 'module') {
+        const pos = $('tpl-module-position')?.value || 'end';
+        const afterIndex = parseInt($('tpl-module-after')?.value || "0", 10);
+        insertModule(loadedTemplate.payload, pos, afterIndex);
+      } else if (loadedTemplate.type === 'moment') {
+        const modIndex = parseInt($('tpl-moment-module')?.value || "0", 10);
+        const pos = $('tpl-moment-position')?.value || 'end';
+        const afterIndex = parseInt($('tpl-moment-after')?.value || "0", 10);
+        insertMoment(loadedTemplate.payload, modIndex, pos, afterIndex);
+      } else {
+        const modIndex = parseInt($('tpl-act-module')?.value || "0", 10);
+        const momIndex = parseInt($('tpl-act-moment')?.value || "0", 10);
+        const pos = $('tpl-act-position')?.value || 'end';
+        const afterIndex = parseInt($('tpl-act-after')?.value || "0", 10);
+        insertActivity(loadedTemplate.payload, modIndex, momIndex, pos, afterIndex);
+      }
+
+      if (typeof updateStats === 'function') updateStats();
+      closeImport();
+    } catch (e) {
+      setError('template-import-error', e?.message || "Erreur lors de l’import.");
+    }
+  }
+
+
+  // Expose minimal API for environments where click listeners are neutralised
+  window.__realOpenTemplateExport = openExport;
+  window.__realOpenTemplateImport = openImport;
+  if (typeof window.__flushPendingTemplateModal === 'function') window.__flushPendingTemplateModal();
+
+  // Assure un déclenchement immédiat des boutons Modèles, même si un routeur global intercepte les clics.
+  // Strictement limité aux IDs des boutons Modèles pour éviter toute interférence avec les autres actions.
+
+  // Bind UI (direct, no interaction with the global router)
+  function bind() {
+    // Toolbar buttons
+    $('btn-template-export')?.addEventListener('click', openExport);
+    $('btn-template-import')?.addEventListener('click', openImport);
+
+
+// Export modal controls
+    $('template-export-close')?.addEventListener('click', closeExport);
+    $('template-export-cancel')?.addEventListener('click', closeExport);
+    $('template-export-do')?.addEventListener('click', exportTemplateNow);
+    $('template-export-type')?.addEventListener('change', populateExportItems);
+
+    // Import modal controls
+    $('template-import-close')?.addEventListener('click', closeImport);
+    $('template-import-cancel')?.addEventListener('click', closeImport);
+    $('template-import-do')?.addEventListener('click', doImport);
+    $('template-import-pick')?.addEventListener('click', () => $('template-file-input')?.click());
+
+    // File input
+    $('template-file-input')?.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      readTemplateFile(f);
+      e.target.value = '';
+    });
+
+    // Hide "after" selectors when not needed
+    $('tpl-module-position')?.addEventListener('change', () => {
+      const isAfter = $('tpl-module-position').value === 'after';
+      $('tpl-module-after').disabled = !isAfter;
+    });
+    $('tpl-moment-position')?.addEventListener('change', () => {
+      const isAfter = $('tpl-moment-position').value === 'after';
+      $('tpl-moment-after').disabled = !isAfter;
+    });
+    $('tpl-act-position')?.addEventListener('change', () => {
+      const isAfter = $('tpl-act-position').value === 'after';
+      $('tpl-act-after').disabled = !isAfter;
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bind, { once: true });
+  } else {
+    bind();
+  }
+})();
+
 </script>
 <div id="js-error-banner" style="display:none; position:fixed; bottom:12px; left:12px; right:12px; z-index:9999; background:#fee2e2; color:#7f1d1d; padding:8px 10px; border:1px solid #fecaca; border-radius:10px; font-size:12px; line-height:1.2; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; box-shadow:0 10px 30px rgba(15,23,42,0.15);">
 <div style="display:flex; gap:10px; align-items:flex-start;">
@@ -8306,5 +8969,128 @@ function updateCharts() {
     </button>
 </div>
 </div>
+<!-- Modèles : Export / Import (DOM réel) -->
+<div class="hidden fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4 no-print" data-display="flex" id="template-export-modal">
+<div class="bg-white w-full max-w-xl rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+<div>
+<div class="text-sm font-semibold text-slate-800">Exporter un modèle</div>
+<div class="text-xs text-slate-500">Choisissez précisément l’élément à exporter.</div>
+</div>
+<button class="text-slate-500 hover:text-slate-800 px-2 py-1 rounded" id="template-export-close" type="button">✕</button>
+</div>
+<div class="p-4 space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div>
+<label class="text-xs font-medium text-slate-700">Niveau</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="template-export-type">
+<option value="module">Module</option>
+<option value="moment">Moment</option>
+<option value="activity">Activité</option>
+</select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Élément</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="template-export-item"></select>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-3 py-1.5 rounded-md border border-slate-300 text-sm text-slate-700 hover:bg-slate-50" id="template-export-cancel" type="button">Annuler</button>
+<button class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700" id="template-export-do" type="button">Exporter</button>
+</div>
+<div class="hidden text-sm text-red-600" id="template-export-error"></div>
+</div>
+</div>
+</div>
+<!-- Modèles : Import -->
+<div class="hidden fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4 no-print" data-display="flex" id="template-import-modal">
+<div class="bg-white w-full max-w-2xl rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+<div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+<div>
+<div class="text-sm font-semibold text-slate-800">Importer un modèle</div>
+<div class="text-xs text-slate-500">Choisissez précisément où insérer le modèle.</div>
+</div>
+<button class="text-slate-500 hover:text-slate-800 px-2 py-1 rounded" id="template-import-close" type="button">✕</button>
+</div>
+<div class="p-4 space-y-4">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700" id="template-import-pick" type="button">Choisir un fichier…</button>
+<div class="text-sm text-slate-600 truncate" id="template-import-filelabel"></div>
+</div>
+<div class="hidden space-y-3" id="template-import-placements">
+<div class="text-xs text-slate-500">Type détecté : <span class="font-semibold text-slate-700" id="template-import-type"></span></div>
+<!-- Placement module -->
+<div class="hidden border border-slate-200 rounded-lg p-3" id="tpl-place-module">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div>
+<label class="text-xs font-medium text-slate-700">Position</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-module-position">
+<option value="start">Au début</option>
+<option value="end">À la fin</option>
+<option value="after">Après…</option>
+</select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Module de référence</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-module-after"></select>
+</div>
+</div>
+</div>
+<!-- Placement moment -->
+<div class="hidden border border-slate-200 rounded-lg p-3" id="tpl-place-moment">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div>
+<label class="text-xs font-medium text-slate-700">Module cible</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-moment-module"></select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Position</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-moment-position">
+<option value="start">Au début</option>
+<option value="end">À la fin</option>
+<option value="after">Après…</option>
+</select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Moment de référence</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-moment-after"></select>
+</div>
+</div>
+</div>
+<!-- Placement activité -->
+<div class="hidden border border-slate-200 rounded-lg p-3" id="tpl-place-activity">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+<div>
+<label class="text-xs font-medium text-slate-700">Module cible</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-act-module"></select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Moment cible</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-act-moment"></select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Position</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-act-position">
+<option value="start">Au début</option>
+<option value="end">À la fin</option>
+<option value="after">Après…</option>
+</select>
+</div>
+<div>
+<label class="text-xs font-medium text-slate-700">Activité de référence</label>
+<select class="mt-1 w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" id="tpl-act-after"></select>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-3 py-1.5 rounded-md border border-slate-300 text-sm text-slate-700 hover:bg-slate-50" id="template-import-cancel" type="button">Annuler</button>
+<button class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700" id="template-import-do" type="button">Importer</button>
+</div>
+<div class="hidden text-sm text-red-600" id="template-import-error"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Fin Modèles (DOM réel) -->
 </body>
 </html>
