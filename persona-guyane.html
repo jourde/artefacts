@@ -392,13 +392,18 @@
             text-decoration: underline;
         }
         .suggestions-panel {
+            display: none;
             animation: fadeIn 0.3s ease;
             margin-bottom: 1rem;
             padding-left: 0.5rem;
             border-left: 2px solid var(--border);
         }
 
-        @keyframes fadeIn {
+        
+        body.show-suggestions .suggestions-panel {
+            display: block;
+        }
+@keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
@@ -477,7 +482,7 @@
 
     <header>
         <h1>Canevas de Persona pour le personnel d'éducation</h1>
-        <div class="subtitle">Concevoir des formations adaptées à la réalité terrain.</div>
+        <div class="subtitle">Prototype pour aider à concevoir des formations adaptées à la réalité terrain.</div>
         
         <!-- Added data-html2canvas-ignore to hide during PDF generation -->
         <div class="actions" data-html2canvas-ignore="true">
@@ -497,13 +502,25 @@
                 </div>
             </div>
 
-            <!-- Bloc Gestion -->
+            
+            <!-- Bloc Affichage -->
+            <div class="action-group">
+                <span class="action-group-title">Affichage</span>
+                <div class="btn-row">
+                    <label class="switch-label">
+                        <span>Suggestions</span>
+                        <label class="switch">
+                            <input type="checkbox" id="suggestionsToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+
+<!-- Bloc Gestion -->
             <div class="action-group">
                 <span class="action-group-title">Gestion</span>
                 <div class="btn-row">
-                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" data-tooltip="Charger une sauvegarde (.json)">
-                        <span class="material-icons">upload_file</span>
-                    </button>
                     <button class="btn btn-reset" onclick="resetForm()" data-tooltip="Réinitialiser le canevas">
                         <span class="material-icons">restart_alt</span>
                     </button>
@@ -514,6 +531,9 @@
             <div class="action-group">
                 <span class="action-group-title">IMPORT & EXPORT</span>
                 <div class="btn-row">
+                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" data-tooltip="Charger une sauvegarde (JSON)">
+                        <span class="material-icons">upload_file</span>
+                    </button>
                     <button class="btn btn-outline" onclick="saveData()" data-tooltip="Sauvegarder (JSON)">
                         <span class="material-icons">save</span>
                     </button>
@@ -533,10 +553,7 @@
             <div class="action-group">
                 <span class="action-group-title">Aide</span>
                 <div class="btn-row">
-                    <button class="btn btn-outline" onclick="loadExample()" data-tooltip="Charger l'exemple 'Sarah'">
-                        <span class="material-icons">face</span>
-                    </button>
-                    <button class="btn btn-outline" onclick="openHelpModal()" data-tooltip="Guide d'utilisation">
+<button class="btn btn-outline" onclick="openHelpModal()" data-tooltip="Guide d'utilisation">
                         <span class="material-icons">help</span>
                     </button>
                     <button class="btn btn-outline" onclick="openInfoModal()" data-tooltip="À propos">
@@ -631,13 +648,7 @@
                     <label>Type d'établissement</label>
                     <input type="text" placeholder="Ex: École de quartier..." id="schoolType">
                 </div>
-
-                <!-- Toggle Suggestions -->
-                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
-                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
-                </button>
-                
-                <div class="suggestions-panel" style="display: none;">
+                <div class="suggestions-panel">
                     <div class="form-group">
                         <label>Profil général de la classe</label>
                         <div class="checkbox-group">
@@ -686,14 +697,8 @@
                     <label>Détails</label>
                     <textarea id="digitalDetails" placeholder="Détails"></textarea>
                 </div>
-
-                <!-- Toggle Suggestions -->
-                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
-                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
-                </button>
-
                 <!-- Base -->
-                <div class="suggestions-panel" style="display: none;">
+                <div class="suggestions-panel">
                     <div class="form-group">
                         <label>Outils & Usages</label>
                         <div class="checkbox-group">
@@ -715,8 +720,8 @@
                 <div class="guyane-context">
                     <span class="guyane-label">Spécifique Guyane</span>
                     <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="systemD"> Système D (Ressources hors-ligne, partage de connexion)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="fracture"> Fracture numérique (Matériel obsolète)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="systemD"> Solutions de contournement numériques (ressources hors ligne, partage de connexion)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="fracture"> Fracture numérique (matériel)</label>
                         <label class="checkbox-item"><input type="checkbox" id="fracture_skills"> Fracture numérique (Compétences insuffisantes)</label>
                     </div>
                 </div>
@@ -732,14 +737,8 @@
                     <label>Détails</label>
                     <textarea id="motivationDetails" placeholder="Détails"></textarea>
                 </div>
-
-                <!-- Toggle Suggestions -->
-                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
-                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
-                </button>
-
                 <!-- Base -->
-                <div class="suggestions-panel" style="display: none;">
+                <div class="suggestions-panel">
                     <div class="form-group">
                         <label>Pourquoi se former ?</label>
                         <div class="checkbox-group">
@@ -775,14 +774,8 @@
                     <label>Détails</label>
                     <textarea id="obstacleDetails" placeholder="Détails"></textarea>
                 </div>
-
-                <!-- Toggle Suggestions -->
-                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
-                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
-                </button>
-
                 <!-- Base -->
-                <div class="suggestions-panel" style="display: none;">
+                <div class="suggestions-panel">
                     <div class="form-group">
                         <label>Obstacles à la formation</label>
                         <div class="checkbox-group">
@@ -816,14 +809,8 @@
                     <label>Détails</label>
                     <textarea id="formatDetails" placeholder="Détails"></textarea>
                 </div>
-
-                <!-- Toggle Suggestions -->
-                <button type="button" class="btn-toggle-suggestions" onclick="toggleSuggestions(this)">
-                    <span class="material-icons">add_circle_outline</span> Afficher les suggestions
-                </button>
-
                 <!-- Base -->
-                <div class="suggestions-panel" style="display: none;">
+                <div class="suggestions-panel">
                     <div class="form-group">
                         <label>Formats préférés</label>
                         <div class="checkbox-group">
@@ -874,31 +861,36 @@
             <h2 style="border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">Guide d'utilisation</h2>
             
             <div style="font-size: 0.95rem; line-height: 1.6; color: #334155;">
-                <p><strong>1. Objectif de l'outil</strong><br>
-                Ce canevas permet de modéliser le profil type d'un enseignant (persona) pour concevoir des formations adaptées à ses besoins réels, ses contraintes et son environnement.</p>
+<p><strong>1. Objectif</strong><br>
+Ce canevas sert à décrire un profil type (persona) afin de concevoir des formations réellement adaptées aux besoins, motivations, contraintes et contextes d’exercice.</p>
 
-                <p><strong>2. Gérer le contexte</strong><br>
-                Utilisez l'interrupteur en haut de page pour basculer entre :
-                <ul style="margin-top: 5px; margin-bottom: 10px;">
-                    <li><strong>Vue Standard :</strong> Les critères génériques pour tout personnel d'éducation.</li>
-                    <li><strong>Mode <span style="color: #059669; font-weight: bold;">Guyane</span> :</strong> Révèle les spécificités du territoire (isolement, climat, multilinguisme, logistique fleuve...).</li>
-                </ul>
-                </p>
+<p><strong>2. Basculer les vues (en haut de page)</strong><br>
+Deux interrupteurs pilotent l’affichage :
+<ul style="margin-top: 5px; margin-bottom: 10px;">
+    <li><strong>Standard / <span style="color: #059669; font-weight: bold;">Guyane</span> :</strong> active les items spécifiques au contexte guyanais (isolement, climat, logistique fleuve, multilinguisme, etc.).</li>
+    <li><strong>Suggestions :</strong> affiche (ou masque) d’un seul coup les listes de cases à cocher “Suggestions” dans tous les blocs.</li>
+</ul>
+</p>
 
-                <p><strong>3. Remplir le profil</strong><br>
-                <ul>
-                    <li><strong>Détails (Texte libre) :</strong> Décrivez les nuances qualitatives (anecdotes, contexte spécifique).</li>
-                    <li><strong>Suggestions :</strong> Cliquez sur <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85em;"><span class="material-icons" style="font-size: 12px; vertical-align: middle;">add_circle_outline</span> Afficher les suggestions</span> pour cocher rapidement des critères fréquents.</li>
-                </ul>
-                </p>
+<p><strong>3. Renseigner le persona</strong><br>
+<ul>
+    <li><strong>Texte libre :</strong> décrivez les éléments qualitatifs (exemples, anecdotes, précisions de contexte).</li>
+    <li><strong>Suggestions (cases à cocher) :</strong> activez l’interrupteur <strong>Suggestions</strong> pour faire apparaître les options, puis cochez ce qui correspond au profil.</li>
+</ul>
+</p>
 
-                <p><strong>4. Export & Sauvegarde</strong><br>
-                <ul>
-                    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">save</span> Sauvegarder (.json) :</strong> Pour enregistrer votre travail et le modifier plus tard (via le bouton "Charger").</li>
-                    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">picture_as_pdf</span> PDF :</strong> Pour imprimer ou partager la fiche persona visuelle.</li>
-                    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">integration_instructions</span> Markdown :</strong> Génère un texte structuré optimisé pour les IA. Copiez le contenu dans ChatGPT ou Gemini pour générer automatiquement un scénario de formation adapté à ce profil.</li>
-                </ul>
-                </p>
+<p><strong>4. Import & Export</strong><br>
+Le bloc <strong>IMPORT & EXPORT</strong> regroupe les actions de partage et de sauvegarde :
+<ul>
+    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">save</span> Sauvegarder (.json)</strong> : enregistre l’état du formulaire (y compris les interrupteurs) pour le reprendre plus tard.</li>
+    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">upload_file</span> Charger une sauvegarde (.json)</strong> : recharge un fichier précédemment sauvegardé.</li>
+    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">picture_as_pdf</span> PDF</strong> : génère une fiche persona imprimable/partageable.</li>
+    <li><strong><span class="material-icons" style="font-size: 14px; vertical-align: middle;">integration_instructions</span> Markdown</strong> : produit un texte structuré, utile pour copier-coller dans un assistant IA afin de générer un scénario ou un plan de formation contextualisé.</li>
+</ul>
+</p>
+
+<p style="margin-top: 12px;"><strong>Note</strong><br>
+Cet outil est un <strong>prototype non officiel</strong> : n’hésitez pas à partager vos retours et suggestions d’amélioration.</p>
             </div>
         </div>
     </div>
@@ -909,6 +901,7 @@
             <span class="close-btn" onclick="closeInfoModal()">&times;</span>
             <h2>À propos</h2>
             <p>Cet outil permet de modéliser les besoins, motivations et contraintes des personnels d'éducation afin de concevoir des formations adaptées.</p>
+            <p>Ce document est un prototype non officiel, partagé à des fins de collecte de suggestions d’amélioration.</p>
             <p><strong>Traitement local :</strong> toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.</p>
             <div class="modal-footer">
                 F. Jourde & J. Dubois (2026) • CC BY-SA
@@ -919,6 +912,7 @@
     <script>
         const toggle = document.getElementById('contextToggle');
         const body = document.body;
+        const suggestionsToggle = document.getElementById('suggestionsToggle');
         const infoModal = document.getElementById('infoModal');
         const helpModal = document.getElementById('helpModal');
 
@@ -931,28 +925,29 @@
             }
         });
 
-        // Toggle Suggestions Logic
-        function toggleSuggestions(btn) {
-            const panel = btn.nextElementSibling;
-            if (panel.style.display === "none") {
-                panel.style.display = "block";
-                btn.innerHTML = '<span class="material-icons">remove_circle_outline</span> Masquer les suggestions';
+        
+
+        // Suggestions (affichage global)
+        suggestionsToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.classList.add('show-suggestions');
             } else {
-                panel.style.display = "none";
-                btn.innerHTML = '<span class="material-icons">add_circle_outline</span> Afficher les suggestions';
+                body.classList.remove('show-suggestions');
             }
-        }
+        });
 
         // Save Functionality
         function saveData() {
             const data = {
                 contextToggle: toggle.checked,
+                suggestionsToggle: suggestionsToggle.checked,
                 fields: {}
             };
 
             // Capture standard inputs with IDs
             document.querySelectorAll('[id]').forEach(el => {
                 if(el.id === 'contextToggle') return; // Handled separately
+                if(el.id === 'suggestionsToggle') return; // Handled separately
                 if(el.id === 'fileInput') return; // Skip hidden input
 
                 if(el.type === 'checkbox') {
@@ -1011,6 +1006,11 @@
             toggle.checked = !!data.contextToggle;
             if(toggle.checked) body.classList.add('show-context');
             else body.classList.remove('show-context');
+
+            // Restore Suggestions Toggle
+            suggestionsToggle.checked = !!data.suggestionsToggle;
+            if(suggestionsToggle.checked) body.classList.add('show-suggestions');
+            else body.classList.remove('show-suggestions');
 
             // Restore Fields
             for (const [key, value] of Object.entries(data.fields)) {
@@ -1283,113 +1283,13 @@
             URL.revokeObjectURL(url);
         }
 
-        // Load Example Logic (Sarah)
-        function loadExample() {
-            // Activer le mode Guyane pour voir les champs remplis
-            toggle.checked = true;
-            body.classList.add('show-context');
-
-            // Identité
-            document.getElementById('name').value = "Sarah";
-            document.getElementById('level').value = "Élémentaire";
-            document.getElementById('discipline').value = ""; 
-            document.getElementById('status').value = "Contractuel";
-            document.getElementById('experience').value = "Débutante (1 an)";
-            document.querySelector('input[name="origin"][value="Local"]').checked = true;
-            document.getElementById('seniority').value = "Arrivant";
-
-            // Contexte
-            document.getElementById('contextDetails').value = "Classe de CP surchargée (28 élèves).";
-            document.getElementById('schoolType').value = "École de Camopi (Oyapock)";
-            document.getElementById('heterogeneity').checked = true;
-            document.getElementById('climate').checked = false;
-            // Nouveaux champs context
-            document.getElementById('multilevel').checked = false;
-            document.getElementById('overcrowded').checked = true; // Classe surchargée
-            document.getElementById('inclusion').checked = false;
-            document.getElementById('social').checked = true; // Précarité sociale probable
-            document.getElementById('turnover_students').checked = false;
-
-            document.getElementById('location').value = "Fleuve";
-            document.getElementById('allophone').checked = true;
-            document.getElementById('heat').checked = true;
-            document.getElementById('power').checked = true;
-
-            // Numérique
-            document.getElementById('digitalDetails').value = "Utilise son forfait perso pour télécharger des ressources quand le réseau passe.";
-            document.getElementById('office').checked = true;
-            document.getElementById('institution').checked = false;
-            document.getElementById('smartphone').checked = true;
-            // New items numeric
-            document.getElementById('no_computer').checked = false;
-            document.getElementById('basic_training').checked = false;
-            document.getElementById('paper_only').checked = false;
-            document.getElementById('social_watch').checked = true; // Probable pour une jeune contractuelle
-            document.getElementById('ai_curious').checked = false;
-            document.getElementById('cloud_academic').checked = false;
-
-            document.getElementById('systemD').checked = true;
-            document.getElementById('fracture').checked = false;
-            document.getElementById('fracture_skills').checked = false;
-
-            // Motivations
-            document.getElementById('motivationDetails').value = "Cherche des méthodes ludiques pour l'apprentissage de la lecture.";
-            document.getElementById('classManagement').checked = false;
-            document.getElementById('security').checked = true;
-            document.getElementById('time').checked = true;
-            
-            // Initialisation nouveaux champs motivation
-            document.getElementById('innovation').checked = true; // Cohérent avec "méthodes ludiques"
-            document.getElementById('wellbeing').checked = false;
-            document.getElementById('mutation').checked = false;
-            document.getElementById('project').checked = false;
-
-            document.getElementById('fls').checked = true;
-            document.getElementById('isolation').checked = true;
-
-            // Freins
-            document.getElementById('obstacleDetails').value = "Peu de temps personnel le soir (prépare tout à la main).";
-            document.getElementById('workload').checked = true;
-            // Initialisation nouveaux champs freins
-            document.getElementById('training_gap').checked = true; // Offre souvent inadaptée au contexte Wayampi
-            document.getElementById('logistics').checked = true; // Transport compliqué depuis Camopi
-            document.getElementById('language_barrier').checked = true; // Sarah ne parle pas la langue des élèves
-
-            document.getElementById('internet').checked = true;
-            document.getElementById('turnover').checked = true;
-            document.getElementById('jetlag').checked = false;
-
-            // Format
-            document.getElementById('formatDetails').value = "A besoin de fichiers audio légers à écouter en pirogue.";
-            document.getElementById('micro').checked = true;
-            document.getElementById('mobile').checked = true;
-            
-            // Initialisation nouveaux champs format
-            document.getElementById('visio').checked = false; // Pas de débit
-            document.getElementById('hybrid').checked = false;
-            document.getElementById('tutoring').checked = false;
-            document.getElementById('resources').checked = true; // Besoin de fiches outils
-
-            document.getElementById('offline').checked = true;
-            document.getElementById('whatsapp').checked = true;
-            document.getElementById('peer').checked = true;
-
-            // Scénario
-            document.getElementById('scenario').value = "Sarah, 24 ans. Enseigne le CP à Camopi. Ses élèves parlent Wayampi ou Teko, très peu le français. Elle est désespérée car les méthodes de lecture classiques ne fonctionnent pas. Internet par satellite est très lent et coupe souvent. Elle ne peut pas regarder de vidéos en streaming. Elle a besoin de fiches-outils illustrées (PDF légers) et de podcasts audio téléchargeables pour se former au FLS.";
-        }
-
         function resetForm() {
             document.getElementById('personaForm').reset();
             toggle.checked = false;
             body.classList.remove('show-context');
-            
-            // Fermer toutes les suggestions
-            document.querySelectorAll('.suggestions-panel').forEach(panel => {
-                panel.style.display = 'none';
-            });
-            document.querySelectorAll('.btn-toggle-suggestions').forEach(btn => {
-                btn.innerHTML = '<span class="material-icons">add_circle_outline</span> Afficher les suggestions';
-            });
+
+            suggestionsToggle.checked = false;
+            body.classList.remove('show-suggestions');
         }
 
         // Modal Logic
