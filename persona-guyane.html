@@ -549,6 +549,16 @@
                 </div>
             </div>
 
+
+            <!-- Bloc Améliorations (collecte de suggestions) -->
+            <div class="action-group">
+                <span class="action-group-title">AMÉLIORATIONS</span>
+                <div class="btn-row">
+                    <button class="btn btn-outline" onclick="openSuggestionsModal()" data-tooltip="Proposer une amélioration (export local)">
+                        <span class="material-icons">feedback</span>
+                    </button>
+                </div>
+            </div>
             <!-- Bloc Aide -->
             <div class="action-group">
                 <span class="action-group-title">Aide</span>
@@ -895,7 +905,77 @@ Cet outil est un <strong>prototype non officiel</strong> : n’hésitez pas à p
         </div>
     </div>
 
-    <!-- Modal Info (Ignored in PDF) -->
+    
+    <!-- Modal Suggestions (Ignored in PDF) -->
+    <div id="suggestionsModal" class="modal" data-html2canvas-ignore="true">
+        <div class="modal-content" style="max-width: 720px;">
+            <span class="close-btn" onclick="closeSuggestionsModal()">&times;</span>
+            <h2 style="border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">Proposer une amélioration</h2>
+
+            <div style="font-size: 0.95rem; line-height: 1.6; color: #334155;">
+                <p style="margin-top: 0;">
+                    Cet espace permet de proposer des améliorations sur le contenu ou l’interface. Les suggestions sont stockées localement dans votre navigateur et peuvent être exportées en fichier (JSON) afin de les partager.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; margin: 14px 0;">
+                    <div>
+                        <label for="suggestionCategory" style="display:block; font-weight: 600; margin-bottom: 6px;">Catégorie</label>
+                        <select id="suggestionCategory" class="input" style="width: 100%;">
+                            <option value="Contenu des blocs">Contenu des blocs</option>
+                            <option value="Libellés / vocabulaire">Libellés / vocabulaire</option>
+                            <option value="Suggestions proposées">Suggestions proposées</option>
+                            <option value="Ergonomie / interface">Ergonomie / interface</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="suggestionPriority" style="display:block; font-weight: 600; margin-bottom: 6px;">Priorité</label>
+                        <select id="suggestionPriority" class="input" style="width: 100%;">
+                            <option value="À discuter">À discuter</option>
+                            <option value="Faible">Faible</option>
+                            <option value="Moyenne">Moyenne</option>
+                            <option value="Élevée">Élevée</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin: 12px 0;">
+                    <label for="suggestionText" style="display:block; font-weight: 600; margin-bottom: 6px;">Suggestion</label>
+                    <textarea id="suggestionText" class="input" rows="5" style="width: 100%; resize: vertical;" placeholder="Décrivez votre proposition de manière précise (ex. libellé à modifier, option à ajouter/supprimer, clarification à apporter, etc.)."></textarea>
+                    <div style="font-size: 0.82rem; color: #64748b; margin-top: 6px;">
+                        Merci d’éviter toute donnée personnelle. Objectif : améliorer le contenu et l’ergonomie.
+                    </div>
+                </div>
+
+                <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px;">
+                    <button class="btn btn-primary" onclick="addSuggestion()">
+                        <span class="material-icons" style="vertical-align: middle;">add</span>
+                        Ajouter
+                    </button>
+                    <button class="btn btn-outline" onclick="exportSuggestions()" id="exportSuggestionsBtn">
+                        <span class="material-icons" style="vertical-align: middle;">download</span>
+                        Exporter les suggestions
+                    </button>
+                    <button class="btn btn-reset" onclick="clearSuggestions()" id="clearSuggestionsBtn" data-tooltip="Supprimer toutes les suggestions locales">
+                        <span class="material-icons">delete</span>
+                    </button>
+                    <span id="suggestionsCount" style="margin-left: auto; font-weight: 600; color:#0f172a;">0 suggestion</span>
+                </div>
+
+                <div style="margin-top: 14px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc;">
+                    <div style="font-weight: 700; margin-bottom: 6px;">Partager le fichier</div>
+                    <div style="font-size: 0.92rem; color:#334155;">
+                        Après export, merci de partager le fichier <strong>JSON</strong> (par exemple en pièce jointe dans un e-mail ou via votre canal habituel) afin de contribuer à l’amélioration du prototype.
+                    </div>
+                </div>
+
+                <div id="suggestionsList" style="margin-top: 14px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Modal Info (Ignored in PDF) -->
     <div id="infoModal" class="modal" data-html2canvas-ignore="true">
         <div class="modal-content">
             <span class="close-btn" onclick="closeInfoModal()">&times;</span>
@@ -915,6 +995,29 @@ Cet outil est un <strong>prototype non officiel</strong> : n’hésitez pas à p
         const suggestionsToggle = document.getElementById('suggestionsToggle');
         const infoModal = document.getElementById('infoModal');
         const helpModal = document.getElementById('helpModal');
+        const suggestionsModal = document.getElementById('suggestionsModal');
+
+        // Suggestions storage (local only)
+        const SUGGESTIONS_STORAGE_KEY = 'persona_guyane_suggestions_v1';
+        let suggestions = [];
+
+        function loadSuggestionsFromStorage() {
+            try {
+                const raw = localStorage.getItem(SUGGESTIONS_STORAGE_KEY);
+                suggestions = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(suggestions)) suggestions = [];
+            } catch (e) {
+                suggestions = [];
+            }
+        }
+
+        function saveSuggestionsToStorage() {
+            try {
+                localStorage.setItem(SUGGESTIONS_STORAGE_KEY, JSON.stringify(suggestions));
+            } catch (e) {
+                // Ignore storage errors (private browsing, quota, etc.)
+            }
+        }
 
         // Toggle logic
         toggle.addEventListener('change', function() {
@@ -1292,6 +1395,148 @@ Cet outil est un <strong>prototype non officiel</strong> : n’hésitez pas à p
             body.classList.remove('show-suggestions');
         }
 
+        
+        // Suggestions (local collection)
+        function pluraliseSuggestion(n) {
+            return n === 1 ? 'suggestion' : 'suggestions';
+        }
+
+        function formatDateTimeISO(dt) {
+            const pad = (x) => String(x).padStart(2, '0');
+            return dt.getFullYear()
+                + '-' + pad(dt.getMonth() + 1)
+                + '-' + pad(dt.getDate())
+                + ' ' + pad(dt.getHours())
+                + ':' + pad(dt.getMinutes());
+        }
+
+        function renderSuggestions() {
+            const countEl = document.getElementById('suggestionsCount');
+            const listEl = document.getElementById('suggestionsList');
+            if (!countEl || !listEl) return;
+
+            const n = suggestions.length;
+            countEl.textContent = `${n} ${pluraliseSuggestion(n)}`;
+
+            if (n === 0) {
+                listEl.innerHTML = '<div style="color:#64748b; font-size:0.92rem; margin-top: 8px;">Aucune suggestion enregistrée pour le moment.</div>';
+                return;
+            }
+
+            const items = suggestions
+                .slice()
+                .sort((a, b) => (b.created_at || 0) - (a.created_at || 0))
+                .map(s => {
+                    const created = s.created_at ? formatDateTimeISO(new Date(s.created_at)) : '';
+                    const cat = s.category || '—';
+                    const prio = s.priority || '—';
+                    const text = (s.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `
+                        <div style="border:1px solid #e2e8f0; border-radius:10px; padding:12px; background:#ffffff; margin-top:10px;">
+                            <div style="display:flex; gap:10px; align-items: baseline; flex-wrap: wrap;">
+                                <span style="font-weight:700; color:#0f172a;">${cat}</span>
+                                <span style="color:#64748b;">•</span>
+                                <span style="font-weight:600; color:#334155;">Priorité : ${prio}</span>
+                                ${created ? `<span style="margin-left:auto; color:#64748b; font-size:0.85rem;">${created}</span>` : `<span style="margin-left:auto;"></span>`}
+                            </div>
+                            <div style="margin-top:8px; white-space:pre-wrap; color:#0f172a;">${text}</div>
+                            <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+                                <button class="btn btn-reset" onclick="removeSuggestion('${s.id}')" data-tooltip="Supprimer cette suggestion">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>`;
+                })
+                .join('');
+
+            listEl.innerHTML = items;
+        }
+
+        function openSuggestionsModal() {
+            loadSuggestionsFromStorage();
+            renderSuggestions();
+            suggestionsModal.style.display = "block";
+        }
+
+        function closeSuggestionsModal() {
+            suggestionsModal.style.display = "none";
+        }
+
+        function addSuggestion() {
+            const catEl = document.getElementById('suggestionCategory');
+            const prioEl = document.getElementById('suggestionPriority');
+            const textEl = document.getElementById('suggestionText');
+
+            if (!textEl) return;
+
+            const text = (textEl.value || '').trim();
+            if (!text) {
+                alert('Merci de saisir une suggestion avant de l’ajouter.');
+                return;
+            }
+
+            const suggestion = {
+                id: 'sug_' + Math.random().toString(36).slice(2) + '_' + Date.now(),
+                created_at: Date.now(),
+                category: catEl ? catEl.value : 'Autre',
+                priority: prioEl ? prioEl.value : 'À discuter',
+                text: text
+            };
+
+            loadSuggestionsFromStorage();
+            suggestions.push(suggestion);
+            saveSuggestionsToStorage();
+
+            textEl.value = '';
+            renderSuggestions();
+        }
+
+        function removeSuggestion(id) {
+            loadSuggestionsFromStorage();
+            suggestions = suggestions.filter(s => s.id !== id);
+            saveSuggestionsToStorage();
+            renderSuggestions();
+        }
+
+        function clearSuggestions() {
+            const ok = confirm('Supprimer toutes les suggestions enregistrées localement ?');
+            if (!ok) return;
+            suggestions = [];
+            saveSuggestionsToStorage();
+            renderSuggestions();
+        }
+
+        function exportSuggestions() {
+            loadSuggestionsFromStorage();
+
+            if (!suggestions || suggestions.length === 0) {
+                alert('Aucune suggestion à exporter.');
+                return;
+            }
+
+            const payload = {
+                tool: 'Canevas de personas — Guyane (prototype)',
+                exported_at: new Date().toISOString(),
+                suggestions: suggestions
+            };
+
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const dt = new Date();
+            const pad = (x) => String(x).padStart(2, '0');
+            const filename = `suggestions-persona-guyane-${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}-${pad(dt.getHours())}${pad(dt.getMinutes())}${pad(dt.getSeconds())}.json`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+
         // Modal Logic
         function openInfoModal() {
             infoModal.style.display = "block";
@@ -1316,6 +1561,9 @@ Cet outil est un <strong>prototype non officiel</strong> : n’hésitez pas à p
             }
             if (event.target == helpModal) {
                 helpModal.style.display = "none";
+            }
+            if (event.target == suggestionsModal) {
+                suggestionsModal.style.display = "none";
             }
         }
     </script>
