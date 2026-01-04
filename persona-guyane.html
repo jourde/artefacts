@@ -599,8 +599,8 @@
                     <div class="form-group">
                         <label>Origine & Mobilité</label>
                         <div class="checkbox-group">
-                            <label class="checkbox-item"><input type="radio" name="origin" value="Muté"> Muté depuis Métropole/DOM</label>
-                            <label class="checkbox-item"><input type="radio" name="origin" value="Local"> Recrutement local / Originaire</label>
+                            <label class="checkbox-item"><input type="radio" name="origin" value="Muté"> Mutation depuis Métropole/DOM</label>
+                            <label class="checkbox-item"><input type="radio" name="origin" value="Local"> Recrutement local</label>
                         </div>
                     </div>
                     <div class="form-group">
@@ -617,7 +617,7 @@
 
             <!-- 2. CONTEXTE D'EXERCICE -->
             <div class="card">
-                <h2><span class="material-icons">place</span> Lieu & Classe</h2>
+                <h2><span class="material-icons">place</span> Localisation & classe</h2>
                 <div class="card-desc">Environnement et conditions d'exercice.</div>
                 
                 <!-- Champ texte libre (Détails) en premier et plus large (textarea) -->
@@ -669,8 +669,7 @@
                         <label>Réalités Terrain</label>
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="allophone"> Élèves allophones / Plurilinguisme fort</label>
-                            <label class="checkbox-item"><input type="checkbox" id="absenteeism"> Absentéisme (Saisons, pirogue)</label>
-                            <label class="checkbox-item"><input type="checkbox" id="heat"> Climatisation HS / Chaleur extrême</label>
+                            <label class="checkbox-item"><input type="checkbox" id="heat"> Ventilation HS / Chaleur extrême</label>
                             <label class="checkbox-item"><input type="checkbox" id="power"> Coupures électricité / Net HS</label>
                         </div>
                     </div>
@@ -718,6 +717,7 @@
                     <div class="checkbox-group">
                         <label class="checkbox-item"><input type="checkbox" id="systemD"> Système D (Ressources hors-ligne, partage de connexion)</label>
                         <label class="checkbox-item"><input type="checkbox" id="fracture"> Fracture numérique (Matériel obsolète)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="fracture_skills"> Fracture numérique (Compétences insuffisantes)</label>
                     </div>
                 </div>
             </div>
@@ -744,12 +744,12 @@
                         <label>Pourquoi se former ?</label>
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="classManagement"> Gestion de classe / Autorité</label>
-                            <label class="checkbox-item"><input type="checkbox" id="security"> Sécurisation Pro / Concours</label>
+                            <label class="checkbox-item"><input type="checkbox" id="security"> Préparation aux concours</label>
                             <label class="checkbox-item"><input type="checkbox" id="time"> Gain de temps (Ressources prêtes)</label>
                             <!-- Nouveaux ajouts -->
                             <label class="checkbox-item"><input type="checkbox" id="innovation"> Tester de nouvelles approches (Ludification, etc.)</label>
                             <label class="checkbox-item"><input type="checkbox" id="wellbeing"> Climat de classe / Bien-être</label>
-                            <label class="checkbox-item"><input type="checkbox" id="mutation"> Bonifier dossier mutation</label>
+                            <label class="checkbox-item"><input type="checkbox" id="mutation"> Évolution de carrière/perspectives</label>
                             <label class="checkbox-item"><input type="checkbox" id="project"> Monter un projet (Sortie, échange)</label>
                         </div>
                     </div>
@@ -759,8 +759,7 @@
                 <div class="guyane-context">
                     <span class="guyane-label">Spécifique Guyane</span>
                     <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" id="fls"> Urgence FLS (Français Langue de Scolarisation)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="culture"> Adaptation Culturelle (Codes locaux)</label>
+                        <label class="checkbox-item"><input type="checkbox" id="fls"> FLS</label>
                         <label class="checkbox-item"><input type="checkbox" id="isolation"> Rompre l'isolement géographique</label>
                     </div>
                 </div>
@@ -788,11 +787,9 @@
                         <label>Obstacles à la formation</label>
                         <div class="checkbox-group">
                             <label class="checkbox-item"><input type="checkbox" id="workload"> Charge de travail</label>
-                            <label class="checkbox-item"><input type="checkbox" id="useless"> Sentiment d'inutilité (Théorie vs Pratique)</label>
                             <!-- Nouveaux ajouts -->
                             <label class="checkbox-item"><input type="checkbox" id="training_gap"> Offre de formation inadaptée</label>
                             <label class="checkbox-item"><input type="checkbox" id="logistics"> Transport / Logistique (Accès formation)</label>
-                            <label class="checkbox-item"><input type="checkbox" id="hierarchy"> Manque de soutien hiérarchique</label>
                             <label class="checkbox-item"><input type="checkbox" id="language_barrier"> Barrière de la langue (Enseignant/Élèves)</label>
                         </div>
                     </div>
@@ -803,8 +800,7 @@
                     <span class="guyane-label">Spécifique Guyane</span>
                     <div class="checkbox-group">
                         <label class="checkbox-item"><input type="checkbox" id="internet"> Connexion domicile instable/inexistante</label>
-                        <label class="checkbox-item"><input type="checkbox" id="fatigue"> Fatigue climatique (Chaleur/Humidité)</label>
-                        <label class="checkbox-item"><input type="checkbox" id="turnover"> Turnover ("Je repars bientôt")</label>
+                        <label class="checkbox-item"><input type="checkbox" id="turnover"> Faible motivation</label>
                         <label class="checkbox-item"><input type="checkbox" id="jetlag"> Décalage horaire (si formateur métropole)</label>
                     </div>
                 </div>
@@ -1316,7 +1312,6 @@
 
             document.getElementById('location').value = "Fleuve";
             document.getElementById('allophone').checked = true;
-            document.getElementById('absenteeism').checked = true;
             document.getElementById('heat').checked = true;
             document.getElementById('power').checked = true;
 
@@ -1335,6 +1330,7 @@
 
             document.getElementById('systemD').checked = true;
             document.getElementById('fracture').checked = false;
+            document.getElementById('fracture_skills').checked = false;
 
             // Motivations
             document.getElementById('motivationDetails').value = "Cherche des méthodes ludiques pour l'apprentissage de la lecture.";
@@ -1349,22 +1345,17 @@
             document.getElementById('project').checked = false;
 
             document.getElementById('fls').checked = true;
-            document.getElementById('culture').checked = true;
             document.getElementById('isolation').checked = true;
 
             // Freins
             document.getElementById('obstacleDetails').value = "Peu de temps personnel le soir (prépare tout à la main).";
             document.getElementById('workload').checked = true;
-            document.getElementById('useless').checked = false;
-            
             // Initialisation nouveaux champs freins
             document.getElementById('training_gap').checked = true; // Offre souvent inadaptée au contexte Wayampi
             document.getElementById('logistics').checked = true; // Transport compliqué depuis Camopi
-            document.getElementById('hierarchy').checked = false;
             document.getElementById('language_barrier').checked = true; // Sarah ne parle pas la langue des élèves
 
             document.getElementById('internet').checked = true;
-            document.getElementById('fatigue').checked = true;
             document.getElementById('turnover').checked = true;
             document.getElementById('jetlag').checked = false;
 
