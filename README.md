@@ -8,7 +8,7 @@ Vous pouvez créer des adaptations (merci de m’en tenir informé si possible).
 ### Curseurs - interface de paramétrage de dimensions pédagogiques
   - [https://jourde.github.io/artefacts/curseurs.html](https://jourde.github.io/artefacts/curseurs.html)
 ### Personas - interface de conception de personas
-  - [https://jourde.github.io/artefacts/persona-guyane.html](https://jourde.github.io/artefacts/persona-guyane.html)
+  - Prototype en développement adapté au contexte de l'académie de Guyane: [https://jourde.github.io/artefacts/persona-guyane.html](https://jourde.github.io/artefacts/persona-guyane.html)
 ### Learning Designer - interface de conception pédagogique
   - [https://jourde.github.io/learning-designer](https://jourde.github.io/learning-designer)
 
