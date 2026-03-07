@@ -230,6 +230,11 @@
                         <span id="betaBadge" class="hidden md:inline-flex items-center justify-center bg-slate-200 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-400 uppercase tracking-wide">Beta</span>
                     </button>
 
+                    <button id="btnSummary" type="button" onclick="toggleSummary()" class="text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Afficher ou masquer la synthèse" aria-pressed="false" aria-controls="summaryPanel">
+                        <span class="material-icons-round text-lg" aria-hidden="true">article</span>
+                        <span id="btnSummaryLabel" class="text-xs font-semibold hidden xl:inline">Synthèse</span>
+                    </button>
+
                     <button id="btnSave" type="button" onclick="saveState()" class="text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Sauvegarder">
                         <span class="material-icons-round text-lg" aria-hidden="true">save</span>
                         <span id="btnSaveLabel" class="text-xs font-semibold hidden xl:inline">Sauvegarde</span>
@@ -331,6 +336,25 @@
                 <h2 id="alertsSectionHeading" class="sr-only">Points de vigilance</h2>
                 <div id="alertsContainer" class="hidden" hidden aria-live="polite" aria-atomic="true" role="region"></div>
             </section>
+
+            <section id="summaryPanel" class="mt-4 bg-white rounded-2xl shadow-sm border border-slate-300 hidden" hidden aria-hidden="true" aria-labelledby="summaryHeading">
+                <div class="p-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                        <div>
+                            <h2 id="summaryHeading" class="text-base font-bold text-slate-900">Synthèse dynamique</h2>
+                            <p id="summaryDescription" class="text-xs text-slate-700 mt-1">Résumé textuel de la configuration actuelle, prêt à copier-coller.</p>
+                        </div>
+                        <button id="copySummaryBtn" type="button" onclick="copySummary()" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors">
+                            <span class="material-icons-round text-base" aria-hidden="true">content_copy</span>
+                            <span id="copySummaryBtnLabel">Copier la synthèse</span>
+                        </button>
+                    </div>
+
+                    <label id="summaryOutputLabel" for="summaryOutput" class="sr-only">Texte de synthèse</label>
+                    <textarea id="summaryOutput" rows="11" readonly class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 leading-relaxed font-mono resize-y"></textarea>
+                    <p id="summaryHelp" class="text-[11px] text-slate-700 mt-2">Le texte est mis à jour automatiquement selon vos réglages.</p>
+                </div>
+            </section>
         </main>
 
         <footer class="mt-6 pt-4 border-t border-slate-300 text-center">
@@ -344,6 +368,7 @@
 
     <script>
         let alertsEnabled = false;
+        let summaryVisible = false;
         let currentLang = "fr";
         let sortableInstance = null;
         let activeModalId = null;
@@ -368,11 +393,13 @@
                     about: "Infos",
                     order: "Ordre",
                     analysis: "Analyse",
+                    summary: "Synthèse",
                     save: "Sauvegarde",
                     load: "Charger",
                     exportMd: "Export MD",
                     reset: "Réinitialiser",
                     analysisTitle: "Activer l'analyse",
+                    summaryTitle: "Afficher ou masquer la synthèse",
                     orderTitle: "Réorganiser",
                     aboutTitle: "À propos",
                     saveTitle: "Sauvegarder",
@@ -388,6 +415,10 @@
                     invalidFile: "Fichier de sauvegarde invalide.",
                     exportFailed: "L'export Markdown a échoué sur ce navigateur.",
                     exported: "Export Markdown généré.",
+                    summaryShown: "Synthèse affichée.",
+                    summaryHidden: "Synthèse masquée.",
+                    summaryCopied: "Synthèse copiée dans le presse-papiers.",
+                    summaryCopyFailed: "Impossible de copier la synthèse automatiquement.",
                     resetDone: "Tous les curseurs ont été réinitialisés à 50 %.",
                     languageChanged: "Langue de l'interface : {language}.",
                     orderApplied: "Nouvel ordre des dimensions appliqué.",
@@ -433,6 +464,20 @@
                     none: "Aucun point de vigilance détecté pour la configuration actuelle.",
                     regionLabel: "Points de vigilance"
                 },
+                summary: {
+                    heading: "Synthèse dynamique",
+                    description: "Résumé textuel de la configuration actuelle, prêt à copier-coller.",
+                    copy: "Copier la synthèse",
+                    copyTitle: "Copier la synthèse dans le presse-papiers",
+                    outputLabel: "Texte de synthèse",
+                    help: "Le texte est mis à jour automatiquement selon vos réglages.",
+                    title: "Synthèse de configuration pédagogique",
+                    formation: "Formation",
+                    date: "Date",
+                    dimensions: "Dimensions",
+                    alerts: "Points de vigilance",
+                    emptyFormation: "Non renseignée"
+                },
                 markdown: {
                     title: "Dispositif de formation",
                     info: "Informations",
@@ -464,11 +509,13 @@
                     about: "About",
                     order: "Order",
                     analysis: "Analysis",
+                    summary: "Summary",
                     save: "Save",
                     load: "Load",
                     exportMd: "Export MD",
                     reset: "Reset",
                     analysisTitle: "Enable analysis",
+                    summaryTitle: "Show or hide summary",
                     orderTitle: "Reorder",
                     aboutTitle: "About",
                     saveTitle: "Save",
@@ -485,6 +532,10 @@
                     invalidFile: "Invalid backup file.",
                     exportFailed: "Markdown export failed in this browser.",
                     exported: "Markdown export generated.",
+                    summaryShown: "Summary shown.",
+                    summaryHidden: "Summary hidden.",
+                    summaryCopied: "Summary copied to clipboard.",
+                    summaryCopyFailed: "Unable to copy summary automatically.",
                     resetDone: "All sliders were reset to 50%.",
                     languageChanged: "Interface language: {language}.",
                     orderApplied: "Dimension order applied.",
@@ -529,6 +580,20 @@
                     heading: "Attention points ({count})",
                     none: "No attention points detected for the current configuration.",
                     regionLabel: "Attention points"
+                },
+                summary: {
+                    heading: "Dynamic summary",
+                    description: "Text summary of the current configuration, ready to copy-paste.",
+                    copy: "Copy summary",
+                    copyTitle: "Copy summary to clipboard",
+                    outputLabel: "Summary text",
+                    help: "This text updates automatically as you change settings.",
+                    title: "Learning design configuration summary",
+                    formation: "Course",
+                    date: "Date",
+                    dimensions: "Dimensions",
+                    alerts: "Attention points",
+                    emptyFormation: "Not specified"
                 },
                 markdown: {
                     title: "Learning setup",
@@ -900,6 +965,7 @@
             setText("btnAboutLabel", "toolbar.about");
             setText("btnOrderLabel", "toolbar.order");
             setText("btnAlertsLabel", "toolbar.analysis");
+            setText("btnSummaryLabel", "toolbar.summary");
             setText("btnSaveLabel", "toolbar.save");
             setText("btnLoadLabel", "toolbar.load");
             setText("btnExportLabel", "toolbar.exportMd");
@@ -921,6 +987,11 @@
             setText("orderPanelInstruction", "orderPanel.instruction");
             setText("reorderKeyboardHelp", "orderPanel.keyboardHelp");
             setText("applyOrderBtn", "orderPanel.apply");
+            setText("summaryHeading", "summary.heading");
+            setText("summaryDescription", "summary.description");
+            setText("summaryOutputLabel", "summary.outputLabel");
+            setText("copySummaryBtnLabel", "summary.copy");
+            setText("summaryHelp", "summary.help");
 
             setText("footerCredits", "footer.credits");
             setText("footerCodePrefix", "footer.codePrefix");
@@ -947,10 +1018,12 @@
             setButtonMeta("btnAbout", "toolbar.aboutTitle");
             setButtonMeta("orderPanelToggle", "toolbar.orderTitle");
             setButtonMeta("btnAlerts", "toolbar.analysisTitle");
+            setButtonMeta("btnSummary", "toolbar.summaryTitle");
             setButtonMeta("btnSave", "toolbar.saveTitle");
             setButtonMeta("btnLoad", "toolbar.loadTitle");
             setButtonMeta("btnExport", "toolbar.exportTitle");
             setButtonMeta("btnReset", "toolbar.resetTitle");
+            setButtonMeta("copySummaryBtn", "summary.copyTitle");
             setButtonMeta("aboutCloseBtn", "common.close");
 
             const orderClose = document.getElementById("orderPanelClose");
@@ -976,6 +1049,7 @@
             }
 
             checkAlerts();
+            updateSummaryOutput();
             if (!options.silent) {
                 const languageName = currentLang === "fr" ? "Français" : "English";
                 announce(t("status.languageChanged", { language: languageName }));
@@ -1029,6 +1103,7 @@
 
             renderSliders();
             checkAlerts();
+            updateSummaryOutput();
         }
 
         function saveState() {
@@ -1238,6 +1313,32 @@
             setAlertsUI(alertsEnabled);
         }
 
+        function setSummaryUI(enabled, options = {}) {
+            const btn = document.getElementById("btnSummary");
+            const panel = document.getElementById("summaryPanel");
+            if (!btn || !panel) return;
+
+            summaryVisible = !!enabled;
+            btn.setAttribute("aria-pressed", String(summaryVisible));
+
+            if (summaryVisible) {
+                btn.classList.add("text-indigo-700", "bg-indigo-50");
+                btn.classList.remove("text-slate-700");
+                setHidden(panel, false);
+                updateSummaryOutput();
+                if (options.announceState !== false) announce(t("status.summaryShown"));
+            } else {
+                btn.classList.remove("text-indigo-700", "bg-indigo-50");
+                btn.classList.add("text-slate-700");
+                setHidden(panel, true);
+                if (options.announceState !== false) announce(t("status.summaryHidden"));
+            }
+        }
+
+        function toggleSummary() {
+            setSummaryUI(!summaryVisible);
+        }
+
         function renderSliders() {
             const container = document.getElementById("slidersContainer");
             if (!container) return;
@@ -1337,6 +1438,7 @@
             if (output) output.textContent = `${t("slider.currentLevel")} : ${labels[idx]}`;
 
             checkAlerts();
+            updateSummaryOutput();
         }
 
         function showTooltip(id, inputEl) {
@@ -1383,6 +1485,95 @@
             announce(t("status.recentered", { dimension: `${localized.leftTitle}${t("slider.axisSeparator")}${localized.rightTitle}` }));
         }
 
+        function getActiveAlerts() {
+            const values = dimensions.map((dim) => dim.value);
+            const isL = (idx) => values[idx] < 50;
+            const isR = (idx) => values[idx] > 50;
+
+            return ALERT_RULES
+                .filter((rule) => rule.when(isL, isR))
+                .map((rule) => rule[currentLang] || rule.fr);
+        }
+
+        function formatSummarySentenceCase(text, capitalizeFirst = true) {
+            const raw = String(text || "").replace(/\s+/g, " ").trim();
+            if (!raw) return "";
+            const locale = currentLang === "fr" ? "fr-FR" : "en-US";
+            const lowered = raw.toLocaleLowerCase(locale);
+            if (!capitalizeFirst) return lowered;
+            return lowered.charAt(0).toLocaleUpperCase(locale) + lowered.slice(1);
+        }
+
+        function buildSummaryText() {
+            const formation = (document.getElementById("formationInput")?.value || "").trim();
+            const orderedDims = currentOrder
+                .map((id) => dimensions.find((d) => d.id === id))
+                .filter(Boolean)
+                .map((dim) => getLocalizedDimension(dim));
+            const alerts = getActiveAlerts();
+            const locale = currentLang === "fr" ? "fr-FR" : "en-US";
+
+            const lines = [
+                t("summary.title"),
+                `${t("summary.formation")} : ${formation || t("summary.emptyFormation")}`,
+                `${t("summary.date")} : ${new Date().toLocaleString(locale)}`,
+                "",
+                `${t("summary.dimensions")} :`
+            ];
+
+            orderedDims.forEach((dim) => {
+                const labels = tickLabelsFor(dim);
+                const idx = Math.max(0, Math.min(4, Math.round(dim.value / 25)));
+                const left = formatSummarySentenceCase(dim.leftTitle, true);
+                const right = formatSummarySentenceCase(dim.rightTitle, false);
+                const axisName = `${left}${t("slider.axisSeparator")}${right}`;
+                const level = formatSummarySentenceCase(labels[idx] || "", false);
+                lines.push(`- ${axisName} : ${level}.`);
+            });
+
+            lines.push("");
+            lines.push(`${t("summary.alerts")} (${alerts.length}) :`);
+            if (alerts.length === 0) {
+                lines.push(`- ${t("alerts.none")}`);
+            } else {
+                alerts.forEach((item) => {
+                    const title = formatSummarySentenceCase(item.title, true);
+                    const body = formatSummarySentenceCase(item.body, true);
+                    lines.push(`- ${title} : ${body}`);
+                });
+            }
+
+            return lines.join("\n");
+        }
+
+        function updateSummaryOutput() {
+            const output = document.getElementById("summaryOutput");
+            if (!output) return;
+            output.value = buildSummaryText();
+        }
+
+        async function copySummary() {
+            const output = document.getElementById("summaryOutput");
+            if (!output) return;
+
+            const text = output.value || "";
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    output.focus();
+                    output.select();
+                    const copied = document.execCommand("copy");
+                    output.setSelectionRange(0, 0);
+                    if (!copied) throw new Error("copy failed");
+                }
+                announce(t("status.summaryCopied"));
+            } catch (error) {
+                console.warn("Unable to copy summary:", error);
+                announce(t("status.summaryCopyFailed"), true);
+            }
+        }
+
         function checkAlerts() {
             const container = document.getElementById("alertsContainer");
             if (!container) return;
@@ -1393,13 +1584,7 @@
                 return;
             }
 
-            const values = dimensions.map((dim) => dim.value);
-            const isL = (idx) => values[idx] < 50;
-            const isR = (idx) => values[idx] > 50;
-
-            const activeAlerts = ALERT_RULES
-                .filter((rule) => rule.when(isL, isR))
-                .map((rule) => rule[currentLang] || rule.fr);
+            const activeAlerts = getActiveAlerts();
 
             if (activeAlerts.length > 0) {
                 container.innerHTML = `
@@ -1522,6 +1707,7 @@
         function applyOrder() {
             syncOrderFromDom();
             renderSliders();
+            updateSummaryOutput();
             togglePanel("orderPanel");
             announce(t("status.orderApplied"));
         }
@@ -1607,6 +1793,7 @@
 
             renderSliders();
             checkAlerts();
+            updateSummaryOutput();
             hideResetModal();
             announce(t("status.resetDone"));
         }
@@ -1633,9 +1820,18 @@
                 });
             }
 
+            const formationInput = document.getElementById("formationInput");
+            if (formationInput) {
+                formationInput.addEventListener("input", () => {
+                    updateSummaryOutput();
+                });
+            }
+
             renderSliders();
             setAlertsUI(alertsEnabled, { announceState: false });
             checkAlerts();
+            setSummaryUI(summaryVisible, { announceState: false });
+            updateSummaryOutput();
 
             const orderPanel = document.getElementById("orderPanel");
             if (orderPanel) {
