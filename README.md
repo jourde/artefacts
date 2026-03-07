@@ -5,12 +5,9 @@ Vous pouvez créer des adaptations (merci de m’en tenir informé si possible).
 --
 
 ## Artefacts pour la conception pédagogique et la formation
-### Curseurs - interface de paramétrage de dimensions pédagogiques
-  - [https://jourde.github.io/artefacts/curseurs.html](https://jourde.github.io/artefacts/curseurs.html)
-### Personas - interface de conception de personas
-  - Prototype en développement adapté au contexte de l'académie de Guyane: [https://jourde.github.io/artefacts/persona-guyane.html](https://jourde.github.io/artefacts/persona-guyane.html)
-### Learning Designer - interface de conception pédagogique
-  - [https://jourde.github.io/learning-designer](https://jourde.github.io/learning-designer)
+- [Curseurs - interface de paramétrage de dimensions pédagogiques](https://jourde.github.io/artefacts/learning-design/curseurs.html)
+- [Personas - interface de conception de personas - Prototype adapté au contexte de l'académie de Guyane](https://jourde.github.io/artefacts/learning-design/persona-guyane.html)
+- [Learning Designer - interface de conception pédagogique](https://github.com/jourde/learning-designer)
 
 --
 
