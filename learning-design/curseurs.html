@@ -851,6 +851,15 @@
             return [left, `Intermediate (${left})`, "Balanced", `Intermediate (${right})`, right];
         }
 
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         function setHidden(element, hidden) {
             if (!element) return;
             element.hidden = hidden;
