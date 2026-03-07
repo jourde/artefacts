@@ -3,45 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration Formation à Distance</title>
+    <title>Curseurs de la conception pédagogique</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Sortable Library for reordering dimensions -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
+        :root {
+            --focus-outline: #1d4ed8;
+            --focus-ring: rgba(29, 78, 216, 0.25);
+            --text-strong: #0f172a;
+            --text-muted: #334155;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
+            color: var(--text-strong);
         }
 
-        /* Custom Slider Styling */
-        input[type=range] {
-            -webkit-appearance: none; 
-            background: transparent; 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
-        
-        input[type=range]::-webkit-slider-thumb {
+
+        .skip-link {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            z-index: 100;
+            transform: translateY(-200%);
+            background: #1d4ed8;
+            color: #ffffff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+        }
+
+        .skip-link:focus-visible {
+            transform: translateY(0);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--focus-outline);
+            outline-offset: 2px;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            box-shadow: 0 0 0 4px var(--focus-ring);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             height: 20px;
             width: 20px;
             border-radius: 50%;
-            background: #4f46e5;
+            background: #4338ca;
             cursor: grab;
-            margin-top: -8px; 
-            box-shadow: 0 2px 4px 0 rgba(79, 70, 229, 0.4);
-            border: 2px solid white;
+            margin-top: -8px;
+            box-shadow: 0 2px 4px 0 rgba(67, 56, 202, 0.4);
+            border: 2px solid #ffffff;
             transition: transform 0.1s ease;
         }
 
-        input[type=range]::-webkit-slider-thumb:active {
+        input[type="range"]::-webkit-slider-thumb:active {
             cursor: grabbing;
             transform: scale(1.1);
         }
 
-        input[type=range]::-webkit-slider-runnable-track {
+        input[type="range"]::-webkit-slider-runnable-track {
             width: 100%;
             height: 4px;
             cursor: pointer;
@@ -49,34 +96,56 @@
             border-radius: 9999px;
         }
 
-        input[type=range]:focus {
+        input[type="range"]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4338ca;
+            cursor: grab;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px 0 rgba(67, 56, 202, 0.4);
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: transparent;
+            border-radius: 9999px;
+        }
+
+        input[type="range"]:focus {
             outline: none;
         }
 
-        /* Sortable ghost styles */
-        .sortable-ghost {
-            opacity: 0.4;
-            background-color: #f1f5f9;
-            border: 2px dashed #94a3b8;
+        input[type="range"]:focus-visible::-webkit-slider-thumb,
+        input[type="range"]:focus-visible::-moz-range-thumb {
+            box-shadow: 0 0 0 4px var(--focus-ring);
         }
-        
+
+        .sortable-ghost {
+            opacity: 0.45;
+            background-color: #f1f5f9;
+            border: 2px dashed #64748b;
+        }
+
         .panel-content {
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
             max-height: 0;
             opacity: 0;
             overflow: hidden;
         }
+
         .panel-content.open {
-            max-height: 2000px;
+            max-height: 2200px;
             opacity: 1;
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-    
-        /* Slider tooltip (appears on hover/move) */
+
         .slider-tooltip {
             position: absolute;
             z-index: 30;
@@ -91,793 +160,1481 @@
             font-weight: 700;
             color: #0f172a;
             background: rgba(255, 255, 255, 0.98);
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
         }
-        .slider-tooltip.hidden { display: none; }
 
+        .slider-tooltip.hidden {
+            display: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-3 md:p-4">
+    <a id="skipLink" href="#mainContent" class="skip-link">Aller au contenu principal</a>
+    <div id="liveRegion" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-    <div class="max-w-4xl mx-auto">
-        <!-- Header Section -->
-        <header class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
-            <div class="mb-2 md:mb-0">
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Configuration Pédagogique</h1>
-                <p class="text-slate-500 mt-1 whitespace-nowrap overflow-x-auto">Définissez les dimensions de votre dispositif de formation</p>
-
-                <!-- Formation field -->
-                <div class="mt-5">
-                    <label for="formationInput" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Formation :</label>
-                    <input id="formationInput" type="text" placeholder="Nom de la formation" class="mt-2 w-full md:w-[420px] bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300" />
-                </div>
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col gap-3 mb-4">
+            <div>
+                <h1 id="pageTitle" class="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight whitespace-nowrap overflow-x-auto">Curseurs de la conception pédagogique</h1>
+                <p id="pageSubtitle" class="text-base text-slate-700 mt-0.5 whitespace-nowrap overflow-x-auto">Définissez les dimensions de votre dispositif de formation.</p>
             </div>
-            
-            <div class="flex flex-wrap gap-4 items-end">
-                <!-- Toolbar -->
-                <div class="flex flex-col gap-1">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Outils</span>
-                    <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1.5 gap-1 shadow-sm h-[52px]">
-                         <button onclick="showAboutModal()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="À propos">
-                            <span class="material-icons-round text-xl">info</span>
-                            <span class="text-sm font-semibold hidden md:inline">Infos</span>
-                        </button>
-                        <button onclick="togglePanel('orderPanel')" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Réorganiser">
-                            <span class="material-icons-round text-xl">sort</span>
-                            <span class="text-sm font-semibold hidden md:inline">Ordre</span>
-                        </button>
-                        
-                        <!-- Experimental Alert Button -->
-                        <button id="btnAlerts" onclick="toggleAlerts()" class="text-slate-400 hover:text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Activer l'analyse (Expérimental)">
-                            <span class="material-icons-round text-xl">science</span>
-                            <span class="text-sm font-semibold hidden md:inline">Analyse</span>
-                            <span id="betaBadge" class="hidden md:inline-flex items-center justify-center bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded border border-slate-200 uppercase tracking-wide">Beta</span>
-                        </button>
 
-
-<!-- Save / Load -->
-<button onclick="saveState()" class="text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Sauvegarder">
-    <span class="material-icons-round text-xl">save</span>
-    <span class="text-sm font-semibold hidden md:inline">Sauvegarde</span>
-</button>
-<button onclick="triggerLoad()" class="text-slate-600 hover:text-sky-600 hover:bg-sky-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Charger une sauvegarde">
-    <span class="material-icons-round text-xl">folder_open</span>
-    <span class="text-sm font-semibold hidden md:inline">Charger</span>
-</button>
-<button onclick="exportMarkdown()" class="text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-xl transition-colors flex items-center gap-2" title="Exporter en Markdown">
-    <span class="material-icons-round text-xl">description</span>
-    <span class="text-sm font-semibold hidden md:inline">Export MD</span>
-</button>
-
-<input id="loadFileInput" type="file" accept="application/json" class="hidden" onchange="loadStateFromFile(event)">
-
-                        <div class="w-px bg-slate-200 h-6 mx-1"></div>
-                        <button onclick="showResetModal()" class="text-slate-600 hover:text-rose-600 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-2" title="Réinitialiser">
-                            <span class="material-icons-round text-xl">restart_alt</span>
-                        </button>
+            <div class="flex flex-col gap-1">
+                <span id="toolsLabel" class="text-xs font-bold text-slate-700 uppercase tracking-wider">Outils et Informations</span>
+                <div class="flex flex-wrap items-center bg-white border border-slate-300 rounded-xl p-1 gap-0.5 shadow-sm" role="toolbar" aria-label="Outils et informations">
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 mr-1">
+                        <label id="languageLabel" for="languageSelect" class="text-[11px] font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Langue</label>
+                        <select id="languageSelect" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs text-slate-900" aria-describedby="languageHelp">
+                            <option id="langOptionFr" value="fr">Français</option>
+                            <option id="langOptionEn" value="en">English</option>
+                        </select>
+                        <span id="languageHelp" class="sr-only">Change la langue de l'interface.</span>
                     </div>
-                </div>
-            </div>
-        </header>
 
-        <!-- Custom Reset Modal -->
-        <div id="resetModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden" onclick="if(event.target === this) hideResetModal()">
-            <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 border border-slate-200 animate-[slideIn_0.2s_ease-out]">
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="bg-rose-100 p-3 rounded-full text-rose-600">
-                        <span class="material-icons-round">refresh</span>
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 mr-1">
+                        <label id="formationLabel" for="formationInput" class="text-[11px] font-bold text-slate-700 uppercase tracking-wider whitespace-nowrap">Formation</label>
+                        <input
+                            id="formationInput"
+                            type="text"
+                            placeholder="Nom de la formation"
+                            autocomplete="off"
+                            spellcheck="true"
+                            class="w-40 lg:w-48 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs text-slate-900 shadow-sm focus:border-indigo-600"
+                        />
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900">Réinitialiser ?</h3>
-                </div>
-                <p class="text-slate-600 text-sm mb-6">Tous les curseurs reviendront à leur position centrale (50%).</p>
-                <div class="flex gap-3 justify-end">
-                    <button onclick="hideResetModal()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Annuler</button>
-                    <button onclick="performReset()" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-md transition-colors">Réinitialiser</button>
-                </div>
-            </div>
-        </div>
 
-        <!-- About Modal -->
-        <div id="aboutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden" onclick="if(event.target === this) hideAboutModal()">
-            <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full mx-4 border border-slate-200 relative animate-[slideIn_0.2s_ease-out]">
-                <button onclick="hideAboutModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
-                    <span class="material-icons-round">close</span>
-                </button>
-                
-                <h3 class="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
-                    <span class="material-icons-round text-indigo-500">info</span>
-                    À propos
-                </h3>
-                
-                <div class="space-y-4">
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        Cet outil permet de visualiser et d'équilibrer les 6 dimensions structurelles de votre dispositif de formation.
-                    </p>
-                    <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
-                        <p class="text-xs text-indigo-800 leading-relaxed italic">
-                            Inspiré de : Docq et al. 2023. Enseigner à distance: 5 balises pour vous lancer. Presses universitaires de Louvain.
-                        </p>
-                    </div>
-                    <p class="text-xs text-slate-500 flex items-center gap-2">
-                        <span class="material-icons-round text-sm text-emerald-500">verified_user</span>
-                        Traitement local : toutes les données restent sur votre navigateur, rien n'est envoyé en ligne.
-                    </p>
-                    <div class="text-[10px] text-slate-400 border-t border-slate-100 pt-3 mt-4">
-                        F. Jourde & J. Dubois (2026) • CC BY-SA
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <button id="btnAbout" type="button" onclick="showAboutModal()" class="text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="À propos">
+                        <span class="material-icons-round text-lg" aria-hidden="true">info</span>
+                        <span id="btnAboutLabel" class="text-xs font-semibold hidden xl:inline">Infos</span>
+                    </button>
 
-        <!-- Panel: Reorder Dimensions -->
-        <div id="orderPanel" class="mb-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden panel-content">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <span class="material-icons-round text-indigo-500">unfold_more</span>
-                        Priorité des dimensions
-                    </h3>
-                    <button onclick="togglePanel('orderPanel')" class="text-slate-400 hover:text-slate-600 p-1 rounded-full"><span class="material-icons-round">close</span></button>
-                </div>
-                <p class="text-sm text-slate-500 mb-6">Glissez-déposez pour réorganiser l'affichage.</p>
-                <ul id="sortableList" class="space-y-2 max-w-2xl">
-                    <!-- List items generated by JS -->
-                </ul>
-                <div class="mt-6 pt-6 border-t border-slate-100">
-                    <button onclick="applyOrder()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95">
-                        Mettre à jour l'affichage
+                    <button id="orderPanelToggle" type="button" onclick="togglePanel('orderPanel')" class="text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Réorganiser" aria-expanded="false" aria-controls="orderPanel">
+                        <span class="material-icons-round text-lg" aria-hidden="true">sort</span>
+                        <span id="btnOrderLabel" class="text-xs font-semibold hidden xl:inline">Ordre</span>
+                    </button>
+
+                    <button id="btnAlerts" type="button" onclick="toggleAlerts()" class="text-slate-700 hover:text-amber-700 hover:bg-amber-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Activer l'analyse" aria-pressed="false">
+                        <span class="material-icons-round text-lg" aria-hidden="true">science</span>
+                        <span id="btnAlertsLabel" class="text-xs font-semibold hidden xl:inline">Analyse</span>
+                        <span id="betaBadge" class="hidden md:inline-flex items-center justify-center bg-slate-200 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-400 uppercase tracking-wide">Beta</span>
+                    </button>
+
+                    <button id="btnSave" type="button" onclick="saveState()" class="text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Sauvegarder">
+                        <span class="material-icons-round text-lg" aria-hidden="true">save</span>
+                        <span id="btnSaveLabel" class="text-xs font-semibold hidden xl:inline">Sauvegarde</span>
+                    </button>
+
+                    <button id="btnLoad" type="button" onclick="triggerLoad()" class="text-slate-700 hover:text-sky-700 hover:bg-sky-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Charger une sauvegarde">
+                        <span class="material-icons-round text-lg" aria-hidden="true">folder_open</span>
+                        <span id="btnLoadLabel" class="text-xs font-semibold hidden xl:inline">Charger</span>
+                    </button>
+
+                    <button id="btnExport" type="button" onclick="exportMarkdown()" class="text-slate-700 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1.5 rounded-xl transition-colors flex items-center gap-1.5" title="Exporter en Markdown">
+                        <span class="material-icons-round text-lg" aria-hidden="true">description</span>
+                        <span id="btnExportLabel" class="text-xs font-semibold hidden xl:inline">Export MD</span>
+                    </button>
+
+                    <input id="loadFileInput" type="file" accept="application/json" class="hidden" onchange="loadStateFromFile(event)" aria-hidden="true" tabindex="-1">
+
+                    <div class="w-px bg-slate-300 h-6 mx-1" aria-hidden="true"></div>
+
+                    <button id="btnReset" type="button" onclick="showResetModal()" class="text-slate-700 hover:text-rose-700 hover:bg-rose-50 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Réinitialiser">
+                        <span class="material-icons-round text-lg" aria-hidden="true">restart_alt</span>
+                        <span id="btnResetLabel" class="text-xs font-semibold hidden xl:inline">Réinitialiser</span>
                     </button>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            
-            <!-- Main Content Area: Sliders -->
-            <div class="lg:col-span-2 space-y-4" id="slidersContainer">
-                <!-- Sliders dynamically injected here -->
+            <p id="statusMessage" class="text-xs text-slate-800 min-h-[1rem]" role="status" aria-live="polite"></p>
+        </header>
+
+        <main id="mainContent" tabindex="-1">
+            <div id="resetModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 backdrop-blur-sm hidden" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle" aria-describedby="resetModalBody" onclick="if(event.target === this) hideResetModal()">
+                <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 border border-slate-300 animate-[slideIn_0.2s_ease-out]">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-rose-100 p-3 rounded-full text-rose-700" aria-hidden="true">
+                            <span class="material-icons-round">refresh</span>
+                        </div>
+                        <h2 id="resetModalTitle" class="text-lg font-bold text-slate-900">Réinitialiser ?</h2>
+                    </div>
+                    <p id="resetModalBody" class="text-slate-800 text-sm mb-6">Tous les curseurs reviendront à leur position centrale (50%).</p>
+                    <div class="flex gap-3 justify-end">
+                        <button id="resetCancelBtn" type="button" onclick="hideResetModal()" class="px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">Annuler</button>
+                        <button id="resetConfirmBtn" type="button" onclick="performReset()" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-700 hover:bg-indigo-800 rounded-lg shadow-md transition-colors">Réinitialiser</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Sidebar: Alerts -->
-            <div class="space-y-6 lg:sticky lg:top-8">
-                 <div id="alertsContainer" class="hidden">
-                     <!-- Alerts injected here by JS -->
-                 </div>
-            </div>
-        </div>
+            <div id="aboutModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 backdrop-blur-sm hidden" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="aboutModalTitle" onclick="if(event.target === this) hideAboutModal()">
+                <div class="bg-white rounded-2xl p-6 shadow-2xl max-w-md w-full mx-4 border border-slate-300 relative animate-[slideIn_0.2s_ease-out]">
+                    <button id="aboutCloseBtn" type="button" onclick="hideAboutModal()" class="absolute top-4 right-4 text-slate-700 hover:text-slate-900 transition-colors" aria-label="Fermer">
+                        <span class="material-icons-round" aria-hidden="true">close</span>
+                    </button>
 
-        <!-- Footer Section -->
-        <footer class="mt-16 pt-8 border-t border-slate-200 text-center">
-            <p class="text-xs text-slate-500 font-medium">François Jourde & Jacques Dubois (2026) — CC BY SA</p>
-            <p class="text-xs text-slate-400 mt-2">
-                Code disponible sur 
-                <a href="https://github.com/jourde/artefacts" target="_blank" rel="noopener noreferrer" class="text-indigo-500 hover:text-indigo-600 hover:underline transition-colors">
-                    https://github.com/jourde/artefacts
-                </a>
+                    <h2 id="aboutModalTitle" class="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+                        <span class="material-icons-round text-indigo-700" aria-hidden="true">info</span>
+                        <span id="aboutModalTitleText">À propos</span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        <p id="aboutDescription" class="text-sm text-slate-800 leading-relaxed">Cet outil permet de visualiser et d'équilibrer les six dimensions structurelles de votre dispositif de formation.</p>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                            <p id="aboutReference" class="text-sm text-indigo-900 leading-relaxed italic">Inspiré de : Docq et al. 2023. Enseigner à distance : 5 balises pour vous lancer. Presses universitaires de Louvain.</p>
+                        </div>
+                        <p id="aboutLocalProcessing" class="text-sm text-slate-800 flex items-center gap-2">
+                            <span class="material-icons-round text-base text-emerald-700" aria-hidden="true">verified_user</span>
+                            Traitement local : toutes les données restent dans votre navigateur.
+                        </p>
+                        <div id="aboutCredits" class="text-xs text-slate-700 border-t border-slate-200 pt-3 mt-4">F. Jourde & J. Dubois (2026) • CC BY-SA</div>
+                    </div>
+                </div>
+            </div>
+
+            <section id="orderPanel" class="mb-6 bg-white rounded-2xl shadow-sm border border-slate-300 overflow-hidden panel-content" aria-hidden="true" inert>
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 id="orderPanelHeading" class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span class="material-icons-round text-indigo-700" aria-hidden="true">unfold_more</span>
+                            Priorité des dimensions
+                        </h2>
+                        <button id="orderPanelClose" type="button" onclick="togglePanel('orderPanel')" class="text-slate-700 hover:text-slate-900 p-1 rounded-full" aria-label="Fermer la section d'ordre">
+                            <span class="material-icons-round" aria-hidden="true">close</span>
+                        </button>
+                    </div>
+                    <p id="orderPanelInstruction" class="text-sm text-slate-800 mb-2">Glissez-déposez ou utilisez les boutons Monter/Descendre pour réorganiser l'affichage.</p>
+                    <p id="reorderKeyboardHelp" class="text-sm text-slate-700 mb-6">Chaque dimension dispose de boutons clavier pour changer sa position.</p>
+
+                    <ul id="sortableList" class="space-y-2 max-w-2xl" aria-describedby="reorderKeyboardHelp"></ul>
+
+                    <div class="mt-6 pt-6 border-t border-slate-200">
+                        <button id="applyOrderBtn" type="button" onclick="applyOrder()" class="bg-indigo-700 hover:bg-indigo-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-300 transition-all active:scale-95">Mettre à jour l'affichage</button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                <section class="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-3 content-start" id="slidersContainer" aria-labelledby="slidersHeading">
+                    <h2 id="slidersHeading" class="sr-only">Dimensions pédagogiques</h2>
+                </section>
+
+                <aside class="space-y-4 lg:sticky lg:top-4" aria-labelledby="alertsSectionHeading">
+                    <h2 id="alertsSectionHeading" class="sr-only">Points de vigilance</h2>
+                    <div id="alertsContainer" class="hidden" hidden aria-live="polite" aria-atomic="true" role="region"></div>
+                </aside>
+            </div>
+        </main>
+
+        <footer class="mt-6 pt-4 border-t border-slate-300 text-center">
+            <p id="footerCredits" class="text-xs text-slate-800 font-medium">François Jourde & Jacques Dubois (2026) - CC BY-SA</p>
+            <p class="text-xs text-slate-700 mt-1">
+                <span id="footerCodePrefix">Code disponible sur</span>
+                <a href="https://github.com/jourde/artefacts" target="_blank" rel="noopener noreferrer" class="text-indigo-800 hover:text-indigo-900 hover:underline transition-colors">https://github.com/jourde/artefacts</a>
             </p>
         </footer>
-
     </div>
 
     <script>
-        // --- State Management ---
-        let alertsEnabled = false; // Default off (Experimental)
-        
+        let alertsEnabled = false;
+        let currentLang = "fr";
+        let sortableInstance = null;
+        let activeModalId = null;
+        let previousFocusedElement = null;
+
+        const STORAGE_KEY = "config_pedagogique_state_v2";
+
+        const I18N = {
+            fr: {
+                pageTitle: "Curseurs de la conception pédagogique",
+                pageSubtitle: "Définissez les dimensions de votre dispositif de formation.",
+                skipToMain: "Aller au contenu principal",
+                formationLabel: "Formation",
+                formationPlaceholder: "Nom de la formation",
+                languageLabel: "Langue",
+                languageHelp: "Change la langue de l'interface.",
+                langOptionFr: "Français",
+                langOptionEn: "English",
+                toolsLabel: "Outils et Informations",
+                toolbarAriaLabel: "Outils et informations",
+                toolbar: {
+                    about: "Infos",
+                    order: "Ordre",
+                    analysis: "Analyse",
+                    save: "Sauvegarde",
+                    load: "Charger",
+                    exportMd: "Export MD",
+                    reset: "Réinitialiser",
+                    analysisTitle: "Activer l'analyse",
+                    orderTitle: "Réorganiser",
+                    aboutTitle: "À propos",
+                    saveTitle: "Sauvegarder",
+                    loadTitle: "Charger une sauvegarde",
+                    exportTitle: "Exporter en Markdown",
+                    resetTitle: "Réinitialiser"
+                },
+                status: {
+                    alertsEnabled: "Analyse activée.",
+                    saved: "Configuration sauvegardée localement et exportée en fichier JSON.",
+                    loaded: "Configuration chargée.",
+                    localLoaded: "Configuration locale restaurée.",
+                    invalidFile: "Fichier de sauvegarde invalide.",
+                    exportFailed: "L'export Markdown a échoué sur ce navigateur.",
+                    exported: "Export Markdown généré.",
+                    resetDone: "Tous les curseurs ont été réinitialisés à 50 %.",
+                    languageChanged: "Langue de l'interface : {language}.",
+                    orderApplied: "Nouvel ordre des dimensions appliqué.",
+                    movedUp: "{dimension} déplacée vers le haut.",
+                    movedDown: "{dimension} déplacée vers le bas.",
+                    recentered: "Dimension recentrée : {dimension}."
+                },
+                common: {
+                    close: "Fermer",
+                    cancel: "Annuler",
+                    beta: "Bêta"
+                },
+                slider: {
+                    recenter: "Recentrer",
+                    currentLevel: "Niveau sélectionné",
+                    keyboardHelp: "Utilisez les flèches gauche et droite pour modifier la valeur.",
+                    label: "Dimension {left} à {right}",
+                    axisSeparator: " / "
+                },
+                resetModal: {
+                    title: "Réinitialiser ?",
+                    body: "Tous les curseurs reviendront à leur position centrale (50%).",
+                    confirm: "Réinitialiser"
+                },
+                aboutModal: {
+                    title: "À propos",
+                    description: "Cet outil permet de visualiser et d'équilibrer les six dimensions structurelles de votre dispositif de formation.",
+                    reference: "Inspiré de : Docq et al. 2023. Enseigner à distance : 5 balises pour vous lancer. Presses universitaires de Louvain.",
+                    localProcessing: "Traitement local : toutes les données restent dans votre navigateur.",
+                    credits: "F. Jourde & J. Dubois (2026) • CC BY-SA"
+                },
+                orderPanel: {
+                    heading: "Priorité des dimensions",
+                    instruction: "Glissez-déposez ou utilisez les boutons Monter/Descendre pour réorganiser l'affichage.",
+                    keyboardHelp: "Chaque dimension dispose de boutons clavier pour changer sa position.",
+                    closeLabel: "Fermer la section d'ordre",
+                    apply: "Mettre à jour l'affichage",
+                    moveUp: "Monter",
+                    moveDown: "Descendre"
+                },
+                alerts: {
+                    heading: "Points de vigilance ({count})",
+                    none: "Aucun point de vigilance détecté pour la configuration actuelle.",
+                    regionLabel: "Points de vigilance"
+                },
+                markdown: {
+                    title: "Dispositif de formation",
+                    info: "Informations",
+                    formation: "Formation",
+                    date: "Date",
+                    dimensions: "Dimensions",
+                    colDimension: "Dimension",
+                    colTick: "Cran",
+                    empty: "—"
+                },
+                footer: {
+                    credits: "François Jourde & Jacques Dubois (2026) - CC BY-SA",
+                    codePrefix: "Code disponible sur"
+                }
+            },
+            en: {
+                pageTitle: "Learning design configuration",
+                pageSubtitle: "Define the structural dimensions of your learning setup.",
+                skipToMain: "Skip to main content",
+                formationLabel: "Course",
+                formationPlaceholder: "Course name",
+                languageLabel: "Language",
+                languageHelp: "Changes the interface language.",
+                langOptionFr: "Français",
+                langOptionEn: "English",
+                toolsLabel: "Tools and Information",
+                toolbarAriaLabel: "Tools and information",
+                toolbar: {
+                    about: "About",
+                    order: "Order",
+                    analysis: "Analysis",
+                    save: "Save",
+                    load: "Load",
+                    exportMd: "Export MD",
+                    reset: "Reset",
+                    analysisTitle: "Enable analysis",
+                    orderTitle: "Reorder",
+                    aboutTitle: "About",
+                    saveTitle: "Save",
+                    loadTitle: "Load a backup",
+                    exportTitle: "Export as Markdown",
+                    resetTitle: "Reset"
+                },
+                status: {
+                    alertsEnabled: "Analysis enabled.",
+                    alertsDisabled: "Analysis disabled.",
+                    saved: "Configuration saved locally and exported as JSON.",
+                    loaded: "Configuration loaded.",
+                    localLoaded: "Local configuration restored.",
+                    invalidFile: "Invalid backup file.",
+                    exportFailed: "Markdown export failed in this browser.",
+                    exported: "Markdown export generated.",
+                    resetDone: "All sliders were reset to 50%.",
+                    languageChanged: "Interface language: {language}.",
+                    orderApplied: "Dimension order applied.",
+                    movedUp: "{dimension} moved up.",
+                    movedDown: "{dimension} moved down.",
+                    recentered: "Dimension recentered: {dimension}."
+                },
+                common: {
+                    close: "Close",
+                    cancel: "Cancel",
+                    beta: "Beta"
+                },
+                slider: {
+                    recenter: "Recenter",
+                    currentLevel: "Selected level",
+                    keyboardHelp: "Use left and right arrow keys to change the value.",
+                    label: "Dimension from {left} to {right}",
+                    axisSeparator: " / "
+                },
+                resetModal: {
+                    title: "Reset?",
+                    body: "All sliders will return to the central position (50%).",
+                    confirm: "Reset"
+                },
+                aboutModal: {
+                    title: "About",
+                    description: "This tool helps visualize and balance the six structural dimensions of your learning setup.",
+                    reference: "Inspired by: Docq et al. 2023. Enseigner à distance: 5 balises pour vous lancer. Presses universitaires de Louvain.",
+                    localProcessing: "Local processing: all data stays in your browser.",
+                    credits: "F. Jourde & J. Dubois (2026) • CC BY-SA"
+                },
+                orderPanel: {
+                    heading: "Dimension priority",
+                    instruction: "Drag and drop or use Move up/Move down buttons to reorder the display.",
+                    keyboardHelp: "Each dimension has keyboard-accessible buttons to change its position.",
+                    closeLabel: "Close ordering section",
+                    apply: "Apply display order",
+                    moveUp: "Move up",
+                    moveDown: "Move down"
+                },
+                alerts: {
+                    heading: "Attention points ({count})",
+                    none: "No attention points detected for the current configuration.",
+                    regionLabel: "Attention points"
+                },
+                markdown: {
+                    title: "Learning setup",
+                    info: "Information",
+                    formation: "Course",
+                    date: "Date",
+                    dimensions: "Dimensions",
+                    colDimension: "Dimension",
+                    colTick: "Level",
+                    empty: "—"
+                },
+                footer: {
+                    credits: "François Jourde & Jacques Dubois (2026) - CC BY-SA",
+                    codePrefix: "Source code available at"
+                }
+            }
+        };
+
         const dimensions = [
             {
                 id: 0,
-                leftTitle: "PRÉSENCE",
-                rightTitle: "DISTANCE",
-                leftDesc: "Unité de lieu et de temps.",
-                rightDesc: "Flexibilité géographique.",
                 value: 50,
-                tickLabels: [
-                    "Présentiel",
-                    "Majoritairement présentiel",
-                    "Hybride",
-                    "Majoritairement à distance",
-                    "À distance"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "PRÉSENCE",
+                        rightTitle: "DISTANCE",
+                        leftDesc: "Unité de lieu et de temps.",
+                        rightDesc: "Flexibilité géographique.",
+                        tickLabels: ["Présentiel", "Majoritairement présentiel", "Hybride", "Majoritairement à distance", "À distance"]
+                    },
+                    en: {
+                        leftTitle: "IN-PERSON",
+                        rightTitle: "DISTANCE",
+                        leftDesc: "Shared place and time.",
+                        rightDesc: "Geographic flexibility.",
+                        tickLabels: ["In-person", "Mostly in-person", "Hybrid", "Mostly distance", "Distance"]
+                    }
+                }
             },
             {
                 id: 1,
-                leftTitle: "PETIT GROUPE",
-                rightTitle: "GRAND GROUPE",
-                leftDesc: "Suivi individuel.",
-                rightDesc: "Massification.",
                 value: 50,
-                tickLabels: [
-                    "Petit groupe",
-                    "Groupe restreint",
-                    "Groupe moyen",
-                    "Groupe large",
-                    "Grand groupe"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "PETIT GROUPE",
+                        rightTitle: "GRAND GROUPE",
+                        leftDesc: "Suivi individuel.",
+                        rightDesc: "Massification.",
+                        tickLabels: ["Petit groupe", "Groupe restreint", "Groupe moyen", "Groupe large", "Grand groupe"]
+                    },
+                    en: {
+                        leftTitle: "SMALL GROUP",
+                        rightTitle: "LARGE GROUP",
+                        leftDesc: "Individual follow-up.",
+                        rightDesc: "Large-scale delivery.",
+                        tickLabels: ["Small group", "Limited group", "Medium group", "Large group", "Very large group"]
+                    }
+                }
             },
             {
                 id: 2,
-                leftTitle: "ASYNCHRONE",
-                rightTitle: "SYNCHRONE",
-                leftDesc: "Temps différé.",
-                rightDesc: "Temps réel.",
                 value: 50,
-                tickLabels: [
-                    "Auto-rythmé",
-                    "Asynchrone guidé",
-                    "Mixte",
-                    "Synchrone ponctuel",
-                    "Synchrone"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "ASYNCHRONE",
+                        rightTitle: "SYNCHRONE",
+                        leftDesc: "Temps différé.",
+                        rightDesc: "Temps réel.",
+                        tickLabels: ["Auto-rythmé", "Asynchrone guidé", "Mixte", "Synchrone ponctuel", "Synchrone"]
+                    },
+                    en: {
+                        leftTitle: "ASYNCHRONOUS",
+                        rightTitle: "SYNCHRONOUS",
+                        leftDesc: "Delayed interactions.",
+                        rightDesc: "Real-time interactions.",
+                        tickLabels: ["Self-paced", "Guided async", "Mixed", "Occasional sync", "Synchronous"]
+                    }
+                }
             },
             {
                 id: 3,
-                leftTitle: "INDIVIDUEL",
-                rightTitle: "COLLABORATIF",
-                leftDesc: "Travaux personnels.",
-                rightDesc: "Co-construction.",
                 value: 50,
-                tickLabels: [
-                    "Individuel",
-                    "Individuel + échanges",
-                    "Alterné",
-                    "Travail en équipe",
-                    "Collaboratif"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "INDIVIDUEL",
+                        rightTitle: "COLLABORATIF",
+                        leftDesc: "Travaux personnels.",
+                        rightDesc: "Co-construction.",
+                        tickLabels: ["Individuel", "Individuel + échanges", "Alterné", "Travail en équipe", "Collaboratif"]
+                    },
+                    en: {
+                        leftTitle: "INDIVIDUAL",
+                        rightTitle: "COLLABORATIVE",
+                        leftDesc: "Personal work.",
+                        rightDesc: "Co-construction.",
+                        tickLabels: ["Individual", "Individual + exchange", "Alternating", "Team work", "Collaborative"]
+                    }
+                }
             },
             {
                 id: 4,
-                leftTitle: "APPROPRIATION",
-                rightTitle: "PRODUCTION",
-                leftDesc: "Ressources.",
-                rightDesc: "Création.",
                 value: 50,
-                tickLabels: [
-                    "Appropriation",
-                    "Réutilisation",
-                    "Adaptation",
-                    "Création",
-                    "Production"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "APPROPRIATION",
+                        rightTitle: "PRODUCTION",
+                        leftDesc: "Ressources.",
+                        rightDesc: "Création.",
+                        tickLabels: ["Appropriation", "Réutilisation", "Adaptation", "Création", "Production"]
+                    },
+                    en: {
+                        leftTitle: "RESOURCE USE",
+                        rightTitle: "PRODUCTION",
+                        leftDesc: "Using resources.",
+                        rightDesc: "Creating outputs.",
+                        tickLabels: ["Resource use", "Reuse", "Adaptation", "Creation", "Production"]
+                    }
+                }
             },
             {
                 id: 5,
-                leftTitle: "ACCOMPAGNEMENT",
-                rightTitle: "SANS ACCOMPAGNEMENT",
-                leftDesc: "Guidage fort.",
-                rightDesc: "Autonomie.",
                 value: 50,
-                tickLabels: [
-                    "Accompagnement fort",
-                    "Accompagnement régulier",
-                    "Accompagnement ponctuel",
-                    "Autonomie guidée",
-                    "Sans accompagnement"
-                ]
+                i18n: {
+                    fr: {
+                        leftTitle: "ACCOMPAGNEMENT",
+                        rightTitle: "SANS ACCOMPAGNEMENT",
+                        leftDesc: "Guidage fort.",
+                        rightDesc: "Autonomie.",
+                        tickLabels: ["Accompagnement fort", "Accompagnement régulier", "Accompagnement ponctuel", "Autonomie guidée", "Sans accompagnement"]
+                    },
+                    en: {
+                        leftTitle: "GUIDED",
+                        rightTitle: "UNGUIDED",
+                        leftDesc: "Strong support.",
+                        rightDesc: "Autonomy.",
+                        tickLabels: ["Strong support", "Regular support", "Occasional support", "Guided autonomy", "Unguided"]
+                    }
+                }
             }
         ];
 
-        
+        const ALERT_RULES = [
+            {
+                id: "syncNoSupport",
+                when: (isL, isR) => isR(2) && isR(5),
+                fr: {
+                    title: "Synchrone + Sans accompagnement",
+                    body: "Les sessions en temps réel sont difficiles à gérer sans présence du formateur ou de la formatrice."
+                },
+                en: {
+                    title: "Synchronous + Unguided",
+                    body: "Real-time sessions are difficult to run without active instructor support."
+                }
+            },
+            {
+                id: "collabAsync",
+                when: (isL, isR) => isR(3) && isL(2),
+                fr: {
+                    title: "Collaboratif + Asynchrone",
+                    body: "La collaboration en temps différé exige des consignes et outils fortement structurés."
+                },
+                en: {
+                    title: "Collaborative + Asynchronous",
+                    body: "Asynchronous collaboration needs clear structure, tools, and explicit guidance."
+                }
+            },
+            {
+                id: "prodNoSupport",
+                when: (isL, isR) => isR(4) && isR(5),
+                fr: {
+                    title: "Production + Sans accompagnement",
+                    body: "La production de ressources requiert souvent guidage et feedback."
+                },
+                en: {
+                    title: "Production + Unguided",
+                    body: "Producing content usually requires guidance and feedback."
+                }
+            },
+            {
+                id: "heavyDemandNoSupport",
+                when: (isL, isR) => isR(2) && isR(4) && isR(3) && isR(5),
+                fr: {
+                    title: "Synchrone + Production + Collaboratif + Sans accompagnement",
+                    body: "Configuration très exigeante qui demande beaucoup d'autonomie aux apprenants."
+                },
+                en: {
+                    title: "Synchronous + Production + Collaborative + Unguided",
+                    body: "This is highly demanding and requires strong learner autonomy."
+                }
+            },
+            {
+                id: "heavyDemandSupported",
+                when: (isL, isR) => isR(2) && isR(4) && isR(3) && isL(5),
+                fr: {
+                    title: "Synchrone + Production + Collaboratif (avec accompagnement)",
+                    body: "Cette combinaison demande une coordination importante en temps réel."
+                },
+                en: {
+                    title: "Synchronous + Production + Collaborative (with support)",
+                    body: "This combination requires high real-time coordination."
+                }
+            },
+            {
+                id: "largeGroupSupport",
+                when: (isL, isR) => isR(1) && isL(5),
+                fr: {
+                    title: "Grand groupe + Accompagnement fort",
+                    body: "L'accompagnement individualisé devient difficile avec un grand nombre de participants."
+                },
+                en: {
+                    title: "Large group + Strong support",
+                    body: "Individualized support becomes difficult with many participants."
+                }
+            },
+            {
+                id: "distanceSync",
+                when: (isL, isR) => isR(0) && isR(2),
+                fr: {
+                    title: "Distance + Synchrone",
+                    body: "Les sessions synchrones à distance demandent des outils fiables et une bonne connexion."
+                },
+                en: {
+                    title: "Distance + Synchronous",
+                    body: "Distance synchronous sessions need reliable tools and connectivity."
+                }
+            },
+            {
+                id: "distanceLargeNoSupport",
+                when: (isL, isR) => isR(0) && isR(1) && isR(5),
+                fr: {
+                    title: "Distance + Grand groupe + Sans accompagnement",
+                    body: "Les apprenants peuvent se sentir isolés et en difficulté."
+                },
+                en: {
+                    title: "Distance + Large group + Unguided",
+                    body: "Learners may feel isolated and struggle without support."
+                }
+            },
+            {
+                id: "distanceCollab",
+                when: (isL, isR) => isR(0) && isR(3),
+                fr: {
+                    title: "Distance + Collaboratif",
+                    body: "La collaboration à distance nécessite des outils dédiés et une organisation rigoureuse."
+                },
+                en: {
+                    title: "Distance + Collaborative",
+                    body: "Distance collaboration needs dedicated tools and careful facilitation."
+                }
+            },
+            {
+                id: "largeCollab",
+                when: (isL, isR) => isR(1) && isR(3),
+                fr: {
+                    title: "Grand groupe + Collaboratif",
+                    body: "Le travail collaboratif en grand groupe demande une structuration forte."
+                },
+                en: {
+                    title: "Large group + Collaborative",
+                    body: "Collaborative work in large groups requires strong structuring."
+                }
+            },
+            {
+                id: "largeProd",
+                when: (isL, isR) => isR(1) && isR(4),
+                fr: {
+                    title: "Grand groupe + Production",
+                    body: "Accompagner la production de ressources en grand groupe est exigeant."
+                },
+                en: {
+                    title: "Large group + Production",
+                    body: "Supporting production in large groups is resource-intensive."
+                }
+            },
+            {
+                id: "presenceAsync",
+                when: (isL, isR) => isL(0) && isL(2),
+                fr: {
+                    title: "Présence + Asynchrone",
+                    body: "Cette combinaison est rarement cohérente avec une présence physique forte."
+                },
+                en: {
+                    title: "In-person + Asynchronous",
+                    body: "This combination is often inconsistent with strong in-person presence."
+                }
+            }
+        ];
+
+        let currentOrder = dimensions.map((d) => d.id);
+
+        function t(path, vars = {}) {
+            const resolve = (source) => path.split(".").reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), source);
+            const localized = resolve(I18N[currentLang]);
+            const fallback = resolve(I18N.fr);
+            const raw = localized !== undefined ? localized : fallback;
+            if (typeof raw !== "string") return "";
+            return raw.replace(/\{(\w+)\}/g, (_, key) => (vars[key] !== undefined ? String(vars[key]) : ""));
+        }
+
+        function getLocalizedDimension(dim) {
+            const copy = dim?.i18n?.[currentLang] || dim?.i18n?.fr;
+            return {
+                id: dim.id,
+                value: dim.value,
+                leftTitle: copy?.leftTitle || "Left",
+                rightTitle: copy?.rightTitle || "Right",
+                leftDesc: copy?.leftDesc || "",
+                rightDesc: copy?.rightDesc || "",
+                tickLabels: Array.isArray(copy?.tickLabels) ? copy.tickLabels : []
+            };
+        }
+
         function tickLabelsFor(dim) {
-            // 5 crans réguliers (0/25/50/75/100) avec libellés spécifiques à chaque dimension.
-            // Priorité au paramétrage explicite (dim.tickLabels). Repli sur une logique générique.
-            if (dim && Array.isArray(dim.tickLabels) && dim.tickLabels.length === 5) return dim.tickLabels;
-
-            const left = dim?.leftTitle || "Gauche";
-            const right = dim?.rightTitle || "Droite";
-            return [left, `Intermédiaire (${left})`, "Équilibré", `Intermédiaire (${right})`, right];
+            if (!dim) return ["Left", "", "Balanced", "", "Right"];
+            if (Array.isArray(dim.tickLabels) && dim.tickLabels.length === 5) return dim.tickLabels;
+            const left = dim.leftTitle || "Left";
+            const right = dim.rightTitle || "Right";
+            return [left, `Intermediate (${left})`, "Balanced", `Intermediate (${right})`, right];
         }
 
-let currentOrder = dimensions.map(d => d.id);
+        function setHidden(element, hidden) {
+            if (!element) return;
+            element.hidden = hidden;
+            element.classList.toggle("hidden", hidden);
+            element.setAttribute("aria-hidden", String(hidden));
+        }
 
-        
-
-// --- Save / Load (local + fichier) ---
-const STORAGE_KEY = "config_pedagogique_state_v1";
-
-function buildState() {
-    const formation = (document.getElementById('formationInput')?.value || '').trim();
-    return {
-        version: 1,
-        savedAt: new Date().toISOString(),
-        formation,
-        alertsEnabled: !!alertsEnabled,
-        currentOrder: Array.isArray(currentOrder) ? currentOrder.slice() : dimensions.map(d => d.id),
-        dimensions: dimensions.map(d => ({ id: d.id, value: d.value }))
-    };
-}
-
-function applyState(state) {
-    if (!state || typeof state !== "object") return;
-
-    // Formation label
-    if (typeof state.formation === 'string') {
-        const input = document.getElementById('formationInput');
-        if (input) input.value = state.formation;
-    }
-
-    // Order
-    if (Array.isArray(state.currentOrder) && state.currentOrder.length === dimensions.length) {
-        const ids = new Set(dimensions.map(d => d.id));
-        const isValid = state.currentOrder.every(x => ids.has(x));
-        if (isValid) currentOrder = state.currentOrder.slice();
-    }
-
-    // Values
-    if (Array.isArray(state.dimensions)) {
-        state.dimensions.forEach(item => {
-            const dim = dimensions.find(d => d.id === item.id);
-            if (dim && Number.isFinite(parseInt(item.value))) {
-                const v = Math.max(0, Math.min(100, parseInt(item.value)));
-                dim.value = v;
+        function announce(message, assertive = false) {
+            if (!message) return;
+            const liveRegion = document.getElementById("liveRegion");
+            const status = document.getElementById("statusMessage");
+            if (liveRegion) {
+                liveRegion.setAttribute("aria-live", assertive ? "assertive" : "polite");
+                liveRegion.textContent = "";
+                window.setTimeout(() => {
+                    liveRegion.textContent = message;
+                }, 30);
             }
-        });
-    }
-
-    // Alerts flag + UI
-    if (typeof state.alertsEnabled === "boolean") {
-        alertsEnabled = state.alertsEnabled;
-        setAlertsUI(alertsEnabled);
-    }
-
-    renderSliders();
-    checkAlerts();
-}
-
-function saveState() {
-    const state = buildState();
-
-    // 1) LocalStorage (simple reprise)
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-        console.warn("Impossible d'écrire dans localStorage :", e);
-    }
-
-    // 2) Téléchargement d'un fichier JSON (backup transportable)
-    try {
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        const dateTag = new Date().toISOString().slice(0,19).replace(/[:T]/g, "-");
-        a.href = url;
-        a.download = `configuration-formation_${dateTag}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    } catch (e) {
-        console.warn("Impossible de télécharger la sauvegarde :", e);
-    }
-}
-
-function exportMarkdown() {
-    const state = buildState();
-
-    // Dimensions affichées dans l'ordre courant
-    const orderedDims = (Array.isArray(state.currentOrder) ? state.currentOrder : dimensions.map(d => d.id))
-        .map(id => dimensions.find(d => d.id === id))
-        .filter(Boolean);
-
-    // Helpers
-    const clamp100 = (n) => {
-        const v = Number(n);
-        return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 50;
-    };
-
-    const nearestTickIndex = (value) => Math.round(value / 25); // 0..4
-    const safe = (v) => (v === null || v === undefined) ? "" : String(v);
-    const esc = (s) => safe(s).replace(/\|/g, "\\|").trim();
-
-    const getTickLabel = (dim, value) => {
-        const idx = nearestTickIndex(value);
-        if (Array.isArray(dim?.tickLabels) && dim.tickLabels.length) {
-            return safe(dim.tickLabels[idx] ?? dim.tickLabels[dim.tickLabels.length - 1] ?? "");
+            if (status) status.textContent = message;
         }
-        // Fallback: labels dérivés des titres gauche/droite
-        const left = safe(dim?.leftTitle);
-        const right = safe(dim?.rightTitle);
-        const derived = [
-            left,
-            left ? `Plutôt ${left}` : "",
-            "Équilibré",
-            right ? `Plutôt ${right}` : "",
-            right
-        ];
-        return derived[idx] || "";
-    };
 
-    const getDimensionName = (dim) => {
-        const title = safe(dim?.title).trim();
-        if (title) return title;
+        function applyStaticTranslations() {
+            document.documentElement.lang = currentLang;
+            document.title = t("pageTitle");
 
-        // Fallback: dériver un nom lisible à partir des deux pôles
-        const left = safe(dim?.leftTitle).trim();
-        const right = safe(dim?.rightTitle).trim();
-        if (left && right) return `${left}/${right}`;
-        if (left) return left;
-        if (right) return right;
+            const setText = (id, key) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = t(key);
+            };
 
-        return "—";
-    };
+            setText("pageTitle", "pageTitle");
+            setText("pageSubtitle", "pageSubtitle");
+            setText("skipLink", "skipToMain");
+            setText("formationLabel", "formationLabel");
+            setText("languageLabel", "languageLabel");
+            setText("langOptionFr", "langOptionFr");
+            setText("langOptionEn", "langOptionEn");
+            setText("toolsLabel", "toolsLabel");
 
-    // Construire le Markdown
-    const now = new Date();
-    const lines = [];
+            setText("btnAboutLabel", "toolbar.about");
+            setText("btnOrderLabel", "toolbar.order");
+            setText("btnAlertsLabel", "toolbar.analysis");
+            setText("btnSaveLabel", "toolbar.save");
+            setText("btnLoadLabel", "toolbar.load");
+            setText("btnExportLabel", "toolbar.exportMd");
+            setText("btnResetLabel", "toolbar.reset");
+            setText("betaBadge", "common.beta");
 
-    lines.push(`# Dispositif de formation`);
-    lines.push(``);
-    lines.push(`## Informations`);
-    lines.push(`- **Formation :** ${state.formation ? esc(state.formation) : "—"}`);
-    lines.push(`- **Date :** ${now.toLocaleString('fr-FR')}`);
-    lines.push(``);
-    lines.push(`## Dimensions`);
-    lines.push(``);
-    lines.push(`| Dimension | Cran |`);
-    lines.push(`|---|---|`);
+            setText("resetModalTitle", "resetModal.title");
+            setText("resetModalBody", "resetModal.body");
+            setText("resetCancelBtn", "common.cancel");
+            setText("resetConfirmBtn", "resetModal.confirm");
 
-    orderedDims.forEach((dim) => {
-        const value = clamp100(dim?.value);
-        const tickLabel = getTickLabel(dim, value);
-        const name = getDimensionName(dim);
+            setText("aboutModalTitleText", "aboutModal.title");
+            setText("aboutDescription", "aboutModal.description");
+            setText("aboutReference", "aboutModal.reference");
+            setText("aboutLocalProcessing", "aboutModal.localProcessing");
+            setText("aboutCredits", "aboutModal.credits");
 
-        const tickStr = tickLabel ? tickLabel : "—";
-        lines.push(`| **${esc(name)}** | ${esc(tickStr)} |`);
-    });
+            setText("orderPanelHeading", "orderPanel.heading");
+            setText("orderPanelInstruction", "orderPanel.instruction");
+            setText("reorderKeyboardHelp", "orderPanel.keyboardHelp");
+            setText("applyOrderBtn", "orderPanel.apply");
 
+            setText("footerCredits", "footer.credits");
+            setText("footerCodePrefix", "footer.codePrefix");
 
-    const md = lines.join('\n');
+            const formationInput = document.getElementById("formationInput");
+            if (formationInput) formationInput.placeholder = t("formationPlaceholder");
 
-    // Télécharger le fichier .md
-    try {
-        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+            const languageSelect = document.getElementById("languageSelect");
+            if (languageSelect) languageSelect.setAttribute("aria-describedby", "languageHelp");
+            const languageHelp = document.getElementById("languageHelp");
+            if (languageHelp) languageHelp.textContent = t("languageHelp");
 
-        const safeName = (state.formation || "dispositif-formation").toLowerCase()
-            .replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ\s-]/gi, '')
-            .trim()
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .slice(0, 60) || "dispositif-formation";
+            const toolbar = document.querySelector("[role='toolbar']");
+            if (toolbar) toolbar.setAttribute("aria-label", t("toolbarAriaLabel"));
 
-        const dateTag = now.toISOString().slice(0,10); // YYYY-MM-DD
-        a.href = url;
-        a.download = `${safeName}_${dateTag}.md`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    } catch (e) {
-        console.warn("Impossible d’exporter en Markdown :", e);
-        alert("L’export Markdown a échoué sur ce navigateur.");
-    }
-}
+            const setButtonMeta = (buttonId, titleKey) => {
+                const btn = document.getElementById(buttonId);
+                if (!btn) return;
+                const label = t(titleKey);
+                btn.title = label;
+                btn.setAttribute("aria-label", label);
+            };
 
+            setButtonMeta("btnAbout", "toolbar.aboutTitle");
+            setButtonMeta("orderPanelToggle", "toolbar.orderTitle");
+            setButtonMeta("btnAlerts", "toolbar.analysisTitle");
+            setButtonMeta("btnSave", "toolbar.saveTitle");
+            setButtonMeta("btnLoad", "toolbar.loadTitle");
+            setButtonMeta("btnExport", "toolbar.exportTitle");
+            setButtonMeta("btnReset", "toolbar.resetTitle");
+            setButtonMeta("aboutCloseBtn", "common.close");
 
+            const orderClose = document.getElementById("orderPanelClose");
+            if (orderClose) orderClose.setAttribute("aria-label", t("orderPanel.closeLabel"));
 
-function triggerLoad() {
-    // Priorité au fichier (explicite), mais on tente aussi une restauration locale si le user annule.
-    const input = document.getElementById("loadFileInput");
-    if (input) {
-        input.value = "";
-        input.click();
-    }
-}
-
-function loadStateFromFile(event) {
-    const file = event?.target?.files?.[0];
-    if (!file) {
-        // User a annulé : tentative de reprise locale
-        loadStateFromLocal();
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function() {
-        try {
-            const state = JSON.parse(String(reader.result || ""));
-            applyState(state);
-            // On garde aussi en local pour la prochaine fois
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-        } catch (e) {
-            alert("Fichier de sauvegarde invalide.");
-            console.error(e);
+            const alertsContainer = document.getElementById("alertsContainer");
+            if (alertsContainer) alertsContainer.setAttribute("aria-label", t("alerts.regionLabel"));
         }
-    };
-    reader.readAsText(file, "utf-8");
-}
 
-function loadStateFromLocal() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const state = JSON.parse(raw);
-        applyState(state);
-    } catch (e) {
-        console.warn("Impossible de charger la sauvegarde locale :", e);
-    }
-}
+        function setLanguage(lang, options = {}) {
+            const target = lang === "en" ? "en" : "fr";
+            if (target === currentLang && !options.force) return;
+            currentLang = target;
 
-// --- Core Functions ---
+            const select = document.getElementById("languageSelect");
+            if (select) select.value = currentLang;
 
-        function togglePanel(panelId) {
-            const panel = document.getElementById(panelId);
-            const willOpen = !panel.classList.contains('open');
-            
-            if (willOpen) {
-                if(panelId === 'orderPanel') renderSortableList();
-                panel.classList.add('open');
-            } else {
-                panel.classList.remove('open');
+            applyStaticTranslations();
+            renderSliders();
+
+            if (document.getElementById("orderPanel")?.classList.contains("open")) {
+                renderSortableList();
+            }
+
+            checkAlerts();
+            if (!options.silent) {
+                const languageName = currentLang === "fr" ? "Français" : "English";
+                announce(t("status.languageChanged", { language: languageName }));
             }
         }
 
-        
-function setAlertsUI(enabled) {
-    const btn = document.getElementById('btnAlerts');
-    const badge = document.getElementById('betaBadge');
-    const container = document.getElementById('alertsContainer');
+        function buildState() {
+            const formation = (document.getElementById("formationInput")?.value || "").trim();
+            return {
+                version: 2,
+                savedAt: new Date().toISOString(),
+                language: currentLang,
+                formation,
+                alertsEnabled: !!alertsEnabled,
+                currentOrder: Array.isArray(currentOrder) ? currentOrder.slice() : dimensions.map((d) => d.id),
+                dimensions: dimensions.map((d) => ({ id: d.id, value: d.value }))
+            };
+        }
 
-    if (!btn || !badge) return;
+        function applyState(state) {
+            if (!state || typeof state !== "object") return;
 
-    if (enabled) {
-        btn.classList.remove('text-slate-400');
-        btn.classList.add('text-amber-600', 'bg-amber-50');
-        badge.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
-        badge.classList.add('bg-amber-100', 'text-amber-700', 'border-amber-200');
-        checkAlerts();
-    } else {
-        btn.classList.add('text-slate-400');
-        btn.classList.remove('text-amber-600', 'bg-amber-50');
-        badge.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
-        badge.classList.remove('bg-amber-100', 'text-amber-700', 'border-amber-200');
-        if (container) container.classList.add('hidden');
-    }
-}
+            if (typeof state.language === "string") {
+                setLanguage(state.language, { silent: true, force: true });
+            }
 
-function toggleAlerts() {
-    alertsEnabled = !alertsEnabled;
-    setAlertsUI(alertsEnabled);
-}
+            if (typeof state.formation === "string") {
+                const input = document.getElementById("formationInput");
+                if (input) input.value = state.formation;
+            }
 
-        function renderSliders() {
-            const container = document.getElementById("slidersContainer");
-            let html = "";
-            
-            currentOrder.forEach(id => {
-                const dim = dimensions.find(d => d.id === id);
-                
-                html += `
-                <div id="slider-card-${dim.id}" class="slider-card bg-white px-4 py-3 rounded-xl shadow-sm border border-slate-200 transition-all duration-300">
-                    <div class="flex justify-between items-end mb-1">
-                        <div class="w-5/12">
-                            <h3 class="text-xs font-bold text-slate-800 leading-none">${dim.leftTitle}</h3>
-                            <p class="text-[9px] text-slate-400 leading-tight mt-0.5">${dim.leftDesc}</p>
-                        </div>
-                        
-                        <div class="w-2/12 flex justify-center pb-0.5">
-                             <button onclick="resetDim(${dim.id})" class="text-slate-200 hover:text-indigo-500 transition-colors p-1" title="Recentrer">
-                                <span class="material-icons-round text-base">center_focus_strong</span>
-                            </button>
-                        </div>
+            if (Array.isArray(state.currentOrder) && state.currentOrder.length === dimensions.length) {
+                const ids = new Set(dimensions.map((d) => d.id));
+                const isValid = state.currentOrder.every((x) => ids.has(x));
+                if (isValid) currentOrder = state.currentOrder.slice();
+            }
 
-                        <div class="w-5/12 text-right">
-                            <h3 class="text-xs font-bold text-slate-800 leading-none">${dim.rightTitle}</h3>
-                            <p class="text-[9px] text-slate-400 leading-tight mt-0.5">${dim.rightDesc}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="relative h-5 flex items-center mt-1">
-                        <!-- Track Background -->
-                        <div class="absolute w-full h-1 bg-slate-100 rounded-full overflow-hidden top-1/2 -translate-y-1/2">
-                            <div class="w-1/2 h-full bg-slate-200/40"></div>
-                        </div>
+            if (Array.isArray(state.dimensions)) {
+                state.dimensions.forEach((item) => {
+                    const dim = dimensions.find((d) => d.id === item.id);
+                    if (dim && Number.isFinite(parseInt(item.value, 10))) {
+                        dim.value = Math.max(0, Math.min(100, parseInt(item.value, 10)));
+                    }
+                });
+            }
 
-                        <!-- Graduations / Ticks -->
-                        <div class="absolute w-full h-2 flex justify-between px-[1px] pointer-events-none top-1/2 -translate-y-1/2">
-                            <div class="w-[1px] h-full bg-slate-300"></div> <!-- 0 -->
-                            <div class="w-[1px] h-1 bg-slate-300 self-center"></div> <!-- 25 -->
-                            <div class="w-[2px] h-full bg-slate-400"></div> <!-- 50 -->
-                            <div class="w-[1px] h-1 bg-slate-300 self-center"></div> <!-- 75 -->
-                            <div class="w-[1px] h-full bg-slate-300"></div> <!-- 100 -->
-                        </div>
+            if (typeof state.alertsEnabled === "boolean") {
+                alertsEnabled = state.alertsEnabled;
+                setAlertsUI(alertsEnabled, { announceState: false });
+            }
 
-                        <!-- Input -->
-                        <input type="range" min="0" max="100" step="25" value="${dim.value}" id="range-${dim.id}"
-                            class="w-full relative z-10 appearance-none bg-transparent" 
-                            oninput="updateVal(${dim.id}, this.value); showTooltip(${dim.id}, this, true)" onmousemove="showTooltip(${dim.id}, this)" onmouseenter="showTooltip(${dim.id}, this)" onmouseleave="hideTooltip(${dim.id})" ontouchstart="showTooltip(${dim.id}, this, true)" ontouchmove="showTooltip(${dim.id}, this, true)" ontouchend="hideTooltip(${dim.id})" onfocus="showTooltip(${dim.id}, this, true)" onblur="hideTooltip(${dim.id})">
-                    
-                        <!-- Tooltip (hover/move) -->
-                        <div id="tooltip-${dim.id}" class="slider-tooltip hidden"></div>
-</div>
-                </div>
-                `;
+            renderSliders();
+            checkAlerts();
+        }
+
+        function saveState() {
+            const state = buildState();
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (error) {
+                console.warn("Unable to write localStorage:", error);
+            }
+
+            try {
+                const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const dateTag = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+                link.href = url;
+                link.download = `configuration_${dateTag}.json`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                announce(t("status.saved"));
+            } catch (error) {
+                console.warn("Unable to export backup:", error);
+            }
+        }
+
+        function exportMarkdown() {
+            const state = buildState();
+            const orderedDims = (Array.isArray(state.currentOrder) ? state.currentOrder : dimensions.map((d) => d.id))
+                .map((id) => dimensions.find((d) => d.id === id))
+                .filter(Boolean)
+                .map((dim) => getLocalizedDimension(dim));
+
+            const clamp100 = (n) => {
+                const v = Number(n);
+                return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 50;
+            };
+            const nearestTickIndex = (value) => Math.round(value / 25);
+            const safe = (v) => (v === null || v === undefined ? "" : String(v));
+            const esc = (s) => safe(s).replace(/\|/g, "\\|").trim();
+
+            const getTickLabel = (dim, value) => {
+                const idx = nearestTickIndex(value);
+                if (Array.isArray(dim?.tickLabels) && dim.tickLabels.length) {
+                    return safe(dim.tickLabels[idx] ?? dim.tickLabels[dim.tickLabels.length - 1] ?? "");
+                }
+                const left = safe(dim?.leftTitle);
+                const right = safe(dim?.rightTitle);
+                const derived = [left, `${left}+`, "Balanced", `${right}+`, right];
+                return derived[idx] || "";
+            };
+
+            const now = new Date();
+            const lines = [];
+            lines.push(`# ${t("markdown.title")}`);
+            lines.push("");
+            lines.push(`## ${t("markdown.info")}`);
+            lines.push(`- **${t("markdown.formation")} :** ${state.formation ? esc(state.formation) : t("markdown.empty")}`);
+            lines.push(`- **${t("markdown.date")} :** ${now.toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US")}`);
+            lines.push("");
+            lines.push(`## ${t("markdown.dimensions")}`);
+            lines.push("");
+            lines.push(`| ${t("markdown.colDimension")} | ${t("markdown.colTick")} |`);
+            lines.push("|---|---|");
+
+            orderedDims.forEach((dim) => {
+                const value = clamp100(dim?.value);
+                const tickLabel = getTickLabel(dim, value);
+                const name = `${safe(dim?.leftTitle)}${t("slider.axisSeparator")}${safe(dim?.rightTitle)}`;
+                lines.push(`| **${esc(name)}** | ${esc(tickLabel || t("markdown.empty"))} |`);
             });
-            container.innerHTML = html;
-        }
 
-        function updateVal(id, val) {
-            const dim = dimensions.find(d => d.id === id);
-            if (dim) {
-                dim.value = parseInt(val, 10);
+            const md = lines.join("\n");
 
-                checkAlerts();
+            try {
+                const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                const safeName = (state.formation || "learning-design")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9àâçéèêëîïôûùüÿñæœ\s-]/gi, "")
+                    .trim()
+                    .replace(/\s+/g, "-")
+                    .replace(/-+/g, "-")
+                    .slice(0, 60) || "learning-design";
+                const dateTag = now.toISOString().slice(0, 10);
+                link.href = url;
+                link.download = `${safeName}_${dateTag}.md`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                announce(t("status.exported"));
+            } catch (error) {
+                console.warn("Unable to export markdown:", error);
+                announce(t("status.exportFailed"), true);
             }
         }
 
-        
-function showTooltip(id, inputEl, forceVisible = false) {
-    const dim = dimensions.find(d => d.id === id);
-    if (!dim || !inputEl) return;
-
-    // Determine label for current value (including during drag)
-    const value = parseInt(inputEl.value, 10);
-    const labels = tickLabelsFor(dim);
-    const idx = Math.max(0, Math.min(4, Math.round(value / 25)));
-    const label = labels[idx] ?? `${value}`;
-
-    const tooltip = document.getElementById(`tooltip-${id}`);
-    if (!tooltip) return;
-
-    tooltip.textContent = label;
-    tooltip.classList.remove('hidden');
-
-    // Position tooltip above the thumb using percentage
-    const min = parseInt(inputEl.min || "0", 10);
-    const max = parseInt(inputEl.max || "100", 10);
-    const pct = (value - min) / (max - min || 1);
-
-    // Use input width to set a pixel position inside the parent (relative container)
-    const inputRect = inputEl.getBoundingClientRect();
-    const parent = inputEl.parentElement; // relative container
-    const parentRect = parent.getBoundingClientRect();
-
-    const x = (inputRect.left - parentRect.left) + pct * inputRect.width;
-
-    tooltip.style.left = `${x}px`;
-
-    // On keyboard focus, we also show tooltip (forceVisible = true)
-    if (forceVisible) {
-        // keep visible; hide on blur/mouseleave
-    }
-}
-
-function hideTooltip(id) {
-    const tooltip = document.getElementById(`tooltip-${id}`);
-    if (tooltip) tooltip.classList.add('hidden');
-}
-
-function resetDim(id) {
-            const dim = dimensions.find(d => d.id === id);
-            if(dim) {
-                dim.value = 50;
-                const input = document.getElementById(`range-${id}`);
-                if(input) input.value = 50;
-                updateVal(id, 50);
+        function triggerLoad() {
+            const input = document.getElementById("loadFileInput");
+            if (input) {
+                input.value = "";
+                input.click();
             }
         }
-        
-        function checkAlerts() {
-            const container = document.getElementById('alertsContainer');
-            if (!container) return;
 
-            // If feature disabled, ensure hidden and exit
-            if (!alertsEnabled) {
-                container.classList.add('hidden');
+        function loadStateFromFile(event) {
+            const file = event?.target?.files?.[0];
+            if (!file) {
+                loadStateFromLocal();
                 return;
             }
 
-            const d = dimensions.map(dim => dim.value);
-            const alerts = [];
+            const reader = new FileReader();
+            reader.onload = function onLoad() {
+                try {
+                    const state = JSON.parse(String(reader.result || ""));
+                    applyState(state);
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    } catch (error) {
+                        console.warn("Unable to save loaded state:", error);
+                    }
+                    announce(t("status.loaded"));
+                } catch (error) {
+                    console.error(error);
+                    announce(t("status.invalidFile"), true);
+                }
+            };
+            reader.readAsText(file, "utf-8");
+        }
 
-            // Helpers: Left < 50, Right > 50
-            const isL = (idx) => d[idx] < 50;
-            const isR = (idx) => d[idx] > 50;
-
-            // Mappings:
-            // 0: PRESENCE (L) / DISTANCE (R)
-            // 1: PETIT (L) / GRAND (R)
-            // 2: ASYNC (L) / SYNC (R)
-            // 3: INDIV (L) / COLLAB (R)
-            // 4: APPRO (L) / PROD (R)
-            // 5: ACCOMP (L) / SANS ACCOMP (R)
-
-            // Alert Rules
-            if (isR(2) && isR(5)) alerts.push("<strong>Synchrone + Sans accompagnement :</strong> les sessions en temps réel sont difficiles à gérer sans présence du/de la formateur·rice pour animer et réguler.");
-            if (isR(3) && isL(2)) alerts.push("<strong>Collaboratif + Asynchrone :</strong> la collaboration en temps différé nécessite des outils et consignes très structurés pour coordonner le travail de groupe.");
-            if (isR(4) && isR(5)) alerts.push("<strong>Production + Sans accompagnement :</strong> les étudiant·es qui doivent produire leurs propres ressources ont souvent besoin de guidage et de feedback.");
-            if (isR(2) && isR(4) && isR(3) && isR(5)) alerts.push("<strong>Synchrone + Production + Collaboratif + Sans accompagnement :</strong> configuration très exigeante qui demande beaucoup d'autonomie et de compétences aux étudiant·es.");
-            if (isR(2) && isR(4) && isR(3) && isL(5)) alerts.push("<strong>Synchrone + Production + Collaboratif (avec accompagnement) :</strong> cette combinaison demande une coordination importante en temps réel.");
-            if (isR(1) && isL(5)) alerts.push("<strong>Grand groupe + Accompagnement fort :</strong> l'accompagnement individualisé devient difficile avec un grand nombre de participants.");
-            if (isR(0) && isR(2)) alerts.push("<strong>Distance + Synchrone :</strong> les sessions synchrones à distance nécessitent des outils fiables et une bonne connexion.");
-            if (isR(0) && isR(1) && isR(5)) alerts.push("<strong>Distance + Grand groupe + Sans accompagnement :</strong> les étudiant·es peuvent facilement se sentir isolés et perdus.");
-            if (isR(0) && isR(3)) alerts.push("<strong>Distance + Collaboratif :</strong> la collaboration à distance nécessite des outils spécifiques et une organisation rigoureuse.");
-            if (isR(1) && isR(3)) alerts.push("<strong>Grand groupe + Collaboratif :</strong> organiser du travail collaboratif avec un grand nombre de participants demande une structuration forte.");
-            if (isR(1) && isR(4)) alerts.push("<strong>Grand groupe + Production :</strong> accompagner la production de ressources par un grand groupe est exigeant.");
-            if (isL(0) && isL(2)) alerts.push("<strong>Présence + Asynchrone :</strong> cette combinaison est peu cohérente. Si les étudiant·es sont en présence, privilégiez les interactions synchrones.");
-
-            if (alerts.length > 0) {
-                container.innerHTML = `
-                    <div class="bg-amber-50 rounded-2xl p-5 border border-amber-100 shadow-sm animate-[slideIn_0.3s_ease-out]">
-                        <h3 class="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2">
-                            <span class="material-icons-round text-amber-500">warning_amber</span>
-                            Points de vigilance (${alerts.length})
-                        </h3>
-                        <div class="space-y-3">
-                            ${alerts.map(a => `<div class="text-xs text-amber-900 bg-white/60 p-2 rounded border border-amber-100/50">${a}</div>`).join('')}
-                        </div>
-                    </div>
-                `;
-                container.classList.remove('hidden');
-            } else {
-                container.innerHTML = '';
-                container.classList.add('hidden');
+        function loadStateFromLocal() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const state = JSON.parse(raw);
+                applyState(state);
+                announce(t("status.localLoaded"));
+            } catch (error) {
+                console.warn("Unable to load local state:", error);
             }
         }
 
-        // --- Reordering Logic ---
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (!panel) return;
+
+            const willOpen = !panel.classList.contains("open");
+            panel.classList.toggle("open", willOpen);
+            panel.setAttribute("aria-hidden", String(!willOpen));
+
+            const toggle = document.getElementById("orderPanelToggle");
+            if (toggle) toggle.setAttribute("aria-expanded", String(willOpen));
+
+            if (willOpen) {
+                panel.removeAttribute("inert");
+                if (panelId === "orderPanel") {
+                    renderSortableList();
+                    const firstAction = panel.querySelector("button");
+                    if (firstAction) firstAction.focus();
+                }
+            } else {
+                panel.setAttribute("inert", "");
+                if (toggle) toggle.focus();
+            }
+        }
+
+        function setAlertsUI(enabled, options = {}) {
+            const btn = document.getElementById("btnAlerts");
+            const badge = document.getElementById("betaBadge");
+            const container = document.getElementById("alertsContainer");
+
+            if (!btn || !badge) return;
+
+            btn.setAttribute("aria-pressed", String(enabled));
+
+            if (enabled) {
+                btn.classList.add("text-amber-700", "bg-amber-50");
+                btn.classList.remove("text-slate-700");
+
+                badge.classList.remove("bg-slate-200", "text-slate-700", "border-slate-400");
+                badge.classList.add("bg-amber-200", "text-amber-900", "border-amber-500");
+
+                checkAlerts();
+                if (options.announceState !== false) announce(t("status.alertsEnabled"));
+            } else {
+                btn.classList.remove("text-amber-700", "bg-amber-50");
+                btn.classList.add("text-slate-700");
+
+                badge.classList.add("bg-slate-200", "text-slate-700", "border-slate-400");
+                badge.classList.remove("bg-amber-200", "text-amber-900", "border-amber-500");
+
+                if (container) {
+                    container.innerHTML = "";
+                    setHidden(container, true);
+                }
+
+            }
+        }
+
+        function toggleAlerts() {
+            alertsEnabled = !alertsEnabled;
+            setAlertsUI(alertsEnabled);
+        }
+
+        function renderSliders() {
+            const container = document.getElementById("slidersContainer");
+            if (!container) return;
+
+            let html = "<h2 id=\"slidersHeading\" class=\"sr-only\">Dimensions pédagogiques</h2>";
+
+            currentOrder.forEach((id) => {
+                const dim = dimensions.find((d) => d.id === id);
+                if (!dim) return;
+
+                const localized = getLocalizedDimension(dim);
+                const labels = tickLabelsFor(localized);
+                const idx = Math.max(0, Math.min(4, Math.round(localized.value / 25)));
+                const dimensionName = `${localized.leftTitle}${t("slider.axisSeparator")}${localized.rightTitle}`;
+
+                html += `
+                    <section id="slider-card-${localized.id}" class="slider-card bg-white px-3 py-2.5 rounded-xl shadow-sm border border-slate-300 transition-all duration-300" aria-labelledby="range-label-${localized.id}">
+                        <div class="flex justify-between items-start gap-2 mb-1.5">
+                            <div class="w-5/12">
+                                <h3 class="text-xs font-bold text-slate-900 leading-tight">${localized.leftTitle}</h3>
+                                <p id="left-desc-${localized.id}" class="text-[11px] text-slate-700 leading-tight mt-0.5">${localized.leftDesc}</p>
+                            </div>
+
+                            <div class="w-2/12 flex justify-center pt-0.5">
+                                <button type="button" onclick="resetDim(${localized.id})" class="text-slate-700 hover:text-indigo-800 transition-colors p-1 rounded-md" title="${t("slider.recenter")}" aria-label="${t("slider.recenter")} - ${dimensionName}">
+                                    <span class="material-icons-round text-base" aria-hidden="true">center_focus_strong</span>
+                                </button>
+                            </div>
+
+                            <div class="w-5/12 text-right">
+                                <h3 class="text-xs font-bold text-slate-900 leading-tight">${localized.rightTitle}</h3>
+                                <p id="right-desc-${localized.id}" class="text-[11px] text-slate-700 leading-tight mt-0.5">${localized.rightDesc}</p>
+                            </div>
+                        </div>
+
+                        <label id="range-label-${localized.id}" for="range-${localized.id}" class="sr-only">${t("slider.label", { left: localized.leftTitle, right: localized.rightTitle })}</label>
+                        <p id="range-help-${localized.id}" class="sr-only">${t("slider.keyboardHelp")}</p>
+
+                        <div class="relative h-5 flex items-center mt-1">
+                            <div class="absolute w-full h-1 bg-slate-200 rounded-full overflow-hidden top-1/2 -translate-y-1/2" aria-hidden="true">
+                                <div class="w-1/2 h-full bg-slate-300"></div>
+                            </div>
+
+                            <div class="absolute w-full h-2 flex justify-between px-[1px] pointer-events-none top-1/2 -translate-y-1/2" aria-hidden="true">
+                                <div class="w-[1px] h-full bg-slate-500"></div>
+                                <div class="w-[1px] h-1 bg-slate-500 self-center"></div>
+                                <div class="w-[2px] h-full bg-slate-700"></div>
+                                <div class="w-[1px] h-1 bg-slate-500 self-center"></div>
+                                <div class="w-[1px] h-full bg-slate-500"></div>
+                            </div>
+
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="25"
+                                value="${localized.value}"
+                                id="range-${localized.id}"
+                                class="w-full relative z-10 appearance-none bg-transparent"
+                                aria-describedby="range-help-${localized.id} left-desc-${localized.id} right-desc-${localized.id} range-value-${localized.id}"
+                                oninput="updateVal(${localized.id}, this.value); showTooltip(${localized.id}, this, true)"
+                                onmousemove="showTooltip(${localized.id}, this)"
+                                onmouseenter="showTooltip(${localized.id}, this)"
+                                onmouseleave="hideTooltip(${localized.id})"
+                                ontouchstart="showTooltip(${localized.id}, this, true)"
+                                ontouchmove="showTooltip(${localized.id}, this, true)"
+                                ontouchend="hideTooltip(${localized.id})"
+                                onfocus="showTooltip(${localized.id}, this, true)"
+                                onblur="hideTooltip(${localized.id})"
+                            >
+
+                            <div id="tooltip-${localized.id}" class="slider-tooltip hidden" role="status" aria-live="polite"></div>
+                        </div>
+
+                        <div class="mt-1.5 flex justify-between items-center gap-1.5 text-[11px] text-slate-800" aria-hidden="true">
+                            <span class="font-medium">${labels[0]}</span>
+                            <output id="range-value-${localized.id}" class="font-semibold text-slate-900">${t("slider.currentLevel")} : ${labels[idx]}</output>
+                            <span class="font-medium text-right">${labels[4]}</span>
+                        </div>
+                    </section>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateVal(id, value) {
+            const dim = dimensions.find((entry) => entry.id === id);
+            if (!dim) return;
+
+            dim.value = parseInt(value, 10);
+            const localized = getLocalizedDimension(dim);
+            const labels = tickLabelsFor(localized);
+            const idx = Math.max(0, Math.min(4, Math.round(dim.value / 25)));
+
+            const output = document.getElementById(`range-value-${id}`);
+            if (output) output.textContent = `${t("slider.currentLevel")} : ${labels[idx]}`;
+
+            checkAlerts();
+        }
+
+        function showTooltip(id, inputEl) {
+            const dim = dimensions.find((entry) => entry.id === id);
+            if (!dim || !inputEl) return;
+
+            const localized = getLocalizedDimension(dim);
+            const value = parseInt(inputEl.value, 10);
+            const labels = tickLabelsFor(localized);
+            const idx = Math.max(0, Math.min(4, Math.round(value / 25)));
+            const label = labels[idx] ?? `${value}`;
+
+            const tooltip = document.getElementById(`tooltip-${id}`);
+            if (!tooltip) return;
+
+            tooltip.textContent = label;
+            tooltip.classList.remove("hidden");
+
+            const min = parseInt(inputEl.min || "0", 10);
+            const max = parseInt(inputEl.max || "100", 10);
+            const pct = (value - min) / (max - min || 1);
+
+            const inputRect = inputEl.getBoundingClientRect();
+            const parentRect = inputEl.parentElement.getBoundingClientRect();
+            const x = inputRect.left - parentRect.left + pct * inputRect.width;
+            tooltip.style.left = `${x}px`;
+        }
+
+        function hideTooltip(id) {
+            const tooltip = document.getElementById(`tooltip-${id}`);
+            if (tooltip) tooltip.classList.add("hidden");
+        }
+
+        function resetDim(id) {
+            const dim = dimensions.find((entry) => entry.id === id);
+            if (!dim) return;
+
+            dim.value = 50;
+            const input = document.getElementById(`range-${id}`);
+            if (input) input.value = "50";
+
+            updateVal(id, 50);
+            const localized = getLocalizedDimension(dim);
+            announce(t("status.recentered", { dimension: `${localized.leftTitle}${t("slider.axisSeparator")}${localized.rightTitle}` }));
+        }
+
+        function checkAlerts() {
+            const container = document.getElementById("alertsContainer");
+            if (!container) return;
+
+            if (!alertsEnabled) {
+                container.innerHTML = "";
+                setHidden(container, true);
+                return;
+            }
+
+            const values = dimensions.map((dim) => dim.value);
+            const isL = (idx) => values[idx] < 50;
+            const isR = (idx) => values[idx] > 50;
+
+            const activeAlerts = ALERT_RULES
+                .filter((rule) => rule.when(isL, isR))
+                .map((rule) => rule[currentLang] || rule.fr);
+
+            if (activeAlerts.length > 0) {
+                container.innerHTML = `
+                    <div class="bg-amber-50 rounded-2xl p-5 border border-amber-300 shadow-sm animate-[slideIn_0.3s_ease-out]">
+                        <h3 class="text-base font-bold text-amber-900 mb-3 flex items-center gap-2">
+                            <span class="material-icons-round text-amber-800" aria-hidden="true">warning_amber</span>
+                            ${t("alerts.heading", { count: activeAlerts.length })}
+                        </h3>
+                        <div class="space-y-3">
+                            ${activeAlerts
+                                .map((item) => `<div class="text-sm text-amber-950 bg-white/90 p-3 rounded border border-amber-300"><strong>${item.title}:</strong> ${item.body}</div>`)
+                                .join("")}
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="bg-emerald-50 rounded-2xl p-5 border border-emerald-300 shadow-sm animate-[slideIn_0.3s_ease-out]">
+                        <p class="text-sm font-semibold text-emerald-900">${t("alerts.none")}</p>
+                    </div>
+                `;
+            }
+
+            setHidden(container, false);
+        }
+
+        function syncOrderFromDom() {
+            const listItems = document.querySelectorAll("#sortableList li");
+            const nextOrder = [];
+            listItems.forEach((item) => {
+                const id = parseInt(item.getAttribute("data-id"), 10);
+                if (Number.isFinite(id)) nextOrder.push(id);
+            });
+            if (nextOrder.length === dimensions.length) {
+                currentOrder = nextOrder;
+            }
+        }
+
+        function moveDimension(id, direction) {
+            const idx = currentOrder.indexOf(id);
+            if (idx < 0) return;
+
+            const target = idx + direction;
+            if (target < 0 || target >= currentOrder.length) return;
+
+            const next = currentOrder.slice();
+            const [item] = next.splice(idx, 1);
+            next.splice(target, 0, item);
+            currentOrder = next;
+
+            renderSortableList();
+
+            const dim = dimensions.find((entry) => entry.id === id);
+            const localized = dim ? getLocalizedDimension(dim) : null;
+            const dimensionName = localized ? `${localized.leftTitle}${t("slider.axisSeparator")}${localized.rightTitle}` : "";
+            announce(t(direction < 0 ? "status.movedUp" : "status.movedDown", { dimension: dimensionName }));
+
+            window.setTimeout(() => {
+                const row = document.querySelector(`#sortableList li[data-id='${id}']`);
+                const focusTarget = row?.querySelector(direction < 0 ? ".move-up" : ".move-down");
+                if (focusTarget) focusTarget.focus();
+            }, 0);
+        }
+
         function renderSortableList() {
             const list = document.getElementById("sortableList");
+            if (!list) return;
+
             list.innerHTML = "";
-            currentOrder.forEach(id => {
-                const dim = dimensions.find(d => d.id === id);
+
+            currentOrder.forEach((id, index) => {
+                const dim = dimensions.find((entry) => entry.id === id);
+                if (!dim) return;
+                const localized = getLocalizedDimension(dim);
+                const axisLabel = `${localized.leftTitle}${t("slider.axisSeparator")}${localized.rightTitle}`;
+
                 const li = document.createElement("li");
-                li.className = "flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 cursor-grab active:cursor-grabbing hover:border-indigo-300 transition-colors shadow-sm";
-                li.setAttribute("data-id", dim.id);
+                li.className = "flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-300 hover:border-indigo-400 transition-colors shadow-sm";
+                li.setAttribute("data-id", String(localized.id));
+
                 li.innerHTML = `
-                    <span class="material-icons-round text-slate-300">drag_handle</span>
-                    <span class="font-bold text-slate-700 text-sm flex-1">${dim.leftTitle} / ${dim.rightTitle}</span>
+                    <button type="button" class="drag-handle text-slate-700 p-1 rounded-md hover:bg-slate-100" aria-label="Drag ${axisLabel}" title="Drag">
+                        <span class="material-icons-round" aria-hidden="true">drag_handle</span>
+                    </button>
+                    <span class="font-bold text-slate-900 text-sm flex-1">${axisLabel}</span>
+                    <div class="flex items-center gap-1">
+                        <button type="button" class="move-up text-slate-700 hover:bg-slate-100 rounded-md p-1" aria-label="${t("orderPanel.moveUp")} - ${axisLabel}" ${index === 0 ? "disabled" : ""}>
+                            <span class="material-icons-round text-base" aria-hidden="true">arrow_upward</span>
+                        </button>
+                        <button type="button" class="move-down text-slate-700 hover:bg-slate-100 rounded-md p-1" aria-label="${t("orderPanel.moveDown")} - ${axisLabel}" ${index === currentOrder.length - 1 ? "disabled" : ""}>
+                            <span class="material-icons-round text-base" aria-hidden="true">arrow_downward</span>
+                        </button>
+                    </div>
                 `;
+
+                const moveUpButton = li.querySelector(".move-up");
+                const moveDownButton = li.querySelector(".move-down");
+                if (moveUpButton) moveUpButton.addEventListener("click", () => moveDimension(id, -1));
+                if (moveDownButton) moveDownButton.addEventListener("click", () => moveDimension(id, 1));
+
                 list.appendChild(li);
             });
 
-            if (typeof Sortable !== 'undefined') {
-                new Sortable(list, {
+            if (sortableInstance && typeof sortableInstance.destroy === "function") {
+                sortableInstance.destroy();
+            }
+
+            if (typeof Sortable !== "undefined") {
+                sortableInstance = new Sortable(list, {
                     animation: 200,
-                    ghostClass: 'sortable-ghost',
-                    handle: 'li'
+                    ghostClass: "sortable-ghost",
+                    handle: ".drag-handle",
+                    onEnd: () => {
+                        syncOrderFromDom();
+                    }
                 });
             }
         }
 
         function applyOrder() {
-            const listItems = document.querySelectorAll("#sortableList li");
-            const newOrder = [];
-            listItems.forEach(item => {
-                newOrder.push(parseInt(item.getAttribute("data-id")));
-            });
-            currentOrder = newOrder;
+            syncOrderFromDom();
             renderSliders();
-            togglePanel('orderPanel');
+            togglePanel("orderPanel");
+            announce(t("status.orderApplied"));
         }
 
-        // --- Modal & Reset UI ---
-        function showResetModal() { document.getElementById('resetModal').classList.remove('hidden'); }
-        function hideResetModal() { document.getElementById('resetModal').classList.add('hidden'); }
-        
-        function showAboutModal() { document.getElementById('aboutModal').classList.remove('hidden'); }
-        function hideAboutModal() { document.getElementById('aboutModal').classList.add('hidden'); }
+        function getFocusableElements(root) {
+            if (!root) return [];
+            return Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                .filter((el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true");
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            previousFocusedElement = document.activeElement;
+            activeModalId = modalId;
+
+            setHidden(modal, false);
+            document.body.classList.add("overflow-hidden");
+
+            const focusable = getFocusableElements(modal);
+            if (focusable.length > 0) {
+                focusable[0].focus();
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+
+            setHidden(modal, true);
+            if (activeModalId === modalId) activeModalId = null;
+
+            if (document.getElementById("resetModal")?.hidden && document.getElementById("aboutModal")?.hidden) {
+                document.body.classList.remove("overflow-hidden");
+            }
+
+            if (previousFocusedElement && typeof previousFocusedElement.focus === "function") {
+                previousFocusedElement.focus();
+            }
+        }
+
+        function trapFocus(event) {
+            if (event.key !== "Tab" || !activeModalId) return;
+            const modal = document.getElementById(activeModalId);
+            if (!modal) return;
+
+            const focusable = getFocusableElements(modal);
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function showResetModal() {
+            openModal("resetModal");
+        }
+
+        function hideResetModal() {
+            closeModal("resetModal");
+        }
+
+        function showAboutModal() {
+            openModal("aboutModal");
+        }
+
+        function hideAboutModal() {
+            closeModal("aboutModal");
+        }
 
         function performReset() {
-            dimensions.forEach(d => {
-                d.value = 50;
+            dimensions.forEach((dim) => {
+                dim.value = 50;
             });
+
             renderSliders();
             checkAlerts();
             hideResetModal();
+            announce(t("status.resetDone"));
         }
 
-        // --- Initial Load ---
-        // Rendu robuste : ne dépend pas de window.onload (qui peut être écrasé par d'autres scripts)
-        // et tolère les erreurs de lecture localStorage.
-        document.addEventListener('DOMContentLoaded', () => {
-            // Démarrage en position neutre : les curseurs restent au milieu par défaut (50%)
-            // Aucun chargement automatique depuis le navigateur afin d’éviter de réinjecter une ancienne configuration.
-            try { renderSliders(); } catch (e) { console.error(e); }
+        document.addEventListener("keydown", (event) => {
+            if (activeModalId && event.key === "Escape") {
+                event.preventDefault();
+                closeModal(activeModalId);
+                return;
+            }
+            if (activeModalId && event.key === "Tab") {
+                trapFocus(event);
+            }
+        });
 
-            try { setAlertsUI(alertsEnabled); } catch (e) {}
-            try { checkAlerts(); } catch (e) {}
+        document.addEventListener("DOMContentLoaded", () => {
+            applyStaticTranslations();
+
+            const langSelect = document.getElementById("languageSelect");
+            if (langSelect) {
+                langSelect.value = currentLang;
+                langSelect.addEventListener("change", (event) => {
+                    setLanguage(event.target.value);
+                });
+            }
+
+            renderSliders();
+            setAlertsUI(alertsEnabled, { announceState: false });
+            checkAlerts();
+
+            const orderPanel = document.getElementById("orderPanel");
+            if (orderPanel) {
+                orderPanel.setAttribute("aria-hidden", "true");
+                orderPanel.setAttribute("inert", "");
+            }
         });
     </script>
 </body>
