@@ -283,12 +283,78 @@ select:focus-visible,
   background: conic-gradient(#d2d2d2 0% 100%);
 }
 
+.pie-with-labels {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  padding: 26px;
+}
+
+.pie-with-labels.pie-large {
+  padding: 28px;
+}
+
+.pie-outer-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pie-outer-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  color: #2f2f2f;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+  min-width: 0;
+  cursor: default;
+  pointer-events: auto;
+}
+
+.pie-tooltip {
+  position: absolute;
+  z-index: 20;
+  border: 1px solid #b7b7a8;
+  border-radius: 9px;
+  background: #efefe4;
+  color: #1f1f1f;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  padding: 8px 10px;
+  min-width: 106px;
+  pointer-events: none;
+}
+
+.pie-tooltip::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: -6px;
+  width: 11px;
+  height: 11px;
+  border-left: 1px solid #b7b7a8;
+  border-bottom: 1px solid #b7b7a8;
+  background: #efefe4;
+  transform: rotate(-45deg);
+}
+
+.pie-tooltip-name {
+  display: block;
+  font-size: 18px;
+  line-height: 1.04;
+}
+
+.pie-tooltip-pct {
+  display: block;
+  margin-top: 2px;
+  font-size: 18px;
+  line-height: 1;
+}
+
 .top-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  justify-content: center;
-  max-width: 250px;
+  display: none;
 }
 
 .legend-item {
@@ -385,11 +451,7 @@ select:focus-visible,
 }
 
 .analysis-learning-block .analysis-legend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  justify-content: center;
-  align-items: center;
-  gap: 4px 12px;
+  display: none;
 }
 
 .analysis-group-section {
@@ -1122,7 +1184,11 @@ main {
             </div>
           </div>
           <div class="analysis-wrap">
-            <div id="top-pie" class="top-pie" aria-label="Répartition des types d'apprentissage"></div>
+            <div id="top-pie-wrap" class="pie-with-labels">
+              <div id="top-pie" class="top-pie" aria-label="Répartition des types d'apprentissage"></div>
+              <div id="top-pie-labels" class="pie-outer-labels" aria-hidden="true"></div>
+              <div id="top-pie-tooltip" class="pie-tooltip hidden" role="tooltip" aria-hidden="true"></div>
+            </div>
             <div id="top-legend" class="top-legend"></div>
           </div>
         </div>
@@ -1131,7 +1197,11 @@ main {
           <div id="analysis-alerts" class="analysis-alerts hidden" role="status" aria-live="polite" aria-atomic="false"></div>
           <div class="analysis-main-grid">
             <div class="analysis-block analysis-learning-block">
-              <div id="analysis-learning-pie" class="analysis-big-pie"></div>
+              <div id="analysis-learning-pie-wrap" class="pie-with-labels pie-large">
+                <div id="analysis-learning-pie" class="analysis-big-pie"></div>
+                <div id="analysis-learning-labels" class="pie-outer-labels" aria-hidden="true"></div>
+                <div id="analysis-learning-tooltip" class="pie-tooltip hidden" role="tooltip" aria-hidden="true"></div>
+              </div>
               <div id="analysis-learning-legend" class="analysis-legend"></div>
             </div>
             <div class="analysis-block">
@@ -1660,10 +1730,16 @@ const metaDescriptionInput = document.getElementById("meta-description");
 const metaCommandInput = document.getElementById("meta-command");
 const metaPersonasInput = document.getElementById("meta-personas");
 const metaSlidersInput = document.getElementById("meta-sliders");
+const topPieWrap = document.getElementById("top-pie-wrap");
 const topPie = document.getElementById("top-pie");
+const topPieLabels = document.getElementById("top-pie-labels");
+const topPieTooltip = document.getElementById("top-pie-tooltip");
 const topLegend = document.getElementById("top-legend");
 const analysisAlerts = document.getElementById("analysis-alerts");
+const analysisLearningPieWrap = document.getElementById("analysis-learning-pie-wrap");
 const analysisLearningPie = document.getElementById("analysis-learning-pie");
+const analysisLearningLabels = document.getElementById("analysis-learning-labels");
+const analysisLearningTooltip = document.getElementById("analysis-learning-tooltip");
 const analysisLearningLegend = document.getElementById("analysis-learning-legend");
 const analysisDeliveryPie = document.getElementById("analysis-delivery-pie");
 const analysisDeliveryLegend = document.getElementById("analysis-delivery-legend");
@@ -2535,6 +2611,129 @@ function renderLegend(container, data, showPct = true) {
     .join("");
 }
 
+const LEARNING_PIE_CODES = {
+  read: "Acq",
+  collaborate: "Col",
+  discuss: "Dis",
+  investigate: "Inq",
+  practice: "Pra",
+  produce: "Pro"
+};
+
+function learningPieCode(segmentKey) {
+  return LEARNING_PIE_CODES[segmentKey] || "–";
+}
+
+function hidePieTooltip(tooltipEl) {
+  if (!tooltipEl) return;
+  tooltipEl.classList.add("hidden");
+  tooltipEl.setAttribute("aria-hidden", "true");
+}
+
+function showPieTooltip(wrapEl, tooltipEl, segment, clientX, clientY) {
+  if (!wrapEl || !tooltipEl || !segment) return;
+  tooltipEl.textContent = "";
+  const nameEl = document.createElement("span");
+  nameEl.className = "pie-tooltip-name";
+  nameEl.textContent = segment.label;
+  const pctEl = document.createElement("span");
+  pctEl.className = "pie-tooltip-pct";
+  pctEl.textContent = `${Math.round(segment.pct)}%`;
+  tooltipEl.append(nameEl, pctEl);
+  tooltipEl.classList.remove("hidden");
+  tooltipEl.setAttribute("aria-hidden", "false");
+
+  const wrapRect = wrapEl.getBoundingClientRect();
+  const leftBase = clientX - wrapRect.left + 8;
+  const topBase = clientY - wrapRect.top - 10;
+  const tooltipWidth = tooltipEl.offsetWidth || 130;
+  const tooltipHeight = tooltipEl.offsetHeight || 66;
+  const left = Math.max(8, Math.min(leftBase, wrapRect.width - tooltipWidth - 8));
+  const top = Math.max(8, Math.min(topBase - tooltipHeight, wrapRect.height - tooltipHeight - 8));
+  tooltipEl.style.left = `${left}px`;
+  tooltipEl.style.top = `${top}px`;
+}
+
+function segmentForPointer(data, pieEl, event) {
+  if (!data || data.sum <= 0 || !pieEl) return null;
+  const rect = pieEl.getBoundingClientRect();
+  const radius = Math.min(rect.width, rect.height) / 2;
+  const dx = event.clientX - (rect.left + rect.width / 2);
+  const dy = event.clientY - (rect.top + rect.height / 2);
+  if ((dx * dx) + (dy * dy) > radius * radius) return null;
+  let angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+  if (angle < 0) angle += 360;
+  const pct = (angle / 360) * 100;
+  const segments = data.segments.filter((segment) => segment.pct > 0);
+  return segments.find((segment, index) => {
+    if (index === segments.length - 1) return pct >= segment.start && pct <= segment.end;
+    return pct >= segment.start && pct < segment.end;
+  }) || null;
+}
+
+function renderPieOuterLabels(wrapEl, pieEl, labelsEl, tooltipEl, data, codeForSegment) {
+  if (!wrapEl || !pieEl || !labelsEl || !tooltipEl) return;
+  hidePieTooltip(tooltipEl);
+  labelsEl.innerHTML = "";
+  pieEl.onmousemove = null;
+  pieEl.onmouseleave = null;
+
+  if (!data || data.sum <= 0) return;
+
+  const segments = data.segments.filter((segment) => segment.pct > 0);
+  const labelsRect = labelsEl.getBoundingClientRect();
+  const pieRect = pieEl.getBoundingClientRect();
+  const pieWidth = pieRect.width || pieEl.clientWidth || pieEl.offsetWidth || 180;
+  const pieHeight = pieRect.height || pieEl.clientHeight || pieEl.offsetHeight || pieWidth;
+  const labelsWidth = labelsRect.width || labelsEl.clientWidth || (pieWidth + 48);
+  const labelsHeight = labelsRect.height || labelsEl.clientHeight || (pieHeight + 48);
+  const centerX = pieRect.width
+    ? pieRect.left - labelsRect.left + pieRect.width / 2
+    : labelsWidth / 2;
+  const centerY = pieRect.height
+    ? pieRect.top - labelsRect.top + pieRect.height / 2
+    : labelsHeight / 2;
+  const radius = Math.min(pieWidth, pieHeight) / 2 + 10;
+  const labelInset = 16;
+
+  segments.forEach((segment) => {
+    const label = document.createElement("span");
+    label.className = "pie-outer-label";
+    label.textContent = codeForSegment(segment);
+    label.setAttribute("aria-hidden", "true");
+    label.title = `${segment.label} ${Math.round(segment.pct)}%`;
+    const angle = (((segment.start + segment.end) / 2) / 100) * (Math.PI * 2) - (Math.PI / 2);
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    const clampedX = Math.max(labelInset, Math.min(x, labelsWidth - labelInset));
+    const clampedY = Math.max(labelInset, Math.min(y, labelsHeight - labelInset));
+    label.style.left = `${clampedX}px`;
+    label.style.top = `${clampedY}px`;
+    label.addEventListener("mouseenter", (event) => {
+      showPieTooltip(wrapEl, tooltipEl, segment, event.clientX, event.clientY);
+    });
+    label.addEventListener("mousemove", (event) => {
+      showPieTooltip(wrapEl, tooltipEl, segment, event.clientX, event.clientY);
+    });
+    label.addEventListener("mouseleave", () => {
+      hidePieTooltip(tooltipEl);
+    });
+    labelsEl.appendChild(label);
+  });
+
+  pieEl.onmousemove = (event) => {
+    const segment = segmentForPointer(data, pieEl, event);
+    if (!segment) {
+      hidePieTooltip(tooltipEl);
+      return;
+    }
+    showPieTooltip(wrapEl, tooltipEl, segment, event.clientX, event.clientY);
+  };
+  pieEl.onmouseleave = () => {
+    hidePieTooltip(tooltipEl);
+  };
+}
+
 function renderGroupBar(data) {
   analysisGroupBar.setAttribute("role", "img");
   if (data.sum <= 0) {
@@ -2627,6 +2826,14 @@ function renderAnalysisPanel() {
   const learningData = buildSegments(learningDefs, aggregateDurations((a) => a.type).totals);
   renderConic(analysisLearningPie, learningData);
   renderLegend(analysisLearningLegend, learningData, false);
+  renderPieOuterLabels(
+    analysisLearningPieWrap,
+    analysisLearningPie,
+    analysisLearningLabels,
+    analysisLearningTooltip,
+    learningData,
+    (segment) => learningPieCode(segment.key)
+  );
 
   const deliveryDefs = [
     { key: "onsite", label: t("modeOnsite"), color: "#37658b" },
@@ -2712,7 +2919,6 @@ function renderTopPanel() {
   metaDesignedMinutesInput.value = designed.minutes;
 
   const totals = {};
-  let overall = 0;
   LEARNING_TYPES.forEach((type) => {
     totals[type.id] = 0;
   });
@@ -2720,33 +2926,27 @@ function renderTopPanel() {
     session.activities.forEach((activity) => {
       const duration = Number(activity.duration || 0);
       totals[activity.type] = (totals[activity.type] || 0) + duration;
-      overall += duration;
     });
   });
 
-  if (overall <= 0) {
-    topPie.style.background = "conic-gradient(#d2d2d2 0% 100%)";
-    topPie.setAttribute("role", "img");
-    topPie.setAttribute("aria-label", t("noData"));
-  } else {
-    let cursor = 0;
-    const segments = [];
-    const labels = [];
-    LEARNING_TYPES.forEach((type) => {
-      const pct = (totals[type.id] / overall) * 100;
-      if (pct <= 0) return;
-      const next = cursor + pct;
-      segments.push(`${type.color} ${cursor}% ${next}%`);
-      labels.push(`${type.label} ${Math.round(pct)}%`);
-      cursor = next;
-    });
-    topPie.style.background = `conic-gradient(${segments.join(", ")})`;
-    topPie.setAttribute("role", "img");
-    topPie.setAttribute("aria-label", labels.join(", "));
-  }
+  const topDefs = LEARNING_TYPES.map((type) => ({
+    key: type.id,
+    label: type.label,
+    color: type.color
+  }));
+  const topData = buildSegments(topDefs, totals);
+  renderConic(topPie, topData);
+  renderPieOuterLabels(
+    topPieWrap,
+    topPie,
+    topPieLabels,
+    topPieTooltip,
+    topData,
+    (segment) => learningPieCode(segment.key)
+  );
 
   topLegend.innerHTML = LEARNING_TYPES.map((type) => {
-    const pct = overall > 0 ? Math.round((totals[type.id] / overall) * 100) : 0;
+    const pct = topData.sum > 0 ? Math.round((totals[type.id] / topData.sum) * 100) : 0;
     return `<span class="legend-item"><span class="legend-dot" style="background:${type.color}"></span>${type.label} ${pct}%</span>`;
   }).join("");
 
