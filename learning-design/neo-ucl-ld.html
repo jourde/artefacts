@@ -225,6 +225,97 @@ body {
   border-radius: 50%;
 }
 
+.analysis-view {
+  display: grid;
+  gap: 12px;
+}
+
+.analysis-title {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+}
+
+.analysis-warning {
+  border: 1px solid #e9d897;
+  background: #f6ecc9;
+  color: #6b4c14;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.analysis-main-grid {
+  display: grid;
+  grid-template-columns: 1.35fr repeat(4, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.analysis-block {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.analysis-learning-block {
+  justify-items: center;
+}
+
+.analysis-big-pie,
+.analysis-small-pie {
+  border-radius: 50%;
+  border: 1px solid #c8c8c8;
+  background: conic-gradient(#d2d2d2 0% 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.analysis-big-pie {
+  width: 190px;
+  height: 190px;
+}
+
+.analysis-small-pie {
+  width: 130px;
+  height: 130px;
+}
+
+.analysis-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.analysis-legend .legend-item {
+  white-space: nowrap;
+}
+
+.analysis-learning-block .analysis-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: center;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.analysis-group-section {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.analysis-group-bar {
+  width: min(760px, 100%);
+  height: 36px;
+  border: 1px solid #bfc5cb;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #d2d2d2 0% 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -551,6 +642,10 @@ main {
     grid-template-columns: 1fr;
   }
 
+  .analysis-main-grid {
+    grid-template-columns: 1fr;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -566,6 +661,16 @@ main {
   .top-pie {
     width: 150px;
     height: 150px;
+  }
+
+  .analysis-big-pie {
+    width: 160px;
+    height: 160px;
+  }
+
+  .analysis-small-pie {
+    width: 130px;
+    height: 130px;
   }
 
   .legend-item {
@@ -598,22 +703,18 @@ main {
         <div class="brand-left">
           <h1 class="brand-title">Interface de conception d’apprentissage</h1>
         </div>
-        <button id="top-panel-toggle-btn" class="top-panel-toggle" type="button">Replier le panneau</button>
+        <div style="display:inline-flex; gap:8px; align-items:center;">
+          <button id="top-tab-settings" class="top-tab" type="button">Paramètres</button>
+          <button id="top-tab-analysis" class="top-tab active" type="button">Analyse</button>
+          <button id="top-panel-toggle-btn" class="top-panel-toggle" type="button">Replier le panneau</button>
+        </div>
       </div>
       <div id="top-panel-body" class="top-panel-body">
-        <div class="top-tabs">
-          <button id="top-tab-timeline" class="top-tab active" type="button">Timeline</button>
-          <button id="top-tab-analysis" class="top-tab" type="button">Analysis</button>
-        </div>
-        <div class="panel-grid">
+        <div id="timeline-view" class="panel-grid">
           <div class="panel-column">
             <div class="form-row">
-              <label for="meta-name">Nom</label>
+              <label for="meta-name">Titre</label>
               <input id="meta-name" class="panel-input" type="text" />
-            </div>
-            <div class="form-row">
-              <label for="meta-topic">Sujet</label>
-              <input id="meta-topic" class="panel-input" type="text" />
             </div>
             <div class="form-row">
               <label>Temps d'apprentissage</label>
@@ -670,6 +771,38 @@ main {
           <div class="analysis-wrap">
             <div id="top-pie" class="top-pie" aria-label="Répartition des types d'apprentissage"></div>
             <div id="top-legend" class="top-legend"></div>
+          </div>
+        </div>
+        <div id="analysis-view" class="analysis-view hidden">
+          <h2 class="analysis-title">Expérience d’apprentissage</h2>
+          <div id="analysis-warning" class="analysis-warning hidden">
+            Le graphe social peut être imprécis: un ou plusieurs types d’apprentissage n’ont pas de taille de groupe définie.
+          </div>
+          <div class="analysis-main-grid">
+            <div class="analysis-block analysis-learning-block">
+              <div id="analysis-learning-pie" class="analysis-big-pie"></div>
+              <div id="analysis-learning-legend" class="analysis-legend"></div>
+            </div>
+            <div class="analysis-block">
+              <div id="analysis-delivery-pie" class="analysis-small-pie"></div>
+              <div id="analysis-delivery-legend" class="analysis-legend"></div>
+            </div>
+            <div class="analysis-block">
+              <div id="analysis-teacher-pie" class="analysis-small-pie"></div>
+              <div id="analysis-teacher-legend" class="analysis-legend"></div>
+            </div>
+            <div class="analysis-block">
+              <div id="analysis-sync-pie" class="analysis-small-pie"></div>
+              <div id="analysis-sync-legend" class="analysis-legend"></div>
+            </div>
+            <div class="analysis-block">
+              <div id="analysis-eval-pie" class="analysis-small-pie"></div>
+              <div id="analysis-eval-legend" class="analysis-legend"></div>
+            </div>
+          </div>
+          <div class="analysis-group-section">
+            <div id="analysis-group-bar" class="analysis-group-bar"></div>
+            <div id="analysis-group-legend" class="analysis-legend"></div>
           </div>
         </div>
       </div>
@@ -839,7 +972,6 @@ const nextId = () => `id-${Date.now()}-${uid++}`;
 const DEFAULT_DAY_HOURS = 7;
 const DEFAULT_META = {
   name: "La Belle et la Bête",
-  topic: "Séquence 1",
   dayHours: DEFAULT_DAY_HOURS,
   learningDays: 0,
   learningHours: 0,
@@ -848,12 +980,11 @@ const DEFAULT_META = {
   sizeClass: 26,
   designers: "",
   description: "Étude du conte La Belle et la Bête",
-  activeTab: "timeline"
+  activeTab: "settings"
 };
 
 const NEW_DESIGN_META = {
   name: "",
-  topic: "",
   dayHours: DEFAULT_DAY_HOURS,
   learningDays: 0,
   learningHours: 0,
@@ -862,7 +993,7 @@ const NEW_DESIGN_META = {
   sizeClass: "",
   designers: "",
   description: "",
-  activeTab: "timeline"
+  activeTab: "settings"
 };
 
 const defaultState = () => ({
@@ -1031,10 +1162,11 @@ const saveBtn = document.getElementById("save-btn");
 const importFileInput = document.getElementById("import-file-input");
 const topPanel = document.getElementById("top-panel");
 const topPanelToggleBtn = document.getElementById("top-panel-toggle-btn");
-const topTabTimeline = document.getElementById("top-tab-timeline");
+const topTabSettings = document.getElementById("top-tab-settings");
 const topTabAnalysis = document.getElementById("top-tab-analysis");
+const timelineView = document.getElementById("timeline-view");
+const analysisView = document.getElementById("analysis-view");
 const metaNameInput = document.getElementById("meta-name");
-const metaTopicInput = document.getElementById("meta-topic");
 const metaLearningDaysInput = document.getElementById("meta-learning-days");
 const metaLearningHoursInput = document.getElementById("meta-learning-hours");
 const metaLearningMinutesInput = document.getElementById("meta-learning-minutes");
@@ -1048,6 +1180,19 @@ const metaDesignersInput = document.getElementById("meta-designers");
 const metaDescriptionInput = document.getElementById("meta-description");
 const topPie = document.getElementById("top-pie");
 const topLegend = document.getElementById("top-legend");
+const analysisWarning = document.getElementById("analysis-warning");
+const analysisLearningPie = document.getElementById("analysis-learning-pie");
+const analysisLearningLegend = document.getElementById("analysis-learning-legend");
+const analysisDeliveryPie = document.getElementById("analysis-delivery-pie");
+const analysisDeliveryLegend = document.getElementById("analysis-delivery-legend");
+const analysisTeacherPie = document.getElementById("analysis-teacher-pie");
+const analysisTeacherLegend = document.getElementById("analysis-teacher-legend");
+const analysisSyncPie = document.getElementById("analysis-sync-pie");
+const analysisSyncLegend = document.getElementById("analysis-sync-legend");
+const analysisEvalPie = document.getElementById("analysis-eval-pie");
+const analysisEvalLegend = document.getElementById("analysis-eval-legend");
+const analysisGroupBar = document.getElementById("analysis-group-bar");
+const analysisGroupLegend = document.getElementById("analysis-group-legend");
 const infoModalBackdrop = document.getElementById("info-modal-backdrop");
 const infoModalCloseBtn = document.getElementById("info-modal-close-btn");
 const exportModalBackdrop = document.getElementById("export-modal-backdrop");
@@ -1080,6 +1225,10 @@ function loadState() {
     if (parsed.meta.modeDelivery === "blended") parsed.meta.modeDelivery = "hybrid";
     if (!["onsite", "online", "hybrid"].includes(parsed.meta.modeDelivery)) {
       parsed.meta.modeDelivery = "onsite";
+    }
+    if (parsed.meta.activeTab === "timeline") parsed.meta.activeTab = "settings";
+    if (!["settings", "analysis"].includes(parsed.meta.activeTab)) {
+      parsed.meta.activeTab = "settings";
     }
     return parsed;
   } catch {
@@ -1203,12 +1352,134 @@ function setLearningTime(days, hours, minutes) {
   state.meta.learningMinutes = normalized.minutes;
 }
 
+function aggregateDurations(mapper) {
+  const totals = {};
+  let overall = 0;
+  state.sessions.forEach((session) => {
+    session.activities.forEach((activity) => {
+      const key = mapper(activity);
+      const duration = Math.max(0, Number(activity.duration) || 0);
+      totals[key] = (totals[key] || 0) + duration;
+      overall += duration;
+    });
+  });
+  return { totals, overall };
+}
+
+function buildSegments(definitions, totals) {
+  const sum = definitions.reduce((acc, def) => acc + Number(totals[def.key] || 0), 0);
+  let cursor = 0;
+  const segments = definitions.map((def) => {
+    const value = Number(totals[def.key] || 0);
+    const pct = sum > 0 ? (value / sum) * 100 : 0;
+    const start = cursor;
+    cursor += pct;
+    return { ...def, value, pct, start, end: cursor };
+  });
+  return { sum, segments };
+}
+
+function renderConic(el, data) {
+  if (data.sum <= 0) {
+    el.style.background = "conic-gradient(#d2d2d2 0% 100%)";
+    return;
+  }
+  const parts = data.segments
+    .filter((segment) => segment.pct > 0)
+    .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`);
+  el.style.background = `conic-gradient(${parts.join(", ")})`;
+}
+
+function renderLegend(container, data, showPct = true) {
+  container.innerHTML = data.segments
+    .filter((segment) => segment.pct > 0)
+    .map((segment) => {
+      const pct = showPct ? ` ${Math.round(segment.pct)}%` : "";
+      return `<span class="legend-item"><span class="legend-dot" style="background:${segment.color}"></span>${segment.label}${pct}</span>`;
+    })
+    .join("");
+}
+
+function renderGroupBar(data) {
+  if (data.sum <= 0) {
+    analysisGroupBar.style.background = "linear-gradient(90deg, #d2d2d2 0% 100%)";
+    return;
+  }
+  const parts = data.segments
+    .filter((segment) => segment.pct > 0)
+    .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`);
+  analysisGroupBar.style.background = `linear-gradient(90deg, ${parts.join(", ")})`;
+}
+
+function renderAnalysisPanel() {
+  const missingGroupMode = state.sessions.some((session) =>
+    session.activities.some((activity) => !["whole", "subgroups", "individual"].includes(activity.groupMode))
+  );
+  analysisWarning.classList.toggle("hidden", !missingGroupMode);
+
+  const learningDefs = LEARNING_TYPES.map((type) => ({
+    key: type.id,
+    label: type.label,
+    color: type.color
+  }));
+  const learningData = buildSegments(learningDefs, aggregateDurations((a) => a.type).totals);
+  renderConic(analysisLearningPie, learningData);
+  renderLegend(analysisLearningLegend, learningData, false);
+
+  const deliveryDefs = [
+    { key: "onsite", label: "Présentiel", color: "#37658b" },
+    { key: "online", label: "Distanciel", color: "#bcc7d7" },
+    { key: "hybrid", label: "Hybride", color: "#4e84c8" }
+  ];
+  const deliveryData = buildSegments(deliveryDefs, aggregateDurations((a) => a.locationMode).totals);
+  renderConic(analysisDeliveryPie, deliveryData);
+  renderLegend(analysisDeliveryLegend, deliveryData);
+
+  const teacherDefs = [
+    { key: "present", label: "Formateur présent", color: "#7a6854" },
+    { key: "absent", label: "Formateur absent", color: "#c5b59f" }
+  ];
+  const teacherData = buildSegments(teacherDefs, aggregateDurations((a) => a.teacherPresence).totals);
+  renderConic(analysisTeacherPie, teacherData);
+  renderLegend(analysisTeacherLegend, teacherData);
+
+  const syncDefs = [
+    { key: "sync", label: "Synchrone", color: "#ac7f8d" },
+    { key: "async", label: "Asynchrone", color: "#cbbec2" }
+  ];
+  const syncData = buildSegments(syncDefs, aggregateDurations((a) => a.syncMode).totals);
+  renderConic(analysisSyncPie, syncData);
+  renderLegend(analysisSyncLegend, syncData);
+
+  const evalDefs = [
+    { key: "formative", label: "Formative", color: "#ccd5aa" },
+    { key: "summative", label: "Sommative", color: "#b2cf69" }
+  ];
+  const evalTotals = aggregateDurations((activity) => {
+    if (activity.evaluationMode === "summative" || activity.evaluationMode === "certificative") {
+      return "summative";
+    }
+    return "formative";
+  }).totals;
+  const evalData = buildSegments(evalDefs, evalTotals);
+  renderConic(analysisEvalPie, evalData);
+  renderLegend(analysisEvalLegend, evalData);
+
+  const groupDefs = [
+    { key: "whole", label: "Groupe entier", color: "#4f7d5a" },
+    { key: "subgroups", label: "Sous-groupes", color: "#6ab084" },
+    { key: "individual", label: "Individuel", color: "#a8c8b1" }
+  ];
+  const groupData = buildSegments(groupDefs, aggregateDurations((a) => a.groupMode).totals);
+  renderGroupBar(groupData);
+  renderLegend(analysisGroupLegend, groupData);
+}
+
 function renderTopPanel() {
   topPanel.classList.toggle("collapsed", state.topPanelCollapsed);
   topPanelToggleBtn.textContent = state.topPanelCollapsed ? "Déplier le panneau" : "Replier le panneau";
 
   metaNameInput.value = state.meta.name;
-  metaTopicInput.value = state.meta.topic;
   metaLearningDaysInput.value = state.meta.learningDays;
   metaLearningHoursInput.value = state.meta.learningHours;
   metaLearningMinutesInput.value = state.meta.learningMinutes;
@@ -1218,8 +1489,11 @@ function renderTopPanel() {
   metaDesignersInput.value = state.meta.designers;
   metaDescriptionInput.value = state.meta.description;
 
-  topTabTimeline.classList.toggle("active", state.meta.activeTab === "timeline");
+  topTabSettings.classList.toggle("active", state.meta.activeTab === "settings");
   topTabAnalysis.classList.toggle("active", state.meta.activeTab === "analysis");
+  const analysisActive = state.meta.activeTab === "analysis";
+  timelineView.classList.toggle("hidden", analysisActive);
+  analysisView.classList.toggle("hidden", !analysisActive);
 
   const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
   metaDesignedDaysInput.value = designed.days;
@@ -1258,6 +1532,8 @@ function renderTopPanel() {
     const pct = overall > 0 ? Math.round((totals[type.id] / overall) * 100) : 0;
     return `<span class="legend-item"><span class="legend-dot" style="background:${type.color}"></span>${type.label} ${pct}%</span>`;
   }).join("");
+
+  renderAnalysisPanel();
 }
 
 function labelForType(typeId) {
@@ -1644,26 +1920,31 @@ function render() {
       groupModeSelect.addEventListener("change", (e) => {
         activity.groupMode = e.target.value;
         saveState();
+        renderTopPanel();
       });
 
       trainerModeSelect.addEventListener("change", (e) => {
         activity.teacherPresence = e.target.value;
         saveState();
+        renderTopPanel();
       });
 
       syncModeSelect.addEventListener("change", (e) => {
         activity.syncMode = e.target.value;
         saveState();
+        renderTopPanel();
       });
 
       locationModeSelect.addEventListener("change", (e) => {
         activity.locationMode = e.target.value;
         saveState();
+        renderTopPanel();
       });
 
       evaluationModeSelect.addEventListener("change", (e) => {
         activity.evaluationMode = e.target.value;
         saveState();
+        renderTopPanel();
       });
 
       description.addEventListener("input", (e) => {
@@ -1734,8 +2015,8 @@ function bindTopPanelEvents() {
     renderTopPanel();
   });
 
-  topTabTimeline.addEventListener("click", () => {
-    state.meta.activeTab = "timeline";
+  topTabSettings.addEventListener("click", () => {
+    state.meta.activeTab = "settings";
     saveState();
     renderTopPanel();
   });
@@ -1748,10 +2029,6 @@ function bindTopPanelEvents() {
 
   metaNameInput.addEventListener("input", (event) => {
     state.meta.name = event.target.value;
-    saveState();
-  });
-  metaTopicInput.addEventListener("input", (event) => {
-    state.meta.topic = event.target.value;
     saveState();
   });
   metaLearningDaysInput.addEventListener("input", (event) => {
