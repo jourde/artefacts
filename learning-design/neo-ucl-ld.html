@@ -455,6 +455,45 @@ select:focus-visible,
   align-items: center;
 }
 
+.layout-toggle {
+  display: inline-flex;
+  border: 1px solid #aeb4bd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #d7dce2;
+}
+
+.layout-toggle-btn {
+  border: 0;
+  border-right: 1px solid #b7bdc6;
+  background: transparent;
+  color: #3a404a;
+  width: 46px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.layout-toggle-btn:last-child {
+  border-right: 0;
+}
+
+.layout-toggle-btn[aria-pressed="true"] {
+  background: linear-gradient(#f4f6f8, #d4d9df);
+  color: #2f353f;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.layout-toggle-btn:hover {
+  background: #cfd6de;
+}
+
+.layout-toggle-btn[aria-pressed="true"]:hover {
+  background: linear-gradient(#eff2f5, #cfd5dc);
+}
+
 .btn {
   border: 1px solid #ababab;
   border-radius: 5px;
@@ -493,23 +532,49 @@ main {
 .board {
   display: flex;
   gap: 4px;
+  flex-direction: row;
   align-items: stretch;
   height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
   padding: 8px 6px 10px;
 }
 
+.board.layout-columns {
+  flex-direction: row;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.board.layout-list {
+  flex-direction: column;
+  align-items: stretch;
+  overflow-x: hidden;
+  overflow-y: auto;
+  gap: 10px;
+  padding: 10px clamp(18px, 4vw, 72px) 14px;
+}
+
 .session-card {
-  flex: 0 0 390px;
   display: flex;
   flex-direction: column;
   border: 2px solid #666;
   border-radius: 10px;
   background: linear-gradient(#f2f2f2, #dedede);
+  overflow: hidden;
+}
+
+.board.layout-columns .session-card {
+  flex: 0 0 390px;
   height: 100%;
   min-height: 560px;
-  overflow: hidden;
+}
+
+.board.layout-list .session-card {
+  flex: 0 0 auto;
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  min-height: 420px;
+  height: auto;
 }
 
 .session-header {
@@ -586,6 +651,14 @@ main {
 
 .session-card.drop-after {
   box-shadow: inset -6px 0 0 var(--primary);
+}
+
+.board.layout-list .session-card.drop-before {
+  box-shadow: inset 0 6px 0 var(--primary);
+}
+
+.board.layout-list .session-card.drop-after {
+  box-shadow: inset 0 -6px 0 var(--primary);
 }
 
 .activity-card.drop-before {
@@ -909,9 +982,12 @@ main {
   }
 
   .session-card {
-    flex-basis: min(92vw, 390px);
     height: auto;
     min-height: 420px;
+  }
+
+  .board.layout-columns .session-card {
+    flex-basis: min(92vw, 390px);
   }
 
   .activity-toolbar {
@@ -1087,6 +1163,34 @@ main {
       <div class="toolbar-left">
         <button id="add-session-btn" class="btn btn-primary">+ Ajouter un moment</button>
         <button id="expand-notes-btn" class="btn btn-light">Déplier les notes</button>
+        <div id="board-layout-toggle" class="layout-toggle" role="group" aria-label="Mode d'affichage des séances">
+          <button
+            id="board-layout-list-btn"
+            class="layout-toggle-btn"
+            type="button"
+            aria-pressed="false"
+            title="Liste"
+            aria-label="Liste"
+          >
+            <svg class="material-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10.5c.83 0 1.5-.67 1.5-1.5S4.83 7.5 4 7.5 2.5 8.17 2.5 9 3.17 10.5 4 10.5zm0 6c.83 0 1.5-.67 1.5-1.5S4.83 13.5 4 13.5 2.5 14.17 2.5 15 3.17 16.5 4 16.5zM7 16h14v-2H7v2zm0-6h14V8H7v2z"></path>
+            </svg>
+            <span id="board-layout-list-text" class="sr-only">Liste</span>
+          </button>
+          <button
+            id="board-layout-columns-btn"
+            class="layout-toggle-btn"
+            type="button"
+            aria-pressed="true"
+            title="Colonnes"
+            aria-label="Colonnes"
+          >
+            <svg class="material-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 8v-8h8v8h-8z"></path>
+            </svg>
+            <span id="board-layout-columns-text" class="sr-only">Colonnes</span>
+          </button>
+        </div>
       </div>
       <div class="toolbar-right">
         <button id="new-design-btn" class="btn">Nouveau</button>
@@ -1341,7 +1445,8 @@ const DEFAULT_META = {
   command: "",
   personas: "",
   sliders: "",
-  activeTab: "settings"
+  activeTab: "settings",
+  boardLayout: "columns"
 };
 
 const NEW_DESIGN_META = {
@@ -1358,7 +1463,8 @@ const NEW_DESIGN_META = {
   command: "",
   personas: "",
   sliders: "",
-  activeTab: "settings"
+  activeTab: "settings",
+  boardLayout: "columns"
 };
 
 const defaultState = () => ({
@@ -1519,6 +1625,11 @@ const activityTpl = document.getElementById("activity-template");
 
 const addSessionBtn = document.getElementById("add-session-btn");
 const expandNotesBtn = document.getElementById("expand-notes-btn");
+const boardLayoutToggle = document.getElementById("board-layout-toggle");
+const boardLayoutListBtn = document.getElementById("board-layout-list-btn");
+const boardLayoutColumnsBtn = document.getElementById("board-layout-columns-btn");
+const boardLayoutListText = document.getElementById("board-layout-list-text");
+const boardLayoutColumnsText = document.getElementById("board-layout-columns-text");
 const newDesignBtn = document.getElementById("new-design-btn");
 const importDesignBtn = document.getElementById("import-design-btn");
 const exportDesignBtn = document.getElementById("export-design-btn");
@@ -1626,7 +1737,11 @@ const I18N = {
     sessionNotes: "Notes",
     addLearningType: "+ Ajouter type d'apprentissage",
     sessionPrefix: "Séance",
-    sessionMoveHint: "Alt+Flèche gauche/droite pour déplacer.",
+    viewModeLabel: "Mode d'affichage des séances",
+    viewList: "Liste",
+    viewColumns: "Colonnes",
+    sessionMoveHintColumns: "Alt+Flèche gauche/droite pour déplacer.",
+    sessionMoveHintList: "Alt+Flèche haut/bas pour déplacer.",
     activityMoveHint: "Alt+Flèche haut/bas pour déplacer dans la séance.",
     sessionTitleLabel: "Titre de la séance",
     sessionActivitiesLabel: "Activités de la séance",
@@ -1742,7 +1857,11 @@ const I18N = {
     sessionNotes: "Notes",
     addLearningType: "+ Add learning type",
     sessionPrefix: "Session",
-    sessionMoveHint: "Alt+Left/Right Arrow to move.",
+    viewModeLabel: "Session view mode",
+    viewList: "List",
+    viewColumns: "Columns",
+    sessionMoveHintColumns: "Alt+Left/Right Arrow to move.",
+    sessionMoveHintList: "Alt+Up/Down Arrow to move.",
     activityMoveHint: "Alt+Up/Down Arrow to move within the session.",
     sessionTitleLabel: "Session title",
     sessionActivitiesLabel: "Activities for session",
@@ -1822,6 +1941,18 @@ function currentLang() {
 function t(key) {
   const lang = currentLang();
   return I18N[lang][key] || I18N.fr[key] || key;
+}
+
+function getBoardLayout() {
+  return state?.meta?.boardLayout === "list" ? "list" : "columns";
+}
+
+function setBoardLayout(layout) {
+  const nextLayout = layout === "list" ? "list" : "columns";
+  if (getBoardLayout() === nextLayout) return;
+  state.meta.boardLayout = nextLayout;
+  saveState();
+  render();
 }
 
 function defaultSessionTitle(index1Based) {
@@ -1922,6 +2053,16 @@ function applyLocalizedUI() {
   document.getElementById("opt-meta-delivery-hybrid").textContent = t("modeHybrid");
   topPanelToggleBtn.textContent = state.topPanelCollapsed ? t("expandPanel") : t("collapsePanel");
   addSessionBtn.textContent = t("addMoment");
+  boardLayoutToggle.setAttribute("aria-label", t("viewModeLabel"));
+  boardLayoutListText.textContent = t("viewList");
+  boardLayoutColumnsText.textContent = t("viewColumns");
+  boardLayoutListBtn.title = t("viewList");
+  boardLayoutColumnsBtn.title = t("viewColumns");
+  boardLayoutListBtn.setAttribute("aria-label", t("viewList"));
+  boardLayoutColumnsBtn.setAttribute("aria-label", t("viewColumns"));
+  const listActive = getBoardLayout() === "list";
+  boardLayoutListBtn.setAttribute("aria-pressed", listActive ? "true" : "false");
+  boardLayoutColumnsBtn.setAttribute("aria-pressed", listActive ? "false" : "true");
   newDesignBtn.textContent = t("new");
   importDesignBtn.textContent = t("import");
   exportDesignBtn.textContent = t("export");
@@ -2033,6 +2174,9 @@ function hydrateState(parsed, fallback = defaultState()) {
   if (hydrated.meta.activeTab === "timeline") hydrated.meta.activeTab = "settings";
   if (!["settings", "analysis"].includes(hydrated.meta.activeTab)) {
     hydrated.meta.activeTab = "settings";
+  }
+  if (!["columns", "list"].includes(hydrated.meta.boardLayout)) {
+    hydrated.meta.boardLayout = "columns";
   }
 
   return hydrated;
@@ -2494,8 +2638,8 @@ function renderAnalysisPanel() {
   renderLegend(analysisDeliveryLegend, deliveryData);
 
   const teacherDefs = [
-    { key: "present", label: `${currentLang() === "en" ? "Trainer" : "Formateur"} ${t("trainer_present").toLowerCase()}`, color: "#7a6854" },
-    { key: "absent", label: `${currentLang() === "en" ? "Trainer" : "Formateur"} ${t("trainer_absent").toLowerCase()}`, color: "#c5b59f" }
+    { key: "present", label: t("teacherPresentLabel"), color: "#7a6854" },
+    { key: "absent", label: t("teacherAbsentLabel"), color: "#c5b59f" }
   ];
   const teacherData = buildSegments(teacherDefs, aggregateDurations((a) => a.teacherPresence).totals);
   renderConic(analysisTeacherPie, teacherData);
@@ -3408,7 +3552,10 @@ board.addEventListener("dragover", (event) => {
   const targetCard = event.target.closest(".session-card");
   if (!targetCard) return;
   const rect = targetCard.getBoundingClientRect();
-  const position = event.clientX < rect.left + rect.width / 2 ? "before" : "after";
+  const isListLayout = getBoardLayout() === "list";
+  const position = isListLayout
+    ? event.clientY < rect.top + rect.height / 2 ? "before" : "after"
+    : event.clientX < rect.left + rect.width / 2 ? "before" : "after";
   targetCard.classList.add(position === "before" ? "drop-before" : "drop-after");
   board.dataset.dropSessionId = targetCard.dataset.sessionId;
   board.dataset.dropPosition = position;
@@ -3428,6 +3575,11 @@ function render() {
   closeChoiceMenu();
   applyLocalizedUI();
   renderTopPanel();
+  const boardLayout = getBoardLayout();
+  const isListLayout = boardLayout === "list";
+  const sessionMoveHint = isListLayout ? t("sessionMoveHintList") : t("sessionMoveHintColumns");
+  board.classList.toggle("layout-list", isListLayout);
+  board.classList.toggle("layout-columns", !isListLayout);
   board.innerHTML = "";
   state.sessions.forEach((session, sessionIndex) => {
     const frag = sessionTpl.content.cloneNode(true);
@@ -3446,7 +3598,7 @@ function render() {
     card.setAttribute("role", "group");
     card.setAttribute(
       "aria-label",
-      `${sessionIndex + 1}. ${session.title || defaultSessionTitle(sessionIndex + 1)}. ${t("sessionMoveHint")}`
+      `${sessionIndex + 1}. ${session.title || defaultSessionTitle(sessionIndex + 1)}. ${sessionMoveHint}`
     );
     strip.style.background = stripGradientForSession(session);
     title.value = session.title;
@@ -3474,9 +3626,12 @@ function render() {
     });
     card.addEventListener("keydown", (event) => {
       if (!event.altKey) return;
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      const wantsVerticalMove = isListLayout && (event.key === "ArrowUp" || event.key === "ArrowDown");
+      const wantsHorizontalMove = !isListLayout && (event.key === "ArrowLeft" || event.key === "ArrowRight");
+      if (wantsVerticalMove || wantsHorizontalMove) {
         event.preventDefault();
-        const moved = moveSessionByOffset(session.id, event.key === "ArrowLeft" ? -1 : 1);
+        const moveDelta = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+        const moved = moveSessionByOffset(session.id, moveDelta);
         if (moved) {
           saveState();
           render();
@@ -3865,6 +4020,28 @@ expandNotesBtn.addEventListener("click", () => {
   state.allNotesExpanded = !state.allNotesExpanded;
   saveState();
   render();
+});
+
+boardLayoutListBtn.addEventListener("click", () => {
+  setBoardLayout("list");
+});
+
+boardLayoutColumnsBtn.addEventListener("click", () => {
+  setBoardLayout("columns");
+});
+
+[boardLayoutListBtn, boardLayoutColumnsBtn].forEach((btn) => {
+  btn.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === "Home" || event.key === "ArrowLeft") {
+      boardLayoutListBtn.focus();
+      setBoardLayout("list");
+      return;
+    }
+    boardLayoutColumnsBtn.focus();
+    setBoardLayout("columns");
+  });
 });
 
 newDesignBtn.addEventListener("click", () => {
