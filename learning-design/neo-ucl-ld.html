@@ -321,9 +321,9 @@ select:focus-visible,
 }
 
 .analysis-alert {
-  border: 1px solid #dbc67f;
-  background: #f4e8be;
-  color: #664e12;
+  border: 1px solid #d8c46f;
+  background: #fff4cc;
+  color: #4f3a00;
   border-radius: 10px;
   padding: 12px 14px;
   font-size: 13px;
@@ -331,9 +331,9 @@ select:focus-visible,
 }
 
 .analysis-alert.info {
-  border-color: #8eb6df;
-  background: #dfeeff;
-  color: #123f78;
+  border-color: #d8c46f;
+  background: #fff4cc;
+  color: #4f3a00;
 }
 
 .analysis-main-grid {
@@ -1099,7 +1099,7 @@ main {
           <option value="en">English</option>
         </select>
       </div>
-      <input id="import-file-input" type="file" accept="application/json" hidden />
+      <input id="import-file-input" type="file" accept=".json,.csv,application/json,text/csv" hidden />
     </header>
 
     <main id="main-content">
@@ -1204,10 +1204,26 @@ main {
           <option value="markdown">Markdown</option>
           <option value="word">Word</option>
           <option value="html">HTML</option>
+          <option value="csv">CSV</option>
         </select>
         <div class="modal-actions">
           <button id="export-modal-cancel-btn" class="btn btn-light" type="button">Annuler</button>
           <button id="export-modal-confirm-btn" class="btn btn-primary" type="button">Exporter</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="import-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="import-modal-title">
+      <div class="modal">
+        <h2 id="import-modal-title" class="modal-title">Importer le design</h2>
+        <label for="import-format-select">Format</label>
+        <select id="import-format-select" class="panel-select">
+          <option value="json">JSON</option>
+          <option value="csv">CSV</option>
+        </select>
+        <div class="modal-actions">
+          <button id="import-modal-cancel-btn" class="btn btn-light" type="button">Annuler</button>
+          <button id="import-modal-confirm-btn" class="btn btn-primary" type="button">Importer</button>
         </div>
       </div>
     </div>
@@ -1554,6 +1570,10 @@ const exportModalBackdrop = document.getElementById("export-modal-backdrop");
 const exportFormatSelect = document.getElementById("export-format-select");
 const exportModalCancelBtn = document.getElementById("export-modal-cancel-btn");
 const exportModalConfirmBtn = document.getElementById("export-modal-confirm-btn");
+const importModalBackdrop = document.getElementById("import-modal-backdrop");
+const importFormatSelect = document.getElementById("import-format-select");
+const importModalCancelBtn = document.getElementById("import-modal-cancel-btn");
+const importModalConfirmBtn = document.getElementById("import-modal-confirm-btn");
 
 let state = loadState();
 let dragState = null;
@@ -1597,6 +1617,7 @@ const I18N = {
     modeOnsite: "Présentiel",
     modeOnline: "Distanciel",
     modeHybrid: "Hybride",
+    importTitle: "Importer le design",
     exportTitle: "Exporter le design",
     format: "Format",
     cancel: "Annuler",
@@ -1624,7 +1645,7 @@ const I18N = {
     groupTitleEvaluation: "Évaluation",
     newActivityDescription: "Nouvelle activité",
     newDesignConfirm: "Créer un nouveau design et écraser le contenu actuel ?",
-    importInvalid: "Fichier invalide. Importez un JSON exporté depuis cette application.",
+    importInvalid: "Fichier invalide. Importez un JSON ou CSV exporté depuis cette application.",
     commandPlaceholder: "Collez ici la commande institutionnelle déjà définie...",
     personasPlaceholder: "Collez ici les personas (profils) déjà définis...",
     slidersPlaceholder: "Collez ici les curseurs déjà définis...",
@@ -1654,6 +1675,8 @@ const I18N = {
     group_individual: "Individuel",
     trainer_present: "Présent",
     trainer_absent: "Absent",
+    teacherPresentLabel: "Formateur présent",
+    teacherAbsentLabel: "Formateur absent",
     sync_sync: "Synchrone",
     sync_async: "Asynchrone",
     eval_none: "Aucune évaluation",
@@ -1710,6 +1733,7 @@ const I18N = {
     modeOnsite: "Onsite",
     modeOnline: "Online",
     modeHybrid: "Hybrid",
+    importTitle: "Import design",
     exportTitle: "Export design",
     format: "Format",
     cancel: "Cancel",
@@ -1737,7 +1761,7 @@ const I18N = {
     groupTitleEvaluation: "Assessment",
     newActivityDescription: "New activity",
     newDesignConfirm: "Create a new design and replace current content?",
-    importInvalid: "Invalid file. Import a JSON exported by this application.",
+    importInvalid: "Invalid file. Import a JSON or CSV exported by this application.",
     commandPlaceholder: "Paste the previously defined institutional brief here...",
     personasPlaceholder: "Paste previously defined personas here...",
     slidersPlaceholder: "Paste previously defined sliders here...",
@@ -1767,6 +1791,8 @@ const I18N = {
     group_individual: "Individual",
     trainer_present: "Present",
     trainer_absent: "Absent",
+    teacherPresentLabel: "Trainer present",
+    teacherAbsentLabel: "Trainer absent",
     sync_sync: "Synchronous",
     sync_async: "Asynchronous",
     eval_none: "No assessment",
@@ -1902,6 +1928,7 @@ function applyLocalizedUI() {
   saveBtn.textContent = t("save");
   infoBtn.textContent = t("info");
   infoBtn.setAttribute("aria-haspopup", "dialog");
+  importDesignBtn.setAttribute("aria-haspopup", "dialog");
   exportDesignBtn.setAttribute("aria-haspopup", "dialog");
   board.setAttribute("aria-label", t("boardRegion"));
   metaCommandInput.placeholder = t("commandPlaceholder");
@@ -1913,6 +1940,10 @@ function applyLocalizedUI() {
   metaDesignedDaysInput.setAttribute("aria-label", t("designedDaysLabel"));
   metaDesignedHoursInput.setAttribute("aria-label", t("designedHoursLabel"));
   metaDesignedMinutesInput.setAttribute("aria-label", t("designedMinutesLabel"));
+  importModalBackdrop.querySelector("#import-modal-title").textContent = t("importTitle");
+  importModalBackdrop.querySelector("label[for='import-format-select']").textContent = t("format");
+  importModalCancelBtn.textContent = t("cancel");
+  importModalConfirmBtn.textContent = t("import");
   exportModalBackdrop.querySelector("#export-modal-title").textContent = t("exportTitle");
   exportModalBackdrop.querySelector("label[for='export-format-select']").textContent = t("format");
   exportModalCancelBtn.textContent = t("cancel");
@@ -2798,6 +2829,360 @@ function buildHtmlExportDocument() {
 </html>`;
 }
 
+function sanitizeCsvFormula(value) {
+  const text = String(value ?? "");
+  if (/^[=+\-@]/.test(text)) return `'${text}`;
+  return text;
+}
+
+function escapeCsvCell(value) {
+  const text = sanitizeCsvFormula(value).replaceAll('"', '""');
+  return `"${text}"`;
+}
+
+function buildCsvExport() {
+  const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
+  const metaLearningTime = formatPedagogicalTime(
+    state.meta.learningDays,
+    state.meta.learningHours,
+    state.meta.learningMinutes
+  );
+  const metaDesignedTime = formatPedagogicalTime(designed.days, designed.hours, designed.minutes);
+  const rows = [];
+  const headers = [
+    "session_index",
+    "session_title",
+    "session_notes",
+    "activity_index",
+    "learning_type",
+    "duration_minutes",
+    "group_size",
+    "trainer_presence",
+    "pacing",
+    "delivery_mode",
+    "assessment",
+    "activity_description",
+    "activity_notes",
+    "design_title",
+    "design_mode",
+    "design_group_size",
+    "design_designers",
+    "design_learning_time",
+    "design_designed_time",
+    "design_day_hours",
+    "design_description",
+    "design_institutional_brief",
+    "design_personas",
+    "design_sliders"
+  ];
+  rows.push(headers.map(escapeCsvCell).join(","));
+
+  state.sessions.forEach((session, sessionIndex) => {
+    if (!session.activities.length) {
+      rows.push(
+        [
+          sessionIndex + 1,
+          session.title || "",
+          session.notes || "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          state.meta.name || "",
+          labelForLocationMode(state.meta.modeDelivery),
+          state.meta.sizeClass || "",
+          state.meta.designers || "",
+          metaLearningTime,
+          metaDesignedTime,
+          getDayHours(),
+          state.meta.description || "",
+          state.meta.command || "",
+          state.meta.personas || "",
+          state.meta.sliders || ""
+        ]
+          .map(escapeCsvCell)
+          .join(",")
+      );
+      return;
+    }
+
+    session.activities.forEach((activity, activityIndex) => {
+      rows.push(
+        [
+          sessionIndex + 1,
+          session.title || "",
+          session.notes || "",
+          activityIndex + 1,
+          labelForType(activity.type),
+          activity.duration,
+          labelForGroupMode(activity.groupMode),
+          labelForTrainerMode(activity.teacherPresence),
+          labelForSyncMode(activity.syncMode),
+          labelForLocationMode(activity.locationMode),
+          labelForEvaluationMode(activity.evaluationMode),
+          activity.description || "",
+          activity.notes || "",
+          state.meta.name || "",
+          labelForLocationMode(state.meta.modeDelivery),
+          state.meta.sizeClass || "",
+          state.meta.designers || "",
+          metaLearningTime,
+          metaDesignedTime,
+          getDayHours(),
+          state.meta.description || "",
+          state.meta.command || "",
+          state.meta.personas || "",
+          state.meta.sliders || ""
+        ]
+          .map(escapeCsvCell)
+          .join(",")
+      );
+    });
+  });
+
+  return rows.join("\n");
+}
+
+function normalizeToken(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function parseCsvRows(text) {
+  const source = String(text ?? "").replace(/^\uFEFF/, "");
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (inQuotes) {
+      if (char === '"') {
+        if (source[index + 1] === '"') {
+          cell += '"';
+          index += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        cell += char;
+      }
+      continue;
+    }
+    if (char === '"') {
+      inQuotes = true;
+      continue;
+    }
+    if (char === ",") {
+      row.push(cell);
+      cell = "";
+      continue;
+    }
+    if (char === "\n") {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+      continue;
+    }
+    if (char === "\r") continue;
+    cell += char;
+  }
+
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
+function buildLookup(entries) {
+  const map = {};
+  entries.forEach(([code, ...labels]) => {
+    [code, ...labels].forEach((label) => {
+      const token = normalizeToken(label);
+      if (token) map[token] = code;
+    });
+  });
+  return map;
+}
+
+const CSV_TYPE_LOOKUP = buildLookup([
+  ["read", I18N.fr.lt_read, I18N.en.lt_read],
+  ["investigate", I18N.fr.lt_investigate, I18N.en.lt_investigate],
+  ["practice", I18N.fr.lt_practice, I18N.en.lt_practice],
+  ["produce", I18N.fr.lt_produce, I18N.en.lt_produce],
+  ["discuss", I18N.fr.lt_discuss, I18N.en.lt_discuss],
+  ["collaborate", I18N.fr.lt_collaborate, I18N.en.lt_collaborate]
+]);
+
+const CSV_GROUP_LOOKUP = buildLookup([
+  ["whole", I18N.fr.group_whole, I18N.en.group_whole, "whole class"],
+  ["subgroups", I18N.fr.group_subgroups, I18N.en.group_subgroups, "subgroups"],
+  ["individual", I18N.fr.group_individual, I18N.en.group_individual]
+]);
+
+const CSV_TRAINER_LOOKUP = buildLookup([
+  ["present", I18N.fr.trainer_present, I18N.en.trainer_present, I18N.fr.teacherPresentLabel, I18N.en.teacherPresentLabel],
+  ["absent", I18N.fr.trainer_absent, I18N.en.trainer_absent, I18N.fr.teacherAbsentLabel, I18N.en.teacherAbsentLabel]
+]);
+
+const CSV_SYNC_LOOKUP = buildLookup([
+  ["sync", I18N.fr.sync_sync, I18N.en.sync_sync, "synchronous"],
+  ["async", I18N.fr.sync_async, I18N.en.sync_async, "asynchronous"]
+]);
+
+const CSV_LOCATION_LOOKUP = buildLookup([
+  ["onsite", I18N.fr.modeOnsite, I18N.en.modeOnsite, "presentiel", "face to face", "classroom", "classroom-based"],
+  ["online", I18N.fr.modeOnline, I18N.en.modeOnline, "distanciel", "distance"],
+  ["hybrid", I18N.fr.modeHybrid, I18N.en.modeHybrid, "hybride", "blended"]
+]);
+
+const CSV_EVAL_LOOKUP = buildLookup([
+  ["none", I18N.fr.eval_none, I18N.en.eval_none, "aucune evaluation", "none"],
+  ["diagnostic", I18N.fr.eval_diagnostic, I18N.en.eval_diagnostic],
+  ["formative", I18N.fr.eval_formative, I18N.en.eval_formative],
+  ["summative", I18N.fr.eval_summative, I18N.en.eval_summative],
+  ["certificative", I18N.fr.eval_certificative, I18N.en.eval_certificative, "certifying"]
+]);
+
+function lookupValue(raw, lookup, fallback) {
+  return lookup[normalizeToken(raw)] || fallback;
+}
+
+function parseCsvInteger(value, fallback = 0) {
+  const parsed = Number.parseInt(String(value ?? "").trim(), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return parsed;
+}
+
+function parseCsvPedagogicalTime(value, dayHours = DEFAULT_DAY_HOURS) {
+  const values = String(value ?? "")
+    .match(/\d+/g)
+    ?.map((part) => Number.parseInt(part, 10))
+    .filter((num) => Number.isFinite(num)) || [];
+  const days = values[0] ?? 0;
+  const hours = values[1] ?? 0;
+  const minutes = values[2] ?? 0;
+  return normalizePedagogicalTime(days, hours, minutes, dayHours);
+}
+
+function buildStateFromCsv(csvText) {
+  const rows = parseCsvRows(csvText);
+  if (rows.length < 2) return null;
+
+  const headers = rows[0].map(normalizeToken);
+  const headerIndex = Object.fromEntries(headers.map((header, index) => [header, index]));
+  if (headerIndex.session_index == null || headerIndex.session_title == null) return null;
+
+  const dataRows = rows.slice(1).filter((row) => row.some((cell) => String(cell || "").trim() !== ""));
+  if (!dataRows.length) return null;
+
+  const imported = createNewDesignState();
+  imported.meta.uiLanguage = currentLang();
+  const sessions = [];
+  const sessionsByIndex = new Map();
+  let metaLoaded = false;
+
+  dataRows.forEach((row, rowIndex) => {
+    const read = (name) => {
+      const index = headerIndex[name];
+      if (index == null) return "";
+      return String(row[index] ?? "");
+    };
+
+    if (!metaLoaded) {
+      const dayHours = Math.max(1, parseCsvInteger(read("design_day_hours"), DEFAULT_DAY_HOURS));
+      imported.meta.name = read("design_title");
+      imported.meta.modeDelivery = lookupValue(read("design_mode"), CSV_LOCATION_LOOKUP, "onsite");
+      imported.meta.sizeClass = read("design_group_size").trim();
+      imported.meta.designers = read("design_designers");
+      imported.meta.dayHours = dayHours;
+      imported.meta.description = read("design_description");
+      imported.meta.command = read("design_institutional_brief");
+      imported.meta.personas = read("design_personas");
+      imported.meta.sliders = read("design_sliders");
+
+      const learningTime = parseCsvPedagogicalTime(read("design_learning_time"), dayHours);
+      imported.meta.learningDays = learningTime.days;
+      imported.meta.learningHours = learningTime.hours;
+      imported.meta.learningMinutes = learningTime.minutes;
+      metaLoaded = true;
+    }
+
+    const sessionOrder = parseCsvInteger(read("session_index"), rowIndex + 1);
+    const sessionTitle = read("session_title").trim() || defaultSessionTitle(sessionOrder || sessions.length + 1);
+    const sessionNotes = read("session_notes");
+    const sessionKey = `${sessionOrder}`;
+    let session = sessionsByIndex.get(sessionKey);
+    if (!session) {
+      session = {
+        id: nextId(),
+        title: sessionTitle,
+        notes: sessionNotes,
+        notesExpanded: false,
+        activities: []
+      };
+      sessionsByIndex.set(sessionKey, session);
+      sessions.push(session);
+    } else {
+      if (!session.title && sessionTitle) session.title = sessionTitle;
+      if (!session.notes && sessionNotes) session.notes = sessionNotes;
+    }
+
+    const hasActivityData = [
+      read("activity_index"),
+      read("learning_type"),
+      read("duration_minutes"),
+      read("group_size"),
+      read("trainer_presence"),
+      read("pacing"),
+      read("delivery_mode"),
+      read("assessment"),
+      read("activity_description"),
+      read("activity_notes")
+    ].some((value) => value.trim() !== "");
+    if (!hasActivityData) return;
+
+    const duration = Math.max(1, parseCsvInteger(read("duration_minutes"), 1));
+    const activity = {
+      id: nextId(),
+      type: lookupValue(read("learning_type"), CSV_TYPE_LOOKUP, "read"),
+      duration,
+      groupMode: lookupValue(read("group_size"), CSV_GROUP_LOOKUP, "whole"),
+      teacherPresence: lookupValue(read("trainer_presence"), CSV_TRAINER_LOOKUP, "present"),
+      syncMode: lookupValue(read("pacing"), CSV_SYNC_LOOKUP, "sync"),
+      locationMode: lookupValue(read("delivery_mode"), CSV_LOCATION_LOOKUP, "onsite"),
+      evaluationMode: lookupValue(read("assessment"), CSV_EVAL_LOOKUP, "none"),
+      description: read("activity_description"),
+      notes: read("activity_notes"),
+      _csvOrder: parseCsvInteger(read("activity_index"), session.activities.length + 1)
+    };
+    normalizeActivity(activity);
+    session.activities.push(activity);
+  });
+
+  sessions.forEach((session) => {
+    session.activities.sort((a, b) => a._csvOrder - b._csvOrder);
+    session.activities.forEach((activity) => {
+      delete activity._csvOrder;
+    });
+  });
+
+  imported.sessions = sessions;
+  return hydrateState(imported, null);
+}
+
 function downloadBlob(content, type, filename) {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -2845,6 +3230,15 @@ function closeExportModal() {
   closeModal(exportModalBackdrop);
 }
 
+function openImportModal() {
+  importFormatSelect.value = "json";
+  openModal(importModalBackdrop, "#import-format-select");
+}
+
+function closeImportModal() {
+  closeModal(importModalBackdrop);
+}
+
 function openInfoModal() {
   openModal(infoModalBackdrop, "#info-modal-close-btn");
 }
@@ -2878,6 +3272,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
     if (activeModalBackdrop === exportModalBackdrop) closeExportModal();
+    if (activeModalBackdrop === importModalBackdrop) closeImportModal();
     if (activeModalBackdrop === infoModalBackdrop) closeInfoModal();
     return;
   }
@@ -3492,6 +3887,10 @@ saveBtn.addEventListener("click", () => {
 
 function exportDesign(format = "json") {
   const chosen = String(format).toLowerCase();
+  if (chosen === "csv") {
+    downloadBlob(buildCsvExport(), "text/csv;charset=utf-8", "design-learning-designer-fr.csv");
+    return;
+  }
   if (chosen === "md" || chosen === "markdown") {
     downloadBlob(buildMarkdownExport(), "text/markdown;charset=utf-8", "design-learning-designer-fr.md");
     return;
@@ -3548,14 +3947,47 @@ exportModalBackdrop.addEventListener("click", (event) => {
   }
 });
 
-importDesignBtn.addEventListener("click", () => importFileInput.click());
+importDesignBtn.addEventListener("click", () => {
+  openImportModal();
+});
+
+importModalCancelBtn.addEventListener("click", () => {
+  closeImportModal();
+});
+
+importModalConfirmBtn.addEventListener("click", () => {
+  const format = importFormatSelect.value === "csv" ? "csv" : "json";
+  importFileInput.dataset.format = format;
+  importFileInput.accept =
+    format === "csv"
+      ? ".csv,text/csv,text/plain"
+      : ".json,application/json,text/json";
+  importFileInput.value = "";
+  importFileInput.click();
+  closeImportModal();
+});
+
+importModalBackdrop.addEventListener("click", (event) => {
+  if (event.target === importModalBackdrop) {
+    closeImportModal();
+  }
+});
+
 importFileInput.addEventListener("change", async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
+  const forcedFormat = String(importFileInput.dataset.format || "").toLowerCase();
+  const filename = String(file.name || "").toLowerCase();
+  const selectedFormat = forcedFormat === "csv" || filename.endsWith(".csv") ? "csv" : "json";
   try {
     const text = await file.text();
-    const parsed = JSON.parse(text);
-    const hydrated = hydrateState(parsed, null);
+    let hydrated = null;
+    if (selectedFormat === "csv") {
+      hydrated = buildStateFromCsv(text);
+    } else {
+      const parsed = JSON.parse(text);
+      hydrated = hydrateState(parsed, null);
+    }
     if (!hydrated) {
       throw new Error("Format invalide");
     }
@@ -3567,6 +3999,8 @@ importFileInput.addEventListener("change", async (e) => {
     alert(t("importInvalid"));
   } finally {
     importFileInput.value = "";
+    importFileInput.accept = ".json,.csv,application/json,text/csv";
+    delete importFileInput.dataset.format;
   }
 });
 
