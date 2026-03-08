@@ -40,6 +40,14 @@ body {
   flex-direction: column;
 }
 
+.material-icon-svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .top-panel {
   border-bottom: 1px solid #c7c7c7;
   background: #f0f0f0;
@@ -458,12 +466,13 @@ main {
 }
 
 .session-card {
-  flex: 0 0 420px;
+  flex: 0 0 390px;
   display: flex;
   flex-direction: column;
   border: 2px solid #666;
   border-radius: 10px;
   background: linear-gradient(#f2f2f2, #dedede);
+  height: 100%;
   min-height: 560px;
   overflow: hidden;
 }
@@ -487,7 +496,7 @@ main {
 }
 
 .session-title-wrap {
-  padding: 6px 8px 8px;
+  padding: 5px 7px 7px;
 }
 
 .session-title,
@@ -497,19 +506,21 @@ main {
   width: 100%;
   border: 1px solid #c8c8c8;
   border-radius: 4px;
-  padding: 8px;
+  padding: 7px;
   resize: vertical;
   font: inherit;
+  font-size: 13px;
   background: #efefef;
 }
 
 .activities {
-  padding: 0 6px 8px;
+  flex: 1 1 auto;
+  padding: 0 5px 7px;
   overflow-y: auto;
-  min-height: 200px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .activity-card {
@@ -517,7 +528,7 @@ main {
   border-radius: 4px;
   background: #e6e6e6;
   box-shadow: inset 0 0 0 1px #cfcfcf;
-  padding: 6px;
+  padding: 5px;
 }
 
 .session-card,
@@ -557,11 +568,22 @@ main {
 }
 
 .activity-controls {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto auto auto;
+  display: flex;
+  flex-wrap: nowrap;
   gap: 5px;
   align-items: center;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+
+.activity-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   margin-bottom: 5px;
+  padding-bottom: 1px;
 }
 
 .activity-type,
@@ -575,8 +597,113 @@ main {
   font: inherit;
 }
 
+.choice-btn {
+  border: 1px solid #c5ccd8;
+  border-radius: 8px;
+  background: #eceff4;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6f7787;
+  max-width: none;
+}
+
+.choice-btn:hover {
+  background: #e1e7f1;
+}
+
+.choice-btn.open {
+  border-color: #7f8cf8;
+  background: #e8ebff;
+  color: #4a52d8;
+  width: auto;
+  padding: 0 8px;
+  gap: 6px;
+}
+
+.choice-btn.open::after {
+  content: attr(data-group-title);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.choice-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+.choice-btn .material-icon-svg,
+.choice-menu-item .material-icon-svg {
+  flex: 0 0 auto;
+}
+
+.choice-btn .choice-label {
+  display: none;
+}
+
+.choice-menu {
+  position: fixed;
+  min-width: 190px;
+  max-width: 240px;
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid #d4d9e8;
+  border-radius: 12px;
+  background: #f1f3f7;
+  box-shadow: 0 8px 20px rgba(26, 35, 53, 0.2);
+  padding: 6px;
+  z-index: 1500;
+}
+
+.choice-menu-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #616b7f;
+  padding: 8px 10px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.choice-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+  color: #3a4659;
+  font-size: 14px;
+}
+
+.choice-menu-item:hover {
+  background: #e8edf8;
+}
+
+.choice-menu-item.active {
+  background: #e2e7ff;
+  color: #3f46d6;
+  font-weight: 600;
+}
+
+.choice-menu-item svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
 .activity-duration {
-  width: 78px;
+  width: 56px;
 }
 
 .activity-group-mode {
@@ -587,7 +714,7 @@ main {
   display: inline-flex;
   gap: 4px;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .activity-actions {
@@ -596,24 +723,25 @@ main {
 }
 
 .activity-params {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 5px;
-  margin-bottom: 6px;
+  margin-bottom: 0;
+  flex: 0 0 auto;
 }
 
 .activity-param {
-  display: grid;
-  gap: 3px;
-  font-size: 12px;
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 
 .icon-btn {
   border: 1px solid #b6b6b6;
   background: #f4f4f4;
   border-radius: 5px;
-  width: 28px;
-  height: 26px;
+  width: 26px;
+  height: 24px;
   padding: 0;
   cursor: pointer;
   line-height: 1;
@@ -646,9 +774,14 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 8px 6px;
+  gap: 6px;
+  padding: 6px 5px;
   border-top: 1px solid #b9b9b9;
+}
+
+.session-card .btn {
+  font-size: 13px;
+  padding: 6px 9px;
 }
 
 .session-metas {
@@ -664,13 +797,14 @@ main {
   border: 1px solid #b7b7b7;
   border-radius: 7px;
   background: #efefef;
-  min-width: 78px;
-  padding: 6px 10px;
+  min-width: 70px;
+  padding: 5px 8px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .session-notes {
-  padding: 0 6px 8px;
+  padding: 0 5px 7px;
 }
 
 .hidden {
@@ -736,11 +870,11 @@ main {
   }
 
   .session-card {
-    flex-basis: min(92vw, 420px);
+    flex-basis: min(92vw, 390px);
   }
 
-  .activity-params {
-    grid-template-columns: 1fr;
+  .activity-toolbar {
+    overflow-x: auto;
   }
 }
 
@@ -896,9 +1030,9 @@ main {
         <button id="expand-notes-btn" class="btn btn-light">Déplier les notes</button>
       </div>
       <div class="toolbar-right">
-        <button id="new-design-btn" class="btn">Nouveau design</button>
-        <button id="import-design-btn" class="btn">Importer design</button>
-        <button id="export-design-btn" class="btn">Exporter design</button>
+        <button id="new-design-btn" class="btn">Nouveau</button>
+        <button id="import-design-btn" class="btn">Importer</button>
+        <button id="export-design-btn" class="btn">Exporter</button>
         <button id="save-btn" class="btn">Sauvegarder</button>
       </div>
       <input id="import-file-input" type="file" accept="application/json" hidden />
@@ -935,27 +1069,31 @@ main {
           </div>
         </footer>
         <div class="session-notes hidden">
-          <textarea class="session-notes-input" rows="3" placeholder="Notes de la séance..."></textarea>
+          <div class="expandable-field">
+            <textarea class="session-notes-input" rows="3" placeholder="Notes de la séance..."></textarea>
+            <button class="expand-btn" type="button" aria-label="Plein écran">⤢</button>
+          </div>
         </div>
       </article>
     </template>
 
     <template id="activity-template">
       <div class="activity-card">
-        <div class="activity-controls">
-          <select class="activity-type"></select>
-          <label class="mini-label">
-            ⏱
-            <input class="activity-duration" type="number" min="1" />
-          </label>
-          <label class="mini-label">
-            👥
-            <select class="activity-group-mode">
-              <option value="whole">Groupe entier</option>
-              <option value="subgroups">Sous-groupes</option>
-              <option value="individual">Individuel</option>
-            </select>
-          </label>
+        <div class="activity-toolbar">
+          <div class="activity-controls">
+            <button class="choice-btn activity-type-btn" type="button"></button>
+            <label class="mini-label">
+              ⏱
+              <input class="activity-duration" type="number" min="1" />
+            </label>
+            <button class="choice-btn activity-group-mode-btn" type="button"></button>
+          </div>
+          <div class="activity-params">
+            <span class="activity-param"><button class="choice-btn activity-trainer-mode-btn" type="button"></button></span>
+            <span class="activity-param"><button class="choice-btn activity-sync-mode-btn" type="button"></button></span>
+            <span class="activity-param"><button class="choice-btn activity-location-mode-btn" type="button"></button></span>
+            <span class="activity-param"><button class="choice-btn activity-evaluation-mode-btn" type="button"></button></span>
+          </div>
           <div class="activity-actions">
             <button class="icon-btn delete-btn delete-activity-btn" title="Supprimer" aria-label="Supprimer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -964,40 +1102,6 @@ main {
               </svg>
             </button>
           </div>
-        </div>
-        <div class="activity-params">
-          <label class="activity-param">
-            Formateur
-            <select class="activity-trainer-mode">
-              <option value="present">Présent</option>
-              <option value="absent">Absent</option>
-            </select>
-          </label>
-          <label class="activity-param">
-            Rythme
-            <select class="activity-sync-mode">
-              <option value="sync">Synchrone</option>
-              <option value="async">Asynchrone</option>
-            </select>
-          </label>
-          <label class="activity-param">
-            Modalité
-            <select class="activity-location-mode">
-              <option value="onsite">Présentiel</option>
-              <option value="online">Distanciel</option>
-              <option value="hybrid">Hybride</option>
-            </select>
-          </label>
-          <label class="activity-param">
-            Évaluation
-            <select class="activity-evaluation-mode">
-              <option value="none">Aucune évaluation</option>
-              <option value="diagnostic">Diagnostique</option>
-              <option value="formative">Formative</option>
-              <option value="summative">Sommative</option>
-              <option value="certificative">Certificative</option>
-            </select>
-          </label>
         </div>
         <div class="expandable-field">
           <textarea class="activity-description" rows="3"></textarea>
@@ -1053,6 +1157,88 @@ const LEARNING_TYPES = [
   { id: "produce", label: "Produire", color: "#a9d85d" },
   { id: "discuss", label: "Discuter", color: "#66a5f2" },
   { id: "collaborate", label: "Collaborer", color: "#ffc84d" }
+];
+
+const MATERIAL_ICON_PATHS = {
+  menu_book: `<path d="M4 6.5C4 5.12 5.12 4 6.5 4H20v14H6.5C5.67 18 5 18.67 5 19.5S5.67 21 6.5 21H20v1.5H6.5A2.5 2.5 0 0 1 4 20V6.5zm2.5-1A1 1 0 0 0 5.5 6.5V17c.29-.18.63-.3 1-.3H18V5.5H6.5z"/>`,
+  search: `<path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L19 20.49 20.49 19 15.5 14zM9.5 14A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>`,
+  school: `<path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm-7 10.18V19l7 4 7-4v-5.82L12 17l-7-3.82z"/>`,
+  inventory_2: `<path d="M20 2H4a2 2 0 0 0-2 2v3c0 .55.22 1.05.59 1.41L4 22h16l1.41-13.59c.37-.36.59-.86.59-1.41V4a2 2 0 0 0-2-2zm0 5H4V4h16v3zm-5 5H9v-2h6v2z"/>`,
+  forum: `<path d="M21 6h-2v9H6v2c0 .55.45 1 1 1h11l4 4V7c0-.55-.45-1-1-1zM17 12V3c0-.55-.45-1-1-1H3c-.55 0-1 .45-1 1v14l4-4h10c.55 0 1-.45 1-1z"/>`,
+  groups: `<path d="M16 11a3 3 0 1 0-2.82-4H9a3 3 0 1 0 0 2h4.18A3 3 0 0 0 16 11zM8 13c-2.67 0-6 1.34-6 4v3h12v-3c0-2.66-3.33-4-6-4zm10 0c-.83 0-1.55.09-2.18.25A5.77 5.77 0 0 1 18 17v3h6v-3c0-2.66-3.33-4-6-4z"/>`,
+  group_work: `<path d="M5 8h6v6H5V8zm8 0h6v6h-6V8zM5 16h6v6H5v-6zm8 0h6v6h-6v-6z"/>`,
+  person: `<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/>`,
+  face: `<path d="M12 2a10 10 0 0 0-10 10v8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 8 8v1h-2a2 2 0 0 0-2 2v2H8v-2a2 2 0 0 0-2-2H4v-1a8 8 0 0 1 8-8zm-3 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm6 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>`,
+  person_off: `<path d="M2.1 3.51 3.5 2.1l18.39 18.39-1.41 1.41-3.07-3.07V20H4v-2c0-1.48 1.6-2.75 4.04-3.45L2.1 3.51zM12 6a3.98 3.98 0 0 1 3.74 2.62l-5.36-5.36C10.9 3.1 11.44 3 12 3a4 4 0 0 1 0 8c-.56 0-1.1-.1-1.62-.26l1.69 1.69c1.94.04 3.64.52 4.87 1.27l-1.52-1.52a6.8 6.8 0 0 0-2.2-.17A4 4 0 0 1 12 6z"/>`,
+  schedule: `<path d="M11 8h2v5l4.25 2.52-.75 1.23L11 13.5V8zm1-6a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>`,
+  update: `<path d="M21 12a9 9 0 1 1-3.11-6.79L16 7h6V1l-2.67 2.67A11 11 0 1 0 23 12h-2zm-10 1h5v-2h-3V6h-2v7z"/>`,
+  business: `<path d="M3 21h18v-2h-2V3H9v4H3v12H1v2h2zm8-2h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V9h-2v2zm4 8h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V9h-2v2zM7 19h2v-2H7v2zm0-4h2v-2H7v2z"/>`,
+  computer: `<path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6v2H7v2h10v-2h-3v-2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 14H4V4h16v12z"/>`,
+  hub: `<path d="M17 16c-1.3 0-2.4.84-2.82 2H9.82A3 3 0 0 0 7 16c-.35 0-.69.06-1 .18L9.17 13c.5.31 1.08.5 1.71.5 1.45 0 2.68-.93 3.13-2.22l2.15 1.3a2.99 2.99 0 0 0-.16.92c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3c-.6 0-1.15.18-1.62.48l-2.34-1.41A3.5 3.5 0 0 0 11.5 6c-1.93 0-3.5 1.57-3.5 3.5 0 .35.06.68.16 1L4.83 13.8A2.99 2.99 0 0 0 3 13c-1.66 0-3 1.34-3 3s1.34 3 3 3c1.3 0 2.4-.84 2.82-2h4.36A3 3 0 1 0 17 16z"/>`,
+  radio_button_unchecked: `<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>`,
+  fact_check: `<path d="M20 3H4a2 2 0 0 0-2 2v14l4-4h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM10 13H7v-2h3v2zm7 0h-5v-2h5v2zm0-4H7V7h10v2z"/>`,
+  verified: `<path d="m12 1 3 3 4-.5.5 4L23 11l-3.5 3.5.5 4-4-.5-3 3-3-3-4 .5.5-4L1 11l3.5-3.5-.5-4 4 .5 3-3zm-1 14 6-6-1.41-1.41L11 12.17l-1.59-1.59L8 12l3 3z"/>`
+};
+
+const materialIcon = (name) => {
+  const pathMarkup = MATERIAL_ICON_PATHS[name] || MATERIAL_ICON_PATHS.radio_button_unchecked;
+  return `<svg class="material-icon-svg" viewBox="0 0 24 24" aria-hidden="true">${pathMarkup}</svg>`;
+};
+
+const ICONS = {
+  read: materialIcon("menu_book"),
+  investigate: materialIcon("search"),
+  practice: materialIcon("school"),
+  produce: materialIcon("inventory_2"),
+  discuss: materialIcon("forum"),
+  collaborate: materialIcon("groups"),
+  whole: materialIcon("groups"),
+  subgroups: materialIcon("group_work"),
+  individual: materialIcon("person"),
+  present: materialIcon("face"),
+  absent: materialIcon("person_off"),
+  sync: materialIcon("schedule"),
+  async: materialIcon("update"),
+  onsite: materialIcon("business"),
+  online: materialIcon("computer"),
+  hybrid: materialIcon("hub"),
+  none: materialIcon("radio_button_unchecked"),
+  diagnostic: materialIcon("search"),
+  formative: materialIcon("school"),
+  summative: materialIcon("fact_check"),
+  certificative: materialIcon("verified")
+};
+
+const ACTIVITY_TYPE_OPTIONS = LEARNING_TYPES.map((type) => ({
+  value: type.id,
+  label: type.label,
+  short: type.label.split(" ")[0],
+  icon: ICONS[type.id]
+}));
+const GROUP_MODE_OPTIONS = [
+  { value: "whole", label: "Groupe entier", short: "Entier", icon: ICONS.whole },
+  { value: "subgroups", label: "Sous-groupes", short: "Sous-g.", icon: ICONS.subgroups },
+  { value: "individual", label: "Individuel", short: "Indiv.", icon: ICONS.individual }
+];
+const TRAINER_OPTIONS = [
+  { value: "present", label: "Présent", short: "Présent", icon: ICONS.present },
+  { value: "absent", label: "Absent", short: "Absent", icon: ICONS.absent }
+];
+const SYNC_OPTIONS = [
+  { value: "sync", label: "Synchrone", short: "Sync", icon: ICONS.sync },
+  { value: "async", label: "Asynchrone", short: "Async", icon: ICONS.async }
+];
+const LOCATION_OPTIONS = [
+  { value: "onsite", label: "Présentiel", short: "Prés.", icon: ICONS.onsite },
+  { value: "online", label: "Distanciel", short: "Dist.", icon: ICONS.online },
+  { value: "hybrid", label: "Hybride", short: "Hybrid.", icon: ICONS.hybrid }
+];
+const EVAL_OPTIONS = [
+  { value: "none", label: "Aucune", short: "Aucune", icon: ICONS.none },
+  { value: "diagnostic", label: "Diagnostique", short: "Diag.", icon: ICONS.diagnostic },
+  { value: "formative", label: "Formative", short: "Form.", icon: ICONS.formative },
+  { value: "summative", label: "Sommative", short: "Somm.", icon: ICONS.summative },
+  { value: "certificative", label: "Certificative", short: "Certif.", icon: ICONS.certificative }
 ];
 
 let uid = 0;
@@ -1300,34 +1486,69 @@ const exportModalConfirmBtn = document.getElementById("export-modal-confirm-btn"
 let state = loadState();
 let dragState = null;
 
+function hydrateState(parsed, fallback = defaultState()) {
+  if (!parsed || !Array.isArray(parsed.sessions)) return fallback;
+
+  const hydrated = {
+    allNotesExpanded: Boolean(parsed.allNotesExpanded),
+    topPanelCollapsed: Boolean(parsed.topPanelCollapsed),
+    meta: { ...DEFAULT_META, ...(parsed.meta || {}) },
+    sessions: parsed.sessions.map((session, sessionIndex) => ({
+      id: session?.id || nextId(),
+      title: typeof session?.title === "string" ? session.title : `Séance ${sessionIndex + 1}`,
+      notes: typeof session?.notes === "string" ? session.notes : "",
+      notesExpanded: Boolean(session?.notesExpanded),
+      activities: Array.isArray(session?.activities)
+        ? session.activities.map((activity) => {
+            const normalized = {
+              id: activity?.id || nextId(),
+              type: activity?.type || "read",
+              duration: Math.max(1, Number(activity?.duration) || 1),
+              groupMode: activity?.groupMode,
+              teacherPresence: activity?.teacherPresence,
+              syncMode: activity?.syncMode,
+              locationMode: activity?.locationMode,
+              evaluationMode: activity?.evaluationMode,
+              description: typeof activity?.description === "string" ? activity.description : "",
+              notes: typeof activity?.notes === "string" ? activity.notes : ""
+            };
+            normalizeActivity(normalized);
+            return normalized;
+          })
+        : []
+    }))
+  };
+
+  hydrated.meta.dayHours = Math.max(1, Number(hydrated.meta.dayHours) || DEFAULT_DAY_HOURS);
+  const normalizedLearning = normalizePedagogicalTime(
+    hydrated.meta.learningDays,
+    hydrated.meta.learningHours,
+    hydrated.meta.learningMinutes,
+    hydrated.meta.dayHours
+  );
+  hydrated.meta.learningDays = normalizedLearning.days;
+  hydrated.meta.learningHours = normalizedLearning.hours;
+  hydrated.meta.learningMinutes = normalizedLearning.minutes;
+  hydrated.meta.sizeClass = Math.max(1, Number(hydrated.meta.sizeClass) || 1);
+
+  if (hydrated.meta.modeDelivery === "classroom") hydrated.meta.modeDelivery = "onsite";
+  if (hydrated.meta.modeDelivery === "blended") hydrated.meta.modeDelivery = "hybrid";
+  if (!["onsite", "online", "hybrid"].includes(hydrated.meta.modeDelivery)) {
+    hydrated.meta.modeDelivery = "onsite";
+  }
+  if (hydrated.meta.activeTab === "timeline") hydrated.meta.activeTab = "settings";
+  if (!["settings", "analysis"].includes(hydrated.meta.activeTab)) {
+    hydrated.meta.activeTab = "settings";
+  }
+
+  return hydrated;
+}
+
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return defaultState();
   try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.sessions)) return defaultState();
-    parsed.topPanelCollapsed = Boolean(parsed.topPanelCollapsed);
-    parsed.meta = { ...DEFAULT_META, ...(parsed.meta || {}) };
-    parsed.meta.dayHours = Math.max(1, Number(parsed.meta.dayHours) || DEFAULT_DAY_HOURS);
-    const normalizedLearning = normalizePedagogicalTime(
-      parsed.meta.learningDays,
-      parsed.meta.learningHours,
-      parsed.meta.learningMinutes,
-      parsed.meta.dayHours
-    );
-    parsed.meta.learningDays = normalizedLearning.days;
-    parsed.meta.learningHours = normalizedLearning.hours;
-    parsed.meta.learningMinutes = normalizedLearning.minutes;
-    if (parsed.meta.modeDelivery === "classroom") parsed.meta.modeDelivery = "onsite";
-    if (parsed.meta.modeDelivery === "blended") parsed.meta.modeDelivery = "hybrid";
-    if (!["onsite", "online", "hybrid"].includes(parsed.meta.modeDelivery)) {
-      parsed.meta.modeDelivery = "onsite";
-    }
-    if (parsed.meta.activeTab === "timeline") parsed.meta.activeTab = "settings";
-    if (!["settings", "analysis"].includes(parsed.meta.activeTab)) {
-      parsed.meta.activeTab = "settings";
-    }
-    return parsed;
+    return hydrateState(JSON.parse(raw), defaultState());
   } catch {
     return defaultState();
   }
@@ -1365,11 +1586,78 @@ function colorForType(typeId) {
   return LEARNING_TYPES.find((t) => t.id === typeId)?.color || "#999";
 }
 
-function makeTypeOptions(selected) {
-  return LEARNING_TYPES.map(
-    (type) =>
-      `<option value="${type.id}" ${selected === type.id ? "selected" : ""}>${type.label}</option>`
-  ).join("");
+function getOption(options, value) {
+  return options.find((opt) => opt.value === value) || options[0];
+}
+
+function setChoiceButton(button, options, value) {
+  const option = getOption(options, value);
+  button.dataset.value = option.value;
+  button.innerHTML = `${option.icon}<span class="choice-label">${option.short}</span>`;
+  button.title = option.label;
+  button.setAttribute("aria-label", option.label);
+}
+
+let activeChoiceMenu = null;
+let activeChoiceTrigger = null;
+
+function closeChoiceMenu() {
+  if (!activeChoiceMenu) return;
+  activeChoiceMenu.remove();
+  if (activeChoiceTrigger) activeChoiceTrigger.classList.remove("open");
+  activeChoiceMenu = null;
+  activeChoiceTrigger = null;
+}
+
+function openChoiceMenu(trigger, options, currentValue, onSelect) {
+  if (activeChoiceMenu && activeChoiceTrigger === trigger) {
+    closeChoiceMenu();
+    return;
+  }
+  closeChoiceMenu();
+  const rect = trigger.getBoundingClientRect();
+  const menu = document.createElement("div");
+  menu.className = "choice-menu";
+  menu.style.left = `${rect.left}px`;
+  menu.style.top = `${rect.bottom + 4}px`;
+  const groupTitle = trigger.dataset.groupTitle || "";
+  if (groupTitle) {
+    const title = document.createElement("div");
+    title.className = "choice-menu-title";
+    title.textContent = groupTitle;
+    menu.appendChild(title);
+  }
+
+  options.forEach((option) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `choice-menu-item${option.value === currentValue ? " active" : ""}`;
+    item.innerHTML = `${option.icon}<span>${option.label}</span>`;
+    item.addEventListener("click", () => {
+      onSelect(option.value);
+      closeChoiceMenu();
+    });
+    menu.appendChild(item);
+  });
+
+  document.body.appendChild(menu);
+  activeChoiceMenu = menu;
+  activeChoiceTrigger = trigger;
+  trigger.classList.add("open");
+
+  const menuRect = menu.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom + 4;
+  if (left + menuRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - menuRect.width - 8;
+  }
+  if (left < 8) left = 8;
+  if (top + menuRect.height > window.innerHeight - 8) {
+    top = rect.top - menuRect.height - 4;
+  }
+  if (top < 8) top = 8;
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
 }
 
 function normalizeActivity(activity) {
@@ -1677,11 +1965,71 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function escapeHtmlWithBreaks(value) {
+  return escapeHtml(value).replaceAll("\n", "<br />");
+}
+
+function formatPedagogicalTime(days, hours, minutes) {
+  return `${Math.max(0, Number(days) || 0)} j ${Math.max(0, Number(hours) || 0)} h ${Math.max(
+    0,
+    Number(minutes) || 0
+  )} min`;
+}
+
+function markdownQuoteBlock(text) {
+  return String(text)
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n");
+}
+
 function buildMarkdownExport() {
-  const lines = ["# Design Learning", ""];
+  const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
+  const lines = [`# ${state.meta.name || "Design Learning"}`, "", "## Paramètres", ""];
+  lines.push(`- Mode: ${labelForLocationMode(state.meta.modeDelivery)}`);
+  lines.push(`- Taille du groupe: ${state.meta.sizeClass || "-"}`);
+  lines.push(`- Concepteur(s): ${state.meta.designers || "-"}`);
+  lines.push(
+    `- Temps d'apprentissage: ${formatPedagogicalTime(
+      state.meta.learningDays,
+      state.meta.learningHours,
+      state.meta.learningMinutes
+    )}`
+  );
+  lines.push(
+    `- Temps conçu: ${formatPedagogicalTime(designed.days, designed.hours, designed.minutes)}`
+  );
+  lines.push(`- 1 jour = ${getDayHours()} heures`);
+  lines.push("");
+  if (state.meta.description) {
+    lines.push("### Description");
+    lines.push(state.meta.description);
+    lines.push("");
+  }
+  if (state.meta.command) {
+    lines.push("### Commande institutionnelle");
+    lines.push(state.meta.command);
+    lines.push("");
+  }
+  if (state.meta.personas) {
+    lines.push("### Personas (profils)");
+    lines.push(state.meta.personas);
+    lines.push("");
+  }
+  if (state.meta.sliders) {
+    lines.push("### Curseurs");
+    lines.push(state.meta.sliders);
+    lines.push("");
+  }
+  lines.push("## Séances");
+  lines.push("");
+
   state.sessions.forEach((session, sessionIndex) => {
     lines.push(`## ${sessionIndex + 1}. ${session.title}`);
-    if (session.notes) lines.push(`> Notes: ${session.notes}`);
+    if (session.notes) {
+      lines.push("> Notes:");
+      lines.push(markdownQuoteBlock(session.notes));
+    }
     lines.push("");
     session.activities.forEach((activity, activityIndex) => {
       lines.push(`### ${sessionIndex + 1}.${activityIndex + 1} ${labelForType(activity.type)}`);
@@ -1691,7 +2039,7 @@ function buildMarkdownExport() {
       lines.push(`- Rythme: ${labelForSyncMode(activity.syncMode)}`);
       lines.push(`- Modalité: ${labelForLocationMode(activity.locationMode)}`);
       lines.push(`- Évaluation: ${labelForEvaluationMode(activity.evaluationMode)}`);
-      lines.push(`- Description: ${activity.description || ""}`);
+      lines.push(`- Description: ${activity.description || "-"}`);
       if (activity.notes) lines.push(`- Notes: ${activity.notes}`);
       lines.push("");
     });
@@ -1700,6 +2048,7 @@ function buildMarkdownExport() {
 }
 
 function buildHtmlExportDocument() {
+  const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
   const sections = state.sessions
     .map((session, sessionIndex) => {
       const activities = session.activities
@@ -1729,6 +2078,49 @@ function buildHtmlExportDocument() {
     })
     .join("");
 
+  const metadata = `
+  <section>
+    <h2>Paramètres</h2>
+    <p><strong>Mode:</strong> ${escapeHtml(labelForLocationMode(state.meta.modeDelivery))}</p>
+    <p><strong>Taille du groupe:</strong> ${escapeHtml(state.meta.sizeClass || "-")}</p>
+    <p><strong>Concepteur(s):</strong> ${escapeHtml(state.meta.designers || "-")}</p>
+    <p><strong>Temps d'apprentissage:</strong> ${escapeHtml(
+      formatPedagogicalTime(
+        state.meta.learningDays,
+        state.meta.learningHours,
+        state.meta.learningMinutes
+      )
+    )}</p>
+    <p><strong>Temps conçu:</strong> ${escapeHtml(
+      formatPedagogicalTime(designed.days, designed.hours, designed.minutes)
+    )}</p>
+    <p><strong>1 jour =</strong> ${escapeHtml(getDayHours())} heures</p>
+    ${
+      state.meta.description
+        ? `<p><strong>Description:</strong><br />${escapeHtmlWithBreaks(state.meta.description)}</p>`
+        : ""
+    }
+    ${
+      state.meta.command
+        ? `<p><strong>Commande institutionnelle:</strong><br />${escapeHtmlWithBreaks(
+            state.meta.command
+          )}</p>`
+        : ""
+    }
+    ${
+      state.meta.personas
+        ? `<p><strong>Personas (profils):</strong><br />${escapeHtmlWithBreaks(
+            state.meta.personas
+          )}</p>`
+        : ""
+    }
+    ${
+      state.meta.sliders
+        ? `<p><strong>Curseurs:</strong><br />${escapeHtmlWithBreaks(state.meta.sliders)}</p>`
+        : ""
+    }
+  </section>`;
+
   return `<!doctype html>
 <html lang="fr">
 <head>
@@ -1745,7 +2137,8 @@ function buildHtmlExportDocument() {
   </style>
 </head>
 <body>
-  <h1>Design Learning</h1>
+  <h1>${escapeHtml(state.meta.name || "Design Learning")}</h1>
+  ${metadata}
   ${sections}
 </body>
 </html>`;
@@ -1789,6 +2182,16 @@ function setupExpandableFields() {
     btn.setAttribute("aria-label", isFullscreen ? "Quitter le plein écran" : "Plein écran");
   });
 }
+
+document.addEventListener("click", (event) => {
+  if (!activeChoiceMenu) return;
+  if (activeChoiceMenu.contains(event.target)) return;
+  if (event.target.closest(".choice-btn")) return;
+  closeChoiceMenu();
+});
+
+window.addEventListener("resize", closeChoiceMenu);
+window.addEventListener("scroll", closeChoiceMenu, true);
 
 function stripGradientForSession(session) {
   if (!session.activities.length) return "linear-gradient(90deg, #cccccc, #bbbbbb)";
@@ -1893,6 +2296,7 @@ board.addEventListener("drop", (event) => {
 });
 
 function render() {
+  closeChoiceMenu();
   renderTopPanel();
   board.innerHTML = "";
   state.sessions.forEach((session) => {
@@ -1973,13 +2377,13 @@ function render() {
       normalizeActivity(activity);
       const activityFrag = activityTpl.content.cloneNode(true);
       const activityCard = activityFrag.querySelector(".activity-card");
-      const typeSelect = activityFrag.querySelector(".activity-type");
+      const typeBtn = activityFrag.querySelector(".activity-type-btn");
       const durationInput = activityFrag.querySelector(".activity-duration");
-      const groupModeSelect = activityFrag.querySelector(".activity-group-mode");
-      const trainerModeSelect = activityFrag.querySelector(".activity-trainer-mode");
-      const syncModeSelect = activityFrag.querySelector(".activity-sync-mode");
-      const locationModeSelect = activityFrag.querySelector(".activity-location-mode");
-      const evaluationModeSelect = activityFrag.querySelector(".activity-evaluation-mode");
+      const groupModeBtn = activityFrag.querySelector(".activity-group-mode-btn");
+      const trainerModeBtn = activityFrag.querySelector(".activity-trainer-mode-btn");
+      const syncModeBtn = activityFrag.querySelector(".activity-sync-mode-btn");
+      const locationModeBtn = activityFrag.querySelector(".activity-location-mode-btn");
+      const evaluationModeBtn = activityFrag.querySelector(".activity-evaluation-mode-btn");
       const description = activityFrag.querySelector(".activity-description");
       const activityNotes = activityFrag.querySelector(".activity-notes");
       const activityNotesInput = activityFrag.querySelector(".activity-notes-input");
@@ -1988,13 +2392,25 @@ function render() {
       activityCard.dataset.activityId = activity.id;
       activityCard.dataset.sessionId = session.id;
       activityCard.draggable = true;
-      typeSelect.innerHTML = makeTypeOptions(activity.type);
+      setChoiceButton(typeBtn, ACTIVITY_TYPE_OPTIONS, activity.type);
+      typeBtn.dataset.groupTitle = "Type";
+      typeBtn.title = `Type d'apprentissage: ${getOption(ACTIVITY_TYPE_OPTIONS, activity.type).label}`;
       durationInput.value = activity.duration;
-      groupModeSelect.value = activity.groupMode;
-      trainerModeSelect.value = activity.teacherPresence;
-      syncModeSelect.value = activity.syncMode;
-      locationModeSelect.value = activity.locationMode;
-      evaluationModeSelect.value = activity.evaluationMode;
+      setChoiceButton(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode);
+      setChoiceButton(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence);
+      setChoiceButton(syncModeBtn, SYNC_OPTIONS, activity.syncMode);
+      setChoiceButton(locationModeBtn, LOCATION_OPTIONS, activity.locationMode);
+      setChoiceButton(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode);
+      groupModeBtn.dataset.groupTitle = "Groupe";
+      trainerModeBtn.dataset.groupTitle = "Formateur";
+      syncModeBtn.dataset.groupTitle = "Rythme";
+      locationModeBtn.dataset.groupTitle = "Modalité";
+      evaluationModeBtn.dataset.groupTitle = "Évaluation";
+      groupModeBtn.title = `Groupe: ${getOption(GROUP_MODE_OPTIONS, activity.groupMode).label}`;
+      trainerModeBtn.title = `Formateur: ${getOption(TRAINER_OPTIONS, activity.teacherPresence).label}`;
+      syncModeBtn.title = `Rythme: ${getOption(SYNC_OPTIONS, activity.syncMode).label}`;
+      locationModeBtn.title = `Modalité: ${getOption(LOCATION_OPTIONS, activity.locationMode).label}`;
+      evaluationModeBtn.title = `Évaluation: ${getOption(EVAL_OPTIONS, activity.evaluationMode).label}`;
       description.value = activity.description;
       activityNotesInput.value = activity.notes || "";
       activityNotes.classList.toggle("hidden", !(state.allNotesExpanded || session.notesExpanded));
@@ -2016,10 +2432,12 @@ function render() {
         clearDragIndicators();
       });
 
-      typeSelect.addEventListener("change", (e) => {
-        activity.type = e.target.value;
-        saveState();
-        render();
+      typeBtn.addEventListener("click", () => {
+        openChoiceMenu(typeBtn, ACTIVITY_TYPE_OPTIONS, activity.type, (nextValue) => {
+          activity.type = nextValue;
+          saveState();
+          render();
+        });
       });
 
       durationInput.addEventListener("input", (e) => {
@@ -2029,34 +2447,49 @@ function render() {
         renderTopPanel();
       });
 
-      groupModeSelect.addEventListener("change", (e) => {
-        activity.groupMode = e.target.value;
-        saveState();
-        renderTopPanel();
+      groupModeBtn.addEventListener("click", () => {
+        openChoiceMenu(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode, (nextValue) => {
+          activity.groupMode = nextValue;
+          saveState();
+          renderTopPanel();
+          setChoiceButton(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode);
+        });
       });
 
-      trainerModeSelect.addEventListener("change", (e) => {
-        activity.teacherPresence = e.target.value;
-        saveState();
-        renderTopPanel();
+      trainerModeBtn.addEventListener("click", () => {
+        openChoiceMenu(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence, (nextValue) => {
+          activity.teacherPresence = nextValue;
+          saveState();
+          renderTopPanel();
+          setChoiceButton(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence);
+        });
       });
 
-      syncModeSelect.addEventListener("change", (e) => {
-        activity.syncMode = e.target.value;
-        saveState();
-        renderTopPanel();
+      syncModeBtn.addEventListener("click", () => {
+        openChoiceMenu(syncModeBtn, SYNC_OPTIONS, activity.syncMode, (nextValue) => {
+          activity.syncMode = nextValue;
+          saveState();
+          renderTopPanel();
+          setChoiceButton(syncModeBtn, SYNC_OPTIONS, activity.syncMode);
+        });
       });
 
-      locationModeSelect.addEventListener("change", (e) => {
-        activity.locationMode = e.target.value;
-        saveState();
-        renderTopPanel();
+      locationModeBtn.addEventListener("click", () => {
+        openChoiceMenu(locationModeBtn, LOCATION_OPTIONS, activity.locationMode, (nextValue) => {
+          activity.locationMode = nextValue;
+          saveState();
+          renderTopPanel();
+          setChoiceButton(locationModeBtn, LOCATION_OPTIONS, activity.locationMode);
+        });
       });
 
-      evaluationModeSelect.addEventListener("change", (e) => {
-        activity.evaluationMode = e.target.value;
-        saveState();
-        renderTopPanel();
+      evaluationModeBtn.addEventListener("click", () => {
+        openChoiceMenu(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode, (nextValue) => {
+          activity.evaluationMode = nextValue;
+          saveState();
+          renderTopPanel();
+          setChoiceButton(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode);
+        });
       });
 
       description.addEventListener("input", (e) => {
@@ -2293,10 +2726,11 @@ importFileInput.addEventListener("change", async (e) => {
   try {
     const text = await file.text();
     const parsed = JSON.parse(text);
-    if (!parsed || !Array.isArray(parsed.sessions)) {
+    const hydrated = hydrateState(parsed, null);
+    if (!hydrated) {
       throw new Error("Format invalide");
     }
-    state = parsed;
+    state = hydrated;
     saveState();
     render();
   } catch {
