@@ -11,7 +11,8 @@
   --panel-2: #e2e2e2;
   --line: #c3c3c3;
   --text: #2b2b2b;
-  --primary: #1e7af0;
+  --primary: #145bb4;
+  --focus: #0a58ca;
   --read: #5cc9de;
   --investigate: #f78282;
   --practice: #bd93e6;
@@ -38,6 +39,43 @@ body {
 body {
   display: flex;
   flex-direction: column;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 3000;
+  background: #123f78;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #0f3564;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .material-icon-svg {
@@ -120,6 +158,11 @@ body {
   margin-bottom: 8px;
 }
 
+.top-brand .top-tabs {
+  margin-bottom: 0;
+  align-items: center;
+}
+
 .top-tab {
   border: 1px solid transparent;
   border-radius: 6px;
@@ -131,8 +174,8 @@ body {
 }
 
 .top-tab.active {
-  background: #1e7af0;
-  border-color: #1468d3;
+  background: #145bb4;
+  border-color: #104f9c;
   color: #fff;
 }
 
@@ -440,8 +483,8 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(#2c90ff, #1171de);
-  border-color: #0f62c2;
+  background: linear-gradient(#2274da, #0f57b6);
+  border-color: #0d4f9e;
   color: #fff;
   font-weight: 600;
 }
@@ -608,7 +651,7 @@ main {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6f7787;
+  color: #455064;
   max-width: none;
 }
 
@@ -692,7 +735,7 @@ main {
 
 .choice-menu-item.active {
   background: #e2e7ff;
-  color: #3f46d6;
+  color: #2c3db1;
   font-weight: 600;
 }
 
@@ -869,12 +912,41 @@ main {
     padding-bottom: 4px;
   }
 
+  main {
+    overflow: auto;
+  }
+
+  .board {
+    height: auto;
+    min-height: 100%;
+    align-items: flex-start;
+    padding-bottom: 14px;
+  }
+
   .session-card {
     flex-basis: min(92vw, 390px);
+    height: auto;
+    min-height: 420px;
   }
 
   .activity-toolbar {
     overflow-x: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .top-brand {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .toolbar {
+    gap: 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    flex-wrap: wrap;
   }
 }
 
@@ -890,19 +962,23 @@ main {
     </style>
   </head>
   <body>
-    <section id="top-panel" class="top-panel">
+    <a class="skip-link" href="#board">Aller au contenu principal</a>
+    <p id="sr-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+    <section id="top-panel" class="top-panel" role="region" aria-labelledby="app-title">
       <div class="top-brand">
         <div class="brand-left">
-          <h1 class="brand-title">Interface de conception d’apprentissage</h1>
+          <h1 id="app-title" class="brand-title">Interface de conception d’apprentissage</h1>
         </div>
         <div style="display:inline-flex; gap:8px; align-items:center;">
-          <button id="top-tab-settings" class="top-tab" type="button">Paramètres</button>
-          <button id="top-tab-analysis" class="top-tab active" type="button">Analyse</button>
+          <div class="top-tabs" role="tablist" aria-label="Vues du panneau supérieur">
+            <button id="top-tab-settings" class="top-tab" type="button" role="tab" aria-selected="false" aria-controls="timeline-view">Paramètres</button>
+            <button id="top-tab-analysis" class="top-tab active" type="button" role="tab" aria-selected="true" aria-controls="analysis-view">Analyse</button>
+          </div>
           <button id="top-panel-toggle-btn" class="top-panel-toggle" type="button">Replier le panneau</button>
         </div>
       </div>
       <div id="top-panel-body" class="top-panel-body">
-        <div id="timeline-view" class="panel-grid">
+        <div id="timeline-view" class="panel-grid" role="tabpanel" aria-labelledby="top-tab-settings">
           <div class="panel-column panel-column-left">
             <div class="form-row">
               <label for="meta-name">Titre</label>
@@ -989,7 +1065,7 @@ main {
             <div id="top-legend" class="top-legend"></div>
           </div>
         </div>
-        <div id="analysis-view" class="analysis-view hidden">
+        <div id="analysis-view" class="analysis-view hidden" role="tabpanel" aria-labelledby="top-tab-analysis">
           <h2 class="analysis-title">Expérience d’apprentissage</h2>
           <div id="analysis-warning" class="analysis-warning hidden">
             Le graphe social peut être imprécis: un ou plusieurs types d’apprentissage n’ont pas de taille de groupe définie.
@@ -1024,7 +1100,7 @@ main {
       </div>
     </section>
 
-    <header class="toolbar">
+    <header class="toolbar" role="region" aria-label="Actions du design">
       <div class="toolbar-left">
         <button id="add-session-btn" class="btn btn-primary">+ Ajouter un moment</button>
         <button id="expand-notes-btn" class="btn btn-light">Déplier les notes</button>
@@ -1034,11 +1110,16 @@ main {
         <button id="import-design-btn" class="btn">Importer</button>
         <button id="export-design-btn" class="btn">Exporter</button>
         <button id="save-btn" class="btn">Sauvegarder</button>
+        <label for="lang-select" class="sr-only">Langue de l’interface</label>
+        <select id="lang-select" class="panel-select" style="width:auto;min-width:96px;">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </select>
       </div>
       <input id="import-file-input" type="file" accept="application/json" hidden />
     </header>
 
-    <main>
+    <main id="main-content">
       <section id="board" class="board" aria-label="Séquences de séances"></section>
     </main>
 
@@ -1083,6 +1164,7 @@ main {
           <div class="activity-controls">
             <button class="choice-btn activity-type-btn" type="button"></button>
             <label class="mini-label">
+              <span class="sr-only">Durée en minutes</span>
               ⏱
               <input class="activity-duration" type="number" min="1" />
             </label>
@@ -1116,7 +1198,7 @@ main {
       </div>
     </template>
 
-    <div id="info-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+    <div id="info-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="info-modal-title">
       <div class="modal">
         <h2 id="info-modal-title" class="modal-title">À propos</h2>
         <p>Cette application web monopage s’inspire de l’UCL Learning Designer :</p>
@@ -1130,7 +1212,7 @@ main {
       </div>
     </div>
 
-    <div id="export-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+    <div id="export-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="export-modal-title">
       <div class="modal">
         <h2 id="export-modal-title" class="modal-title">Exporter le design</h2>
         <label for="export-format-select">Format</label>
@@ -1246,6 +1328,7 @@ const nextId = () => `id-${Date.now()}-${uid++}`;
 const DEFAULT_DAY_HOURS = 7;
 const DEFAULT_META = {
   name: "La Belle et la Bête",
+  uiLanguage: "fr",
   dayHours: DEFAULT_DAY_HOURS,
   learningDays: 0,
   learningHours: 0,
@@ -1262,6 +1345,7 @@ const DEFAULT_META = {
 
 const NEW_DESIGN_META = {
   name: "",
+  uiLanguage: "fr",
   dayHours: DEFAULT_DAY_HOURS,
   learningDays: 0,
   learningHours: 0,
@@ -1440,6 +1524,9 @@ const exportDesignBtn = document.getElementById("export-design-btn");
 const infoBtn = document.getElementById("info-btn");
 const saveBtn = document.getElementById("save-btn");
 const importFileInput = document.getElementById("import-file-input");
+const langSelect = document.getElementById("lang-select");
+const srStatus = document.getElementById("sr-status");
+const appTitle = document.getElementById("app-title");
 const topPanel = document.getElementById("top-panel");
 const topPanelToggleBtn = document.getElementById("top-panel-toggle-btn");
 const topTabSettings = document.getElementById("top-tab-settings");
@@ -1485,6 +1572,129 @@ const exportModalConfirmBtn = document.getElementById("export-modal-confirm-btn"
 
 let state = loadState();
 let dragState = null;
+let activeModalBackdrop = null;
+let previousFocusedElement = null;
+
+const I18N = {
+  fr: {
+    appTitle: "Interface de conception d’apprentissage",
+    tabSettings: "Paramètres",
+    tabAnalysis: "Analyse",
+    collapsePanel: "Replier le panneau",
+    expandPanel: "Déplier le panneau",
+    addMoment: "+ Ajouter un moment",
+    expandNotes: "Déplier les notes",
+    collapseNotes: "Replier les notes",
+    new: "Nouveau",
+    import: "Importer",
+    export: "Exporter",
+    save: "Sauvegarder",
+    saved: "Exporté",
+    info: "Information",
+    exportTitle: "Exporter le design",
+    format: "Format",
+    cancel: "Annuler",
+    close: "Fermer",
+    boardRegion: "Séquences de séances",
+    sessionNotes: "Notes",
+    addLearningType: "+ Ajouter type d'apprentissage",
+    newDesignConfirm: "Créer un nouveau design et écraser le contenu actuel ?",
+    importInvalid: "Fichier invalide. Importez un JSON exporté depuis cette application.",
+    commandPlaceholder: "Collez ici la commande institutionnelle déjà définie...",
+    personasPlaceholder: "Collez ici les personas (profils) déjà définis...",
+    slidersPlaceholder: "Collez ici les curseurs déjà définis...",
+    fullscreen: "Plein écran",
+    closeFullscreen: "Quitter le plein écran",
+    uiLanguage: "Langue de l’interface",
+    moved: "Élément déplacé."
+  },
+  en: {
+    appTitle: "Learning Design Interface",
+    tabSettings: "Settings",
+    tabAnalysis: "Analysis",
+    collapsePanel: "Collapse panel",
+    expandPanel: "Expand panel",
+    addMoment: "+ Add moment",
+    expandNotes: "Expand notes",
+    collapseNotes: "Collapse notes",
+    new: "New",
+    import: "Import",
+    export: "Export",
+    save: "Save",
+    saved: "Exported",
+    info: "About",
+    exportTitle: "Export design",
+    format: "Format",
+    cancel: "Cancel",
+    close: "Close",
+    boardRegion: "Sequence board",
+    sessionNotes: "Notes",
+    addLearningType: "+ Add learning type",
+    newDesignConfirm: "Create a new design and replace current content?",
+    importInvalid: "Invalid file. Import a JSON exported by this application.",
+    commandPlaceholder: "Paste the previously defined institutional brief here...",
+    personasPlaceholder: "Paste previously defined personas here...",
+    slidersPlaceholder: "Paste previously defined sliders here...",
+    fullscreen: "Fullscreen",
+    closeFullscreen: "Exit fullscreen",
+    uiLanguage: "Interface language",
+    moved: "Item moved."
+  }
+};
+
+function currentLang() {
+  return state?.meta?.uiLanguage === "en" ? "en" : "fr";
+}
+
+function t(key) {
+  const lang = currentLang();
+  return I18N[lang][key] || I18N.fr[key] || key;
+}
+
+function announce(message) {
+  if (!message || !srStatus) return;
+  srStatus.textContent = "";
+  window.setTimeout(() => {
+    srStatus.textContent = message;
+  }, 10);
+}
+
+function applyLocalizedUI() {
+  document.documentElement.lang = currentLang();
+  if (langSelect) langSelect.value = currentLang();
+  appTitle.textContent = t("appTitle");
+  topTabSettings.textContent = t("tabSettings");
+  topTabAnalysis.textContent = t("tabAnalysis");
+  topPanelToggleBtn.textContent = state.topPanelCollapsed ? t("expandPanel") : t("collapsePanel");
+  addSessionBtn.textContent = t("addMoment");
+  newDesignBtn.textContent = t("new");
+  importDesignBtn.textContent = t("import");
+  exportDesignBtn.textContent = t("export");
+  saveBtn.textContent = t("save");
+  infoBtn.textContent = t("info");
+  infoBtn.setAttribute("aria-haspopup", "dialog");
+  exportDesignBtn.setAttribute("aria-haspopup", "dialog");
+  board.setAttribute("aria-label", t("boardRegion"));
+  metaCommandInput.placeholder = t("commandPlaceholder");
+  metaPersonasInput.placeholder = t("personasPlaceholder");
+  metaSlidersInput.placeholder = t("slidersPlaceholder");
+  exportModalBackdrop.querySelector("#export-modal-title").textContent = t("exportTitle");
+  exportModalBackdrop.querySelector("label[for='export-format-select']").textContent = t("format");
+  exportModalCancelBtn.textContent = t("cancel");
+  exportModalConfirmBtn.textContent = t("export");
+  infoModalCloseBtn.textContent = t("close");
+  document.querySelector("label[for='lang-select']").textContent = t("uiLanguage");
+  topPanel.querySelector(".top-tabs").setAttribute(
+    "aria-label",
+    currentLang() === "en" ? "Top panel views" : "Vues du panneau supérieur"
+  );
+  document.querySelectorAll(".expand-btn").forEach((button) => {
+    const wrapper = button.closest(".expandable-field");
+    const expanded = wrapper?.classList.contains("fullscreen");
+    button.setAttribute("aria-label", expanded ? t("closeFullscreen") : t("fullscreen"));
+    button.setAttribute("title", expanded ? t("closeFullscreen") : t("fullscreen"));
+  });
+}
 
 function hydrateState(parsed, fallback = defaultState()) {
   if (!parsed || !Array.isArray(parsed.sessions)) return fallback;
@@ -1530,6 +1740,7 @@ function hydrateState(parsed, fallback = defaultState()) {
   hydrated.meta.learningHours = normalizedLearning.hours;
   hydrated.meta.learningMinutes = normalizedLearning.minutes;
   hydrated.meta.sizeClass = Math.max(1, Number(hydrated.meta.sizeClass) || 1);
+  if (!["fr", "en"].includes(hydrated.meta.uiLanguage)) hydrated.meta.uiLanguage = "fr";
 
   if (hydrated.meta.modeDelivery === "classroom") hydrated.meta.modeDelivery = "onsite";
   if (hydrated.meta.modeDelivery === "blended") hydrated.meta.modeDelivery = "hybrid";
@@ -1582,6 +1793,31 @@ function setupAutoSave() {
   });
 }
 
+function setupFormAccessibility() {
+  document.addEventListener(
+    "invalid",
+    (event) => {
+      const field = event.target;
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
+        return;
+      }
+      field.setAttribute("aria-invalid", "true");
+      announce(field.validationMessage || "Valeur invalide");
+    },
+    true
+  );
+
+  document.addEventListener("input", (event) => {
+    const field = event.target;
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
+      return;
+    }
+    if (field.validity.valid) {
+      field.removeAttribute("aria-invalid");
+    }
+  });
+}
+
 function colorForType(typeId) {
   return LEARNING_TYPES.find((t) => t.id === typeId)?.color || "#999";
 }
@@ -1596,28 +1832,50 @@ function setChoiceButton(button, options, value) {
   button.innerHTML = `${option.icon}<span class="choice-label">${option.short}</span>`;
   button.title = option.label;
   button.setAttribute("aria-label", option.label);
+  button.setAttribute("aria-haspopup", "listbox");
+  button.setAttribute("aria-expanded", "false");
 }
 
 let activeChoiceMenu = null;
 let activeChoiceTrigger = null;
+let activeChoiceItems = [];
+let activeChoiceIndex = -1;
 
-function closeChoiceMenu() {
+function focusChoiceItem(index) {
+  if (!activeChoiceItems.length) return;
+  const safeIndex = Math.max(0, Math.min(index, activeChoiceItems.length - 1));
+  activeChoiceItems[safeIndex].focus();
+  activeChoiceIndex = safeIndex;
+}
+
+function closeChoiceMenu(restoreFocus = false) {
   if (!activeChoiceMenu) return;
   activeChoiceMenu.remove();
-  if (activeChoiceTrigger) activeChoiceTrigger.classList.remove("open");
+  if (activeChoiceTrigger) {
+    activeChoiceTrigger.classList.remove("open");
+    activeChoiceTrigger.setAttribute("aria-expanded", "false");
+    activeChoiceTrigger.removeAttribute("aria-controls");
+    if (restoreFocus) activeChoiceTrigger.focus();
+  }
   activeChoiceMenu = null;
   activeChoiceTrigger = null;
+  activeChoiceItems = [];
+  activeChoiceIndex = -1;
 }
 
 function openChoiceMenu(trigger, options, currentValue, onSelect) {
   if (activeChoiceMenu && activeChoiceTrigger === trigger) {
-    closeChoiceMenu();
+    closeChoiceMenu(true);
     return;
   }
   closeChoiceMenu();
   const rect = trigger.getBoundingClientRect();
   const menu = document.createElement("div");
+  const menuId = `choice-menu-${nextId()}`;
   menu.className = "choice-menu";
+  menu.id = menuId;
+  menu.setAttribute("role", "listbox");
+  menu.setAttribute("aria-label", trigger.dataset.groupTitle || trigger.title || "Options");
   menu.style.left = `${rect.left}px`;
   menu.style.top = `${rect.bottom + 4}px`;
   const groupTitle = trigger.dataset.groupTitle || "";
@@ -1633,6 +1891,9 @@ function openChoiceMenu(trigger, options, currentValue, onSelect) {
     item.type = "button";
     item.className = `choice-menu-item${option.value === currentValue ? " active" : ""}`;
     item.innerHTML = `${option.icon}<span>${option.label}</span>`;
+    item.setAttribute("role", "option");
+    item.setAttribute("tabindex", "-1");
+    item.setAttribute("aria-selected", option.value === currentValue ? "true" : "false");
     item.addEventListener("click", () => {
       onSelect(option.value);
       closeChoiceMenu();
@@ -1643,7 +1904,11 @@ function openChoiceMenu(trigger, options, currentValue, onSelect) {
   document.body.appendChild(menu);
   activeChoiceMenu = menu;
   activeChoiceTrigger = trigger;
+  activeChoiceItems = Array.from(menu.querySelectorAll(".choice-menu-item"));
+  activeChoiceIndex = Math.max(0, options.findIndex((option) => option.value === currentValue));
   trigger.classList.add("open");
+  trigger.setAttribute("aria-expanded", "true");
+  trigger.setAttribute("aria-controls", menuId);
 
   const menuRect = menu.getBoundingClientRect();
   let left = rect.left;
@@ -1658,6 +1923,48 @@ function openChoiceMenu(trigger, options, currentValue, onSelect) {
   if (top < 8) top = 8;
   menu.style.left = `${left}px`;
   menu.style.top = `${top}px`;
+
+  menu.addEventListener("keydown", (event) => {
+    if (!activeChoiceMenu) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeChoiceMenu(true);
+      return;
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusChoiceItem(activeChoiceIndex + 1);
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      focusChoiceItem(activeChoiceIndex - 1);
+      return;
+    }
+    if (event.key === "Home") {
+      event.preventDefault();
+      focusChoiceItem(0);
+      return;
+    }
+    if (event.key === "End") {
+      event.preventDefault();
+      focusChoiceItem(activeChoiceItems.length - 1);
+      return;
+    }
+    if (event.key === "Tab") {
+      closeChoiceMenu();
+      return;
+    }
+    if (event.key === " " || event.key === "Enter") {
+      const item = document.activeElement?.closest(".choice-menu-item");
+      if (item) {
+        event.preventDefault();
+        item.click();
+      }
+    }
+  });
+
+  focusChoiceItem(activeChoiceIndex);
 }
 
 function normalizeActivity(activity) {
@@ -1764,15 +2071,26 @@ function buildSegments(definitions, totals) {
   return { sum, segments };
 }
 
+function chartSummary(data, emptyLabel = "Aucune donnée") {
+  if (!data || data.sum <= 0) return emptyLabel;
+  return data.segments
+    .filter((segment) => segment.pct > 0)
+    .map((segment) => `${segment.label} ${Math.round(segment.pct)}%`)
+    .join(", ");
+}
+
 function renderConic(el, data) {
+  el.setAttribute("role", "img");
   if (data.sum <= 0) {
     el.style.background = "conic-gradient(#d2d2d2 0% 100%)";
+    el.setAttribute("aria-label", "Aucune donnée");
     return;
   }
   const parts = data.segments
     .filter((segment) => segment.pct > 0)
     .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`);
   el.style.background = `conic-gradient(${parts.join(", ")})`;
+  el.setAttribute("aria-label", chartSummary(data));
 }
 
 function renderLegend(container, data, showPct = true) {
@@ -1786,14 +2104,17 @@ function renderLegend(container, data, showPct = true) {
 }
 
 function renderGroupBar(data) {
+  analysisGroupBar.setAttribute("role", "img");
   if (data.sum <= 0) {
     analysisGroupBar.style.background = "linear-gradient(90deg, #d2d2d2 0% 100%)";
+    analysisGroupBar.setAttribute("aria-label", "Aucune donnée");
     return;
   }
   const parts = data.segments
     .filter((segment) => segment.pct > 0)
     .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`);
   analysisGroupBar.style.background = `linear-gradient(90deg, ${parts.join(", ")})`;
+  analysisGroupBar.setAttribute("aria-label", chartSummary(data));
 }
 
 function renderAnalysisPanel() {
@@ -1862,7 +2183,7 @@ function renderAnalysisPanel() {
 
 function renderTopPanel() {
   topPanel.classList.toggle("collapsed", state.topPanelCollapsed);
-  topPanelToggleBtn.textContent = state.topPanelCollapsed ? "Déplier le panneau" : "Replier le panneau";
+  topPanelToggleBtn.textContent = state.topPanelCollapsed ? t("expandPanel") : t("collapsePanel");
 
   metaNameInput.value = state.meta.name;
   metaLearningDaysInput.value = state.meta.learningDays;
@@ -1879,9 +2200,15 @@ function renderTopPanel() {
 
   topTabSettings.classList.toggle("active", state.meta.activeTab === "settings");
   topTabAnalysis.classList.toggle("active", state.meta.activeTab === "analysis");
+  topTabSettings.setAttribute("aria-selected", state.meta.activeTab === "settings" ? "true" : "false");
+  topTabAnalysis.setAttribute("aria-selected", state.meta.activeTab === "analysis" ? "true" : "false");
+  topTabSettings.tabIndex = state.meta.activeTab === "settings" ? 0 : -1;
+  topTabAnalysis.tabIndex = state.meta.activeTab === "analysis" ? 0 : -1;
   const analysisActive = state.meta.activeTab === "analysis";
   timelineView.classList.toggle("hidden", analysisActive);
   analysisView.classList.toggle("hidden", !analysisActive);
+  timelineView.setAttribute("aria-hidden", analysisActive ? "true" : "false");
+  analysisView.setAttribute("aria-hidden", analysisActive ? "false" : "true");
 
   const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
   metaDesignedDaysInput.value = designed.days;
@@ -1903,17 +2230,23 @@ function renderTopPanel() {
 
   if (overall <= 0) {
     topPie.style.background = "conic-gradient(#d2d2d2 0% 100%)";
+    topPie.setAttribute("role", "img");
+    topPie.setAttribute("aria-label", "Aucune donnée");
   } else {
     let cursor = 0;
     const segments = [];
+    const labels = [];
     LEARNING_TYPES.forEach((type) => {
       const pct = (totals[type.id] / overall) * 100;
       if (pct <= 0) return;
       const next = cursor + pct;
       segments.push(`${type.color} ${cursor}% ${next}%`);
+      labels.push(`${type.label} ${Math.round(pct)}%`);
       cursor = next;
     });
     topPie.style.background = `conic-gradient(${segments.join(", ")})`;
+    topPie.setAttribute("role", "img");
+    topPie.setAttribute("aria-label", labels.join(", "));
   }
 
   topLegend.innerHTML = LEARNING_TYPES.map((type) => {
@@ -2154,21 +2487,49 @@ function downloadBlob(content, type, filename) {
   URL.revokeObjectURL(url);
 }
 
+function getFocusableElements(container) {
+  return Array.from(
+    container.querySelectorAll(
+      "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+    )
+  ).filter((el) => !el.closest(".hidden"));
+}
+
+function openModal(backdrop, firstSelector = "button, select, input, textarea") {
+  previousFocusedElement = document.activeElement;
+  activeModalBackdrop = backdrop;
+  backdrop.classList.remove("hidden");
+  backdrop.setAttribute("aria-hidden", "false");
+  const firstTarget = backdrop.querySelector(firstSelector) || getFocusableElements(backdrop)[0];
+  if (firstTarget) firstTarget.focus();
+}
+
+function closeModal(backdrop) {
+  backdrop.classList.add("hidden");
+  backdrop.setAttribute("aria-hidden", "true");
+  if (activeModalBackdrop === backdrop) {
+    activeModalBackdrop = null;
+  }
+  if (previousFocusedElement && typeof previousFocusedElement.focus === "function") {
+    previousFocusedElement.focus();
+  }
+}
+
 function openExportModal() {
   exportFormatSelect.value = "json";
-  exportModalBackdrop.classList.remove("hidden");
+  openModal(exportModalBackdrop, "#export-format-select");
 }
 
 function closeExportModal() {
-  exportModalBackdrop.classList.add("hidden");
+  closeModal(exportModalBackdrop);
 }
 
 function openInfoModal() {
-  infoModalBackdrop.classList.remove("hidden");
+  openModal(infoModalBackdrop, "#info-modal-close-btn");
 }
 
 function closeInfoModal() {
-  infoModalBackdrop.classList.add("hidden");
+  closeModal(infoModalBackdrop);
 }
 
 function setupExpandableFields() {
@@ -2179,9 +2540,39 @@ function setupExpandableFields() {
     if (!wrapper) return;
     const isFullscreen = wrapper.classList.toggle("fullscreen");
     btn.textContent = isFullscreen ? "✕" : "⤢";
-    btn.setAttribute("aria-label", isFullscreen ? "Quitter le plein écran" : "Plein écran");
+    const label = isFullscreen ? t("closeFullscreen") : t("fullscreen");
+    btn.setAttribute("aria-label", label);
+    btn.setAttribute("title", label);
+    announce(label);
   });
 }
+
+document.addEventListener("keydown", (event) => {
+  if (activeChoiceMenu && event.key === "Escape") {
+    event.preventDefault();
+    closeChoiceMenu(true);
+    return;
+  }
+  if (!activeModalBackdrop) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    if (activeModalBackdrop === exportModalBackdrop) closeExportModal();
+    if (activeModalBackdrop === infoModalBackdrop) closeInfoModal();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusables = getFocusableElements(activeModalBackdrop);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
 
 document.addEventListener("click", (event) => {
   if (!activeChoiceMenu) return;
@@ -2272,6 +2663,28 @@ function moveActivity(sourceSessionId, activityId, targetSessionId, targetActivi
   targetSession.activities.splice(insertIndex, 0, movingActivity);
 }
 
+function moveSessionByOffset(sessionId, offset) {
+  const index = state.sessions.findIndex((session) => session.id === sessionId);
+  if (index < 0) return false;
+  const targetIndex = index + offset;
+  if (targetIndex < 0 || targetIndex >= state.sessions.length) return false;
+  const [session] = state.sessions.splice(index, 1);
+  state.sessions.splice(targetIndex, 0, session);
+  return true;
+}
+
+function moveActivityByOffset(sessionId, activityId, offset) {
+  const session = state.sessions.find((item) => item.id === sessionId);
+  if (!session) return false;
+  const index = session.activities.findIndex((activity) => activity.id === activityId);
+  if (index < 0) return false;
+  const targetIndex = index + offset;
+  if (targetIndex < 0 || targetIndex >= session.activities.length) return false;
+  const [activity] = session.activities.splice(index, 1);
+  session.activities.splice(targetIndex, 0, activity);
+  return true;
+}
+
 board.addEventListener("dragover", (event) => {
   if (!dragState || dragState.type !== "session") return;
   event.preventDefault();
@@ -2297,9 +2710,10 @@ board.addEventListener("drop", (event) => {
 
 function render() {
   closeChoiceMenu();
+  applyLocalizedUI();
   renderTopPanel();
   board.innerHTML = "";
-  state.sessions.forEach((session) => {
+  state.sessions.forEach((session, sessionIndex) => {
     const frag = sessionTpl.content.cloneNode(true);
     const card = frag.querySelector(".session-card");
     const strip = frag.querySelector(".session-strip");
@@ -2308,15 +2722,25 @@ function render() {
     const totalDuration = frag.querySelector(".total-duration");
     const sessionNotes = frag.querySelector(".session-notes");
     const sessionNotesInput = frag.querySelector(".session-notes-input");
+    const deleteSessionBtn = frag.querySelector(".delete-session-btn");
 
     card.dataset.sessionId = session.id;
     card.draggable = true;
+    card.tabIndex = 0;
+    card.setAttribute("role", "group");
+    card.setAttribute(
+      "aria-label",
+      `${sessionIndex + 1}. ${session.title || `Séance ${sessionIndex + 1}`}. Alt+Flèche gauche/droite pour déplacer.`
+    );
     strip.style.background = stripGradientForSession(session);
     title.value = session.title;
+    title.setAttribute("aria-label", `Titre de la séance ${sessionIndex + 1}`);
     title.addEventListener("input", (e) => {
       session.title = e.target.value;
       saveState();
     });
+    deleteSessionBtn.title = currentLang() === "en" ? "Delete session" : "Supprimer la séance";
+    deleteSessionBtn.setAttribute("aria-label", deleteSessionBtn.title);
     card.addEventListener("dragstart", (event) => {
       if (isInteractiveTarget(event.target)) {
         event.preventDefault();
@@ -2332,9 +2756,23 @@ function render() {
       dragState = null;
       clearDragIndicators();
     });
+    card.addEventListener("keydown", (event) => {
+      if (!event.altKey) return;
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        const moved = moveSessionByOffset(session.id, event.key === "ArrowLeft" ? -1 : 1);
+        if (moved) {
+          saveState();
+          render();
+          announce(t("moved"));
+        }
+      }
+    });
 
     totalDuration.textContent = String(totalSessionMinutes(session));
     activitiesWrap.dataset.sessionId = session.id;
+    activitiesWrap.setAttribute("role", "group");
+    activitiesWrap.setAttribute("aria-label", `Activités de la séance ${sessionIndex + 1}`);
     activitiesWrap.addEventListener("dragover", (event) => {
       if (!dragState || dragState.type !== "activity") return;
       event.preventDefault();
@@ -2373,7 +2811,7 @@ function render() {
       render();
     });
 
-    session.activities.forEach((activity) => {
+    session.activities.forEach((activity, activityIndex) => {
       normalizeActivity(activity);
       const activityFrag = activityTpl.content.cloneNode(true);
       const activityCard = activityFrag.querySelector(".activity-card");
@@ -2387,15 +2825,24 @@ function render() {
       const description = activityFrag.querySelector(".activity-description");
       const activityNotes = activityFrag.querySelector(".activity-notes");
       const activityNotesInput = activityFrag.querySelector(".activity-notes-input");
+      const deleteActivityBtn = activityFrag.querySelector(".delete-activity-btn");
 
       activityCard.style.borderLeftColor = colorForType(activity.type);
       activityCard.dataset.activityId = activity.id;
       activityCard.dataset.sessionId = session.id;
       activityCard.draggable = true;
+      activityCard.tabIndex = 0;
+      activityCard.setAttribute("role", "group");
+      activityCard.setAttribute(
+        "aria-label",
+        `Activité ${activityIndex + 1}. Alt+Flèche haut/bas pour déplacer dans la séance.`
+      );
       setChoiceButton(typeBtn, ACTIVITY_TYPE_OPTIONS, activity.type);
       typeBtn.dataset.groupTitle = "Type";
       typeBtn.title = `Type d'apprentissage: ${getOption(ACTIVITY_TYPE_OPTIONS, activity.type).label}`;
       durationInput.value = activity.duration;
+      durationInput.setAttribute("inputmode", "numeric");
+      durationInput.setAttribute("aria-label", `Durée en minutes de l'activité ${activityIndex + 1}`);
       setChoiceButton(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode);
       setChoiceButton(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence);
       setChoiceButton(syncModeBtn, SYNC_OPTIONS, activity.syncMode);
@@ -2412,7 +2859,11 @@ function render() {
       locationModeBtn.title = `Modalité: ${getOption(LOCATION_OPTIONS, activity.locationMode).label}`;
       evaluationModeBtn.title = `Évaluation: ${getOption(EVAL_OPTIONS, activity.evaluationMode).label}`;
       description.value = activity.description;
+      description.setAttribute("aria-label", `Description de l'activité ${activityIndex + 1}`);
       activityNotesInput.value = activity.notes || "";
+      activityNotesInput.setAttribute("aria-label", `Notes de l'activité ${activityIndex + 1}`);
+      deleteActivityBtn.title = currentLang() === "en" ? "Delete activity" : "Supprimer l'activité";
+      deleteActivityBtn.setAttribute("aria-label", deleteActivityBtn.title);
       activityNotes.classList.toggle("hidden", !(state.allNotesExpanded || session.notesExpanded));
       activityCard.addEventListener("dragstart", (event) => {
         if (isInteractiveTarget(event.target)) {
@@ -2431,13 +2882,41 @@ function render() {
         dragState = null;
         clearDragIndicators();
       });
+      activityCard.addEventListener("keydown", (event) => {
+        if (!event.altKey) return;
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          event.preventDefault();
+          const moved = moveActivityByOffset(session.id, activity.id, event.key === "ArrowUp" ? -1 : 1);
+          if (moved) {
+            saveState();
+            render();
+            announce(t("moved"));
+          }
+        }
+      });
 
-      typeBtn.addEventListener("click", () => {
-        openChoiceMenu(typeBtn, ACTIVITY_TYPE_OPTIONS, activity.type, (nextValue) => {
+      const bindChoiceControl = (button, options, getValue, applyValue) => {
+        const openMenu = () => {
+          openChoiceMenu(button, options, getValue(), (nextValue) => {
+            applyValue(nextValue);
+          });
+        };
+        button.addEventListener("click", openMenu);
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+            event.preventDefault();
+            openMenu();
+          }
+          if (event.key === "Escape") {
+            closeChoiceMenu(true);
+          }
+        });
+      };
+
+      bindChoiceControl(typeBtn, ACTIVITY_TYPE_OPTIONS, () => activity.type, (nextValue) => {
           activity.type = nextValue;
           saveState();
           render();
-        });
       });
 
       durationInput.addEventListener("input", (e) => {
@@ -2447,50 +2926,50 @@ function render() {
         renderTopPanel();
       });
 
-      groupModeBtn.addEventListener("click", () => {
-        openChoiceMenu(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode, (nextValue) => {
+      bindChoiceControl(groupModeBtn, GROUP_MODE_OPTIONS, () => activity.groupMode, (nextValue) => {
           activity.groupMode = nextValue;
           saveState();
           renderTopPanel();
           setChoiceButton(groupModeBtn, GROUP_MODE_OPTIONS, activity.groupMode);
-        });
       });
 
-      trainerModeBtn.addEventListener("click", () => {
-        openChoiceMenu(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence, (nextValue) => {
+      bindChoiceControl(trainerModeBtn, TRAINER_OPTIONS, () => activity.teacherPresence, (nextValue) => {
           activity.teacherPresence = nextValue;
           saveState();
           renderTopPanel();
           setChoiceButton(trainerModeBtn, TRAINER_OPTIONS, activity.teacherPresence);
-        });
       });
 
-      syncModeBtn.addEventListener("click", () => {
-        openChoiceMenu(syncModeBtn, SYNC_OPTIONS, activity.syncMode, (nextValue) => {
+      bindChoiceControl(syncModeBtn, SYNC_OPTIONS, () => activity.syncMode, (nextValue) => {
           activity.syncMode = nextValue;
           saveState();
           renderTopPanel();
           setChoiceButton(syncModeBtn, SYNC_OPTIONS, activity.syncMode);
-        });
       });
 
-      locationModeBtn.addEventListener("click", () => {
-        openChoiceMenu(locationModeBtn, LOCATION_OPTIONS, activity.locationMode, (nextValue) => {
+      bindChoiceControl(
+        locationModeBtn,
+        LOCATION_OPTIONS,
+        () => activity.locationMode,
+        (nextValue) => {
           activity.locationMode = nextValue;
           saveState();
           renderTopPanel();
           setChoiceButton(locationModeBtn, LOCATION_OPTIONS, activity.locationMode);
-        });
-      });
+        }
+      );
 
-      evaluationModeBtn.addEventListener("click", () => {
-        openChoiceMenu(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode, (nextValue) => {
+      bindChoiceControl(
+        evaluationModeBtn,
+        EVAL_OPTIONS,
+        () => activity.evaluationMode,
+        (nextValue) => {
           activity.evaluationMode = nextValue;
           saveState();
           renderTopPanel();
           setChoiceButton(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode);
-        });
-      });
+        }
+      );
 
       description.addEventListener("input", (e) => {
         activity.description = e.target.value;
@@ -2502,16 +2981,21 @@ function render() {
         saveState();
       });
 
-      activityFrag.querySelector(".delete-activity-btn").addEventListener("click", () => {
+      deleteActivityBtn.addEventListener("click", () => {
         session.activities = session.activities.filter((a) => a.id !== activity.id);
         saveState();
         render();
+        announce(t("moved"));
       });
 
       activitiesWrap.appendChild(activityFrag);
     });
 
-    frag.querySelector(".add-activity-btn").addEventListener("click", () => {
+    const addActivityBtn = frag.querySelector(".add-activity-btn");
+    const toggleSessionNotesBtn = frag.querySelector(".toggle-session-notes-btn");
+    addActivityBtn.textContent = t("addLearningType");
+    toggleSessionNotesBtn.textContent = t("sessionNotes");
+    addActivityBtn.addEventListener("click", () => {
       session.activities.push({
         id: nextId(),
         type: "read",
@@ -2526,21 +3010,24 @@ function render() {
       });
       saveState();
       render();
+      announce(t("moved"));
     });
 
-    frag.querySelector(".delete-session-btn").addEventListener("click", () => {
+    deleteSessionBtn.addEventListener("click", () => {
       state.sessions = state.sessions.filter((s) => s.id !== session.id);
       saveState();
       render();
+      announce(t("moved"));
     });
 
-    frag.querySelector(".toggle-session-notes-btn").addEventListener("click", () => {
+    toggleSessionNotesBtn.addEventListener("click", () => {
       session.notesExpanded = !session.notesExpanded;
       saveState();
       render();
     });
 
     sessionNotesInput.value = session.notes || "";
+    sessionNotesInput.setAttribute("aria-label", `Notes de la séance ${sessionIndex + 1}`);
     sessionNotesInput.addEventListener("input", (e) => {
       session.notes = e.target.value;
       saveState();
@@ -2550,10 +3037,25 @@ function render() {
     board.appendChild(frag);
   });
 
-  expandNotesBtn.textContent = state.allNotesExpanded ? "Replier les notes" : "Déplier les notes";
+  expandNotesBtn.textContent = state.allNotesExpanded ? t("collapseNotes") : t("expandNotes");
 }
 
 function bindTopPanelEvents() {
+  const tabButtons = [topTabSettings, topTabAnalysis];
+  tabButtons.forEach((tab, index) => {
+    tab.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      let nextIndex = index;
+      if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % tabButtons.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = tabButtons.length - 1;
+      tabButtons[nextIndex].focus();
+      tabButtons[nextIndex].click();
+    });
+  });
+
   topPanelToggleBtn.addEventListener("click", () => {
     state.topPanelCollapsed = !state.topPanelCollapsed;
     saveState();
@@ -2625,6 +3127,11 @@ function bindTopPanelEvents() {
     state.meta.sliders = event.target.value;
     saveState();
   });
+  langSelect.addEventListener("change", (event) => {
+    state.meta.uiLanguage = event.target.value === "en" ? "en" : "fr";
+    saveState();
+    render();
+  });
 }
 
 addSessionBtn.addEventListener("click", () => {
@@ -2646,19 +3153,21 @@ expandNotesBtn.addEventListener("click", () => {
 });
 
 newDesignBtn.addEventListener("click", () => {
-  if (!window.confirm("Créer un nouveau design et écraser le contenu actuel ?")) return;
+  if (!window.confirm(t("newDesignConfirm"))) return;
   state = createNewDesignState();
   saveState();
   render();
+  announce(t("moved"));
 });
 
 saveBtn.addEventListener("click", () => {
   saveState();
   exportDesign();
-  saveBtn.textContent = "Exporté";
+  saveBtn.textContent = t("saved");
   setTimeout(() => {
-    saveBtn.textContent = "Sauvegarder";
+    saveBtn.textContent = t("save");
   }, 1100);
+  announce(t("saved"));
 });
 
 function exportDesign(format = "json") {
@@ -2733,8 +3242,9 @@ importFileInput.addEventListener("change", async (e) => {
     state = hydrated;
     saveState();
     render();
+    announce(t("import"));
   } catch {
-    alert("Fichier invalide. Importez un JSON exporté depuis cette application.");
+    alert(t("importInvalid"));
   } finally {
     importFileInput.value = "";
   }
@@ -2742,6 +3252,7 @@ importFileInput.addEventListener("change", async (e) => {
 
 setupAutoSave();
 setupExpandableFields();
+setupFormAccessibility();
 bindTopPanelEvents();
 render();
     </script>
