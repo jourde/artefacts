@@ -214,6 +214,26 @@ select:focus-visible,
   position: relative;
 }
 
+.markdown-toolbar {
+  display: none;
+}
+
+.markdown-tool-btn {
+  min-width: 34px;
+  height: 30px;
+  border: 1px solid #aeb6bf;
+  border-radius: 4px;
+  background: #eef1f4;
+  color: #243246;
+  font: 600 12px/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.markdown-tool-btn:hover {
+  background: #e2e8ef;
+}
+
 .expand-btn {
   position: absolute;
   top: 6px;
@@ -226,9 +246,10 @@ select:focus-visible,
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
+  z-index: 2;
 }
 
-.expandable-field .panel-textarea {
+.expandable-field textarea {
   padding-right: 30px;
 }
 
@@ -240,11 +261,23 @@ select:focus-visible,
   border: 1px solid #bcc3cb;
   border-radius: 8px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.expandable-field.fullscreen .panel-textarea {
-  height: calc(100vh - 88px);
-  min-height: calc(100vh - 88px);
+.expandable-field.fullscreen .markdown-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding-right: 38px;
+}
+
+.expandable-field.fullscreen textarea {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   resize: none;
 }
 
@@ -1715,6 +1748,22 @@ const I18N = {
     durationMinutesSr: "Durée en minutes",
     fullscreen: "Plein écran",
     closeFullscreen: "Quitter le plein écran",
+    markdownToolbarLabel: "Barre de formatage Markdown",
+    mdBold: "Gras",
+    mdItalic: "Italique",
+    mdHeading: "Titre",
+    mdList: "Liste",
+    mdLink: "Lien",
+    mdQuote: "Citation",
+    mdCode: "Code",
+    mdSeparator: "Séparateur",
+    mdPlaceholderBold: "texte en gras",
+    mdPlaceholderItalic: "texte en italique",
+    mdPlaceholderHeading: "Titre",
+    mdPlaceholderList: "element de liste",
+    mdPlaceholderLink: "texte du lien",
+    mdPlaceholderQuote: "citation",
+    mdPlaceholderCode: "code",
     uiLanguage: "Langue de l’interface",
     moved: "Élément déplacé.",
     an01: "Un ou plusieurs graphiques peuvent être incorrects, car une ou plusieurs activités n’ont pas de durée valide.",
@@ -1837,6 +1886,22 @@ const I18N = {
     durationMinutesSr: "Duration in minutes",
     fullscreen: "Fullscreen",
     closeFullscreen: "Exit fullscreen",
+    markdownToolbarLabel: "Markdown formatting toolbar",
+    mdBold: "Bold",
+    mdItalic: "Italic",
+    mdHeading: "Heading",
+    mdList: "List",
+    mdLink: "Link",
+    mdQuote: "Quote",
+    mdCode: "Code",
+    mdSeparator: "Separator",
+    mdPlaceholderBold: "bold text",
+    mdPlaceholderItalic: "italic text",
+    mdPlaceholderHeading: "Heading",
+    mdPlaceholderList: "list item",
+    mdPlaceholderLink: "link text",
+    mdPlaceholderQuote: "quote",
+    mdPlaceholderCode: "code",
     uiLanguage: "Interface language",
     moved: "Item moved.",
     an01: "One or more graphs might not display correctly, because one or more activities do not have a valid duration.",
@@ -1891,6 +1956,17 @@ function t(key) {
   return I18N[lang][key] || I18N.fr[key] || key;
 }
 
+const MARKDOWN_ACTIONS = [
+  { id: "bold", text: "B", titleKey: "mdBold" },
+  { id: "italic", text: "I", titleKey: "mdItalic" },
+  { id: "heading", text: "H", titleKey: "mdHeading" },
+  { id: "list", text: "-", titleKey: "mdList" },
+  { id: "link", text: "[]", titleKey: "mdLink" },
+  { id: "quote", text: ">", titleKey: "mdQuote" },
+  { id: "code", text: "</>", titleKey: "mdCode" },
+  { id: "separator", text: "---", titleKey: "mdSeparator" }
+];
+
 function getBoardLayout() {
   return state?.meta?.boardLayout === "list" ? "list" : "columns";
 }
@@ -1919,6 +1995,46 @@ function shortLabel(label) {
   return String(label || "")
     .split(/[ /-]+/)
     .filter(Boolean)[0] || String(label || "");
+}
+
+function ensureMarkdownToolbars(root = document) {
+  root.querySelectorAll(".expandable-field").forEach((wrapper) => {
+    if (wrapper.querySelector(".markdown-toolbar")) return;
+    const textarea = wrapper.querySelector("textarea");
+    if (!textarea) return;
+    const toolbar = document.createElement("div");
+    toolbar.className = "markdown-toolbar";
+    toolbar.setAttribute("role", "toolbar");
+    toolbar.setAttribute("aria-label", t("markdownToolbarLabel"));
+    MARKDOWN_ACTIONS.forEach((action) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "markdown-tool-btn";
+      button.dataset.mdAction = action.id;
+      button.textContent = action.text;
+      toolbar.appendChild(button);
+    });
+    wrapper.insertBefore(toolbar, textarea);
+  });
+}
+
+function localizeExpandableFieldControls(root = document) {
+  root.querySelectorAll(".markdown-toolbar").forEach((toolbar) => {
+    toolbar.setAttribute("aria-label", t("markdownToolbarLabel"));
+  });
+  root.querySelectorAll(".markdown-tool-btn").forEach((button) => {
+    const action = MARKDOWN_ACTIONS.find((item) => item.id === button.dataset.mdAction);
+    if (!action) return;
+    const label = t(action.titleKey);
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  });
+  root.querySelectorAll(".expand-btn").forEach((button) => {
+    const wrapper = button.closest(".expandable-field");
+    const expanded = wrapper?.classList.contains("fullscreen");
+    button.setAttribute("aria-label", expanded ? t("closeFullscreen") : t("fullscreen"));
+    button.setAttribute("title", expanded ? t("closeFullscreen") : t("fullscreen"));
+  });
 }
 
 function refreshLocalizedCatalogs() {
@@ -2064,12 +2180,7 @@ function applyLocalizedUI() {
     "aria-label",
     currentLang() === "en" ? "Top panel views" : "Vues du panneau supérieur"
   );
-  document.querySelectorAll(".expand-btn").forEach((button) => {
-    const wrapper = button.closest(".expandable-field");
-    const expanded = wrapper?.classList.contains("fullscreen");
-    button.setAttribute("aria-label", expanded ? t("closeFullscreen") : t("fullscreen"));
-    button.setAttribute("title", expanded ? t("closeFullscreen") : t("fullscreen"));
-  });
+  localizeExpandableFieldControls();
 }
 
 function hydrateState(parsed, fallback = defaultState()) {
@@ -3071,7 +3182,7 @@ function escapeCsvCell(value) {
   return `"${text}"`;
 }
 
-function buildCsvExport() {
+function buildSpreadsheetRows() {
   const designed = splitMinutesToPedagogicalTime(totalDesignedMinutes(), getDayHours());
   const metaLearningTime = formatPedagogicalTime(
     state.meta.learningDays,
@@ -3083,6 +3194,7 @@ function buildCsvExport() {
   const headers = [
     "session_index",
     "session_title",
+    "session_objectives",
     "session_notes",
     "activity_index",
     "learning_type",
@@ -3106,7 +3218,7 @@ function buildCsvExport() {
     "design_personas",
     "design_sliders"
   ];
-  rows.push(headers.map(escapeCsvCell).join(","));
+  rows.push(headers);
 
   state.sessions.forEach((session, sessionIndex) => {
     if (!session.activities.length) {
@@ -3114,6 +3226,7 @@ function buildCsvExport() {
         [
           sessionIndex + 1,
           session.title || "",
+          session.objectives || "",
           session.notes || "",
           "",
           "",
@@ -3137,8 +3250,6 @@ function buildCsvExport() {
           state.meta.personas || "",
           state.meta.sliders || ""
         ]
-          .map(escapeCsvCell)
-          .join(",")
       );
       return;
     }
@@ -3148,6 +3259,7 @@ function buildCsvExport() {
         [
           sessionIndex + 1,
           session.title || "",
+          session.objectives || "",
           session.notes || "",
           activityIndex + 1,
           labelForType(activity.type),
@@ -3171,13 +3283,49 @@ function buildCsvExport() {
           state.meta.personas || "",
           state.meta.sliders || ""
         ]
-          .map(escapeCsvCell)
-          .join(",")
       );
     });
   });
 
-  return rows.join("\n");
+  return rows;
+}
+
+function buildCsvExport() {
+  return buildSpreadsheetRows()
+    .map((row) => row.map(escapeCsvCell).join(","))
+    .join("\n");
+}
+
+function buildExcelExportDocument() {
+  const rows = buildSpreadsheetRows();
+  const tableRows = rows
+    .map((row, rowIndex) => {
+      const cellTag = rowIndex === 0 ? "th" : "td";
+      const cells = row
+        .map((cell) => `<${cellTag}>${escapeHtml(cell)}</${cellTag}>`)
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+
+  return `<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export Excel Learning Designer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #b9b9b9; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #e9edf2; font-weight: 700; }
+    td { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <table>${tableRows}</table>
+</body>
+</html>`;
 }
 
 function normalizeToken(value) {
@@ -3479,7 +3627,123 @@ function closeInfoModal() {
   closeModal(infoModalBackdrop);
 }
 
+function getStoredSelection(wrapper, textarea) {
+  const fallback = textarea.value.length;
+  const start = Number.parseInt(wrapper.dataset.selectionStart || "", 10);
+  const end = Number.parseInt(wrapper.dataset.selectionEnd || "", 10);
+  return {
+    start: Number.isInteger(start) ? start : (textarea.selectionStart ?? fallback),
+    end: Number.isInteger(end) ? end : (textarea.selectionEnd ?? fallback)
+  };
+}
+
+function rememberSelection(textarea) {
+  const wrapper = textarea?.closest(".expandable-field");
+  if (!wrapper) return;
+  wrapper.dataset.selectionStart = String(textarea.selectionStart ?? textarea.value.length);
+  wrapper.dataset.selectionEnd = String(textarea.selectionEnd ?? textarea.value.length);
+}
+
+function updateTextareaValue(textarea, value, selectionStart, selectionEnd = selectionStart) {
+  textarea.value = value;
+  textarea.focus();
+  textarea.setSelectionRange(selectionStart, selectionEnd);
+  rememberSelection(textarea);
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function replaceSelection(textarea, wrapper, replacement, selectionStart, selectionEnd) {
+  const { start, end } = getStoredSelection(wrapper, textarea);
+  const nextValue = `${textarea.value.slice(0, start)}${replacement}${textarea.value.slice(end)}`;
+  updateTextareaValue(textarea, nextValue, selectionStart, selectionEnd);
+}
+
+function wrapSelection(textarea, wrapper, before, after, placeholder) {
+  const { start, end } = getStoredSelection(wrapper, textarea);
+  const selected = textarea.value.slice(start, end);
+  const content = selected || placeholder;
+  const replacement = `${before}${content}${after}`;
+  replaceSelection(
+    textarea,
+    wrapper,
+    replacement,
+    start + before.length,
+    start + before.length + content.length
+  );
+}
+
+function prefixSelectionLines(textarea, wrapper, prefix, placeholder) {
+  const { start, end } = getStoredSelection(wrapper, textarea);
+  const selected = textarea.value.slice(start, end);
+  const content = selected || placeholder;
+  const replacement = String(content)
+    .split("\n")
+    .map((line) => `${prefix}${line}`)
+    .join("\n");
+  replaceSelection(textarea, wrapper, replacement, start, start + replacement.length);
+}
+
+function applyMarkdownAction(textarea, actionId) {
+  const wrapper = textarea.closest(".expandable-field");
+  if (!wrapper) return;
+  const placeholders = {
+    bold: t("mdPlaceholderBold"),
+    italic: t("mdPlaceholderItalic"),
+    heading: t("mdPlaceholderHeading"),
+    list: t("mdPlaceholderList"),
+    link: t("mdPlaceholderLink"),
+    quote: t("mdPlaceholderQuote"),
+    code: t("mdPlaceholderCode")
+  };
+  if (actionId === "bold") {
+    wrapSelection(textarea, wrapper, "**", "**", placeholders.bold);
+    return;
+  }
+  if (actionId === "italic") {
+    wrapSelection(textarea, wrapper, "*", "*", placeholders.italic);
+    return;
+  }
+  if (actionId === "heading") {
+    prefixSelectionLines(textarea, wrapper, "## ", placeholders.heading);
+    return;
+  }
+  if (actionId === "list") {
+    prefixSelectionLines(textarea, wrapper, "- ", placeholders.list);
+    return;
+  }
+  if (actionId === "link") {
+    const { start, end } = getStoredSelection(wrapper, textarea);
+    const selected = textarea.value.slice(start, end);
+    const label = selected || placeholders.link;
+    const replacement = `[${label}](https://)`;
+    replaceSelection(textarea, wrapper, replacement, start + 1, start + 1 + label.length);
+    return;
+  }
+  if (actionId === "quote") {
+    prefixSelectionLines(textarea, wrapper, "> ", placeholders.quote);
+    return;
+  }
+  if (actionId === "code") {
+    const { start, end } = getStoredSelection(wrapper, textarea);
+    const selected = textarea.value.slice(start, end);
+    if (selected && !selected.includes("\n")) {
+      wrapSelection(textarea, wrapper, "`", "`", placeholders.code);
+      return;
+    }
+    const content = selected || placeholders.code;
+    const replacement = `\`\`\`\n${content}\n\`\`\``;
+    replaceSelection(textarea, wrapper, replacement, start + 4, start + 4 + content.length);
+    return;
+  }
+  if (actionId === "separator") {
+    const { start, end } = getStoredSelection(wrapper, textarea);
+    const replacement = "\n\n---\n\n";
+    replaceSelection(textarea, wrapper, replacement, start + replacement.length, start + replacement.length);
+  }
+}
+
 function setupExpandableFields() {
+  ensureMarkdownToolbars();
   document.addEventListener("click", (event) => {
     const btn = event.target.closest(".expand-btn");
     if (!btn) return;
@@ -3490,7 +3754,31 @@ function setupExpandableFields() {
     const label = isFullscreen ? t("closeFullscreen") : t("fullscreen");
     btn.setAttribute("aria-label", label);
     btn.setAttribute("title", label);
+    localizeExpandableFieldControls(wrapper);
     announce(label);
+  });
+
+  document.addEventListener("mousedown", (event) => {
+    if (event.target.closest(".markdown-tool-btn")) {
+      event.preventDefault();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(".markdown-tool-btn");
+    if (!button) return;
+    const wrapper = button.closest(".expandable-field");
+    const textarea = wrapper?.querySelector("textarea");
+    if (!textarea) return;
+    applyMarkdownAction(textarea, button.dataset.mdAction || "");
+  });
+
+  ["focusin", "input", "keyup", "mouseup"].forEach((eventName) => {
+    document.addEventListener(eventName, (event) => {
+      const textarea = event.target.closest(".expandable-field textarea");
+      if (!textarea) return;
+      rememberSelection(textarea);
+    });
   });
 }
 
@@ -4003,6 +4291,8 @@ function render() {
     board.appendChild(frag);
   });
 
+  ensureMarkdownToolbars(board);
+  localizeExpandableFieldControls(board);
   expandNotesBtn.textContent = state.allNotesExpanded ? t("collapseNotes") : t("expandNotes");
 }
 
@@ -4162,8 +4452,12 @@ saveBtn.addEventListener("click", () => {
 
 function exportDesign(format = "json") {
   const chosen = String(format).toLowerCase();
-  if (chosen === "csv") {
-    downloadBlob(buildCsvExport(), "text/csv;charset=utf-8", "design-learning-designer-fr.csv");
+  if (chosen === "excel" || chosen === "xls") {
+    downloadBlob(
+      buildExcelExportDocument(),
+      "application/vnd.ms-excel;charset=utf-8",
+      "design-learning-designer-fr.xls"
+    );
     return;
   }
   if (chosen === "md" || chosen === "markdown") {
