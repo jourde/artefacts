@@ -1,4 +1,4 @@
-# Artefacts
+# Prototypes
 Applications web monopage (_Single Page Applications)_ codées de manière conversationnelle avec l’IA générative.
 
 ## Pour la conception pédagogique et la formation
