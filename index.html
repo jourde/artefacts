@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML Text Extraction Editor</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4efe6;
+        --surface: rgba(255, 252, 245, 0.88);
+        --surface-strong: #fffaf0;
+        --border: rgba(83, 55, 23, 0.15);
+        --text: #2c241c;
+        --muted: #706457;
+        --accent: #b85c38;
+        --accent-dark: #924422;
+        --shadow: 0 18px 50px rgba(74, 44, 17, 0.12);
+        --radius: 22px;
+        --radius-sm: 14px;
+        --font-display: "Avenir Next", "Segoe UI", sans-serif;
+        --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font-body);
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(184, 92, 56, 0.18), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(129, 157, 115, 0.22), transparent 30%),
+          linear-gradient(180deg, #f9f4eb 0%, var(--bg) 100%);
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      .app-shell {
+        width: min(1400px, calc(100vw - 32px));
+        margin: 20px auto;
+      }
+
+      .topbar,
+      .panel {
+        backdrop-filter: blur(14px);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: minmax(220px, 320px) 1fr;
+        gap: 20px;
+        padding: 24px;
+        border-radius: calc(var(--radius) + 4px);
+      }
+
+      .brand h1,
+      .panel-heading h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .brand h1 {
+        font-size: clamp(1.8rem, 3vw, 2.7rem);
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--accent-dark);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        align-items: center;
+      }
+
+      .file-picker,
+      .file-meta,
+      .stats,
+      .preview-options,
+      .actions,
+      .status-card,
+      .skip-summary,
+      .editor-card,
+      .preview-frame {
+        border-radius: var(--radius-sm);
+      }
+
+      .file-picker,
+      .file-meta,
+      .stats,
+      .preview-options,
+      .actions {
+        min-height: 88px;
+        padding: 14px 16px;
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+      }
+
+      .file-picker {
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: white;
+        background: linear-gradient(135deg, var(--accent) 0%, #d58f53 100%);
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .file-picker input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .meta-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .file-meta strong,
+      .stats span {
+        display: block;
+      }
+
+      .stats {
+        display: grid;
+        gap: 8px;
+        align-content: center;
+      }
+
+      .actions {
+        display: grid;
+        gap: 10px;
+      }
+
+      .preview-options {
+        display: grid;
+        gap: 6px;
+        align-content: center;
+      }
+
+      .preview-toggle {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        color: var(--text);
+      }
+
+      .preview-toggle input {
+        margin-top: 3px;
+      }
+
+      .preview-hint {
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 16px;
+        font-weight: 700;
+        background: #2f3f33;
+        color: white;
+        cursor: pointer;
+        transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+      }
+
+      button:hover:enabled {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      #reset-button {
+        background: #8b7b68;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 1.05fr);
+        gap: 20px;
+        margin-top: 20px;
+        align-items: start;
+      }
+
+      .panel {
+        min-height: 72vh;
+        padding: 22px;
+        border-radius: var(--radius);
+      }
+
+      .preview-panel {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .panel-heading {
+        margin-bottom: 18px;
+      }
+
+      .panel-heading p {
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+
+      .status-card,
+      .skip-summary {
+        margin-bottom: 16px;
+        padding: 15px 16px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--muted);
+      }
+
+      .skip-summary {
+        color: var(--text);
+        background: rgba(184, 92, 56, 0.08);
+      }
+
+      .editor-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .editor-card {
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.74);
+        border: 1px solid var(--border);
+      }
+
+      .editor-card header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: baseline;
+        margin-bottom: 10px;
+      }
+
+      .editor-card h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .editor-card .path {
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .editor-card textarea {
+        width: 100%;
+        min-height: 110px;
+        resize: vertical;
+        border: 1px solid rgba(83, 55, 23, 0.18);
+        border-radius: 16px;
+        padding: 14px;
+        color: var(--text);
+        background: #fffdfa;
+      }
+
+      .editor-card .snippet {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .preview-canvas {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        padding: 0 12px 12px;
+      }
+
+      .preview-frame {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        height: auto;
+        border: 1px solid var(--border);
+        background: white;
+      }
+
+      @media (max-width: 1100px) {
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+
+        .toolbar {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .panel {
+          min-height: 48vh;
+        }
+
+        .preview-panel {
+          position: static;
+        }
+
+        .preview-frame {
+          aspect-ratio: 16 / 9;
+          height: auto;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .app-shell {
+          width: min(100vw - 20px, 100%);
+          margin: 10px auto;
+        }
+
+        .topbar,
+        .panel {
+          padding: 16px;
+        }
+
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .editor-card header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <p class="eyebrow">Browser-only editor</p>
+          <h1>HTML Text Extraction</h1>
+        </div>
+
+        <div class="toolbar">
+          <label class="file-picker" for="file-input">
+            <span>Upload HTML</span>
+            <input id="file-input" type="file" accept=".htm,.html,text/html" />
+          </label>
+
+          <div class="file-meta">
+            <span class="meta-label">Loaded file</span>
+            <strong id="file-name">No file loaded</strong>
+          </div>
+
+          <div class="stats" aria-live="polite">
+            <span id="extracted-count">0 extracted</span>
+            <span id="skipped-count">0 skipped</span>
+          </div>
+
+          <div class="preview-options">
+            <label class="preview-toggle" for="script-preview-toggle">
+              <input id="script-preview-toggle" type="checkbox" />
+              <span>Interactive SPA preview</span>
+            </label>
+            <p class="preview-hint">
+              Enables uploaded JavaScript inside the preview iframe so slide decks and SPAs can
+              navigate beyond their first screen.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button id="reset-button" type="button" disabled>Reset</button>
+            <button id="export-button" type="button" disabled>Export HTML</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel editor-panel">
+          <div class="panel-heading">
+            <h2>Editable text</h2>
+            <p>Only safe body text blocks are exposed. Mixed-content blocks are skipped.</p>
+          </div>
+
+          <div id="status-message" class="status-card">
+            Upload an HTML file to extract editable text blocks.
+          </div>
+
+          <div id="skip-summary" class="skip-summary" hidden></div>
+
+          <div id="editor-list" class="editor-list" aria-live="polite"></div>
+        </section>
+
+        <section class="panel preview-panel">
+          <div class="panel-heading">
+            <h2>Live preview</h2>
+            <p id="preview-mode-message">Preview runs in a sandboxed iframe with scripts disabled.</p>
+          </div>
+
+          <div class="preview-canvas">
+            <iframe
+              id="preview-frame"
+              class="preview-frame"
+              title="Edited HTML preview"
+              sandbox=""
+            ></iframe>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      "use strict";
+
+      const SAFE_TAGS = new Set([
+        "P",
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "LI",
+        "BUTTON",
+        "LABEL",
+        "BLOCKQUOTE",
+        "TD",
+        "TH",
+        "FIGCAPTION",
+        "CAPTION",
+        "DT",
+        "DD",
+        "SUMMARY",
+        "OPTION",
+      ]);
+
+      const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT"]);
+      const NON_EDITABLE_SCRIPT_KEYS = new Set(["headBg", "headColor", "color", "bg", "background"]);
+      const DECK_PREVIEW_SCALE = 0.97;
+
+      const state = {
+        fileName: "",
+        originalDoc: null,
+        workingDoc: null,
+        editableSegments: [],
+        contentScripts: [],
+        hasInteractiveScripts: false,
+        skippedReasons: new Map(),
+      };
+
+      const elements = {
+        fileInput: document.getElementById("file-input"),
+        fileName: document.getElementById("file-name"),
+        extractedCount: document.getElementById("extracted-count"),
+        skippedCount: document.getElementById("skipped-count"),
+        scriptPreviewToggle: document.getElementById("script-preview-toggle"),
+        resetButton: document.getElementById("reset-button"),
+        exportButton: document.getElementById("export-button"),
+        statusMessage: document.getElementById("status-message"),
+        skipSummary: document.getElementById("skip-summary"),
+        editorList: document.getElementById("editor-list"),
+        previewModeMessage: document.getElementById("preview-mode-message"),
+        previewFrame: document.getElementById("preview-frame"),
+      };
+
+      elements.fileInput.addEventListener("change", handleFileSelection);
+      elements.scriptPreviewToggle.addEventListener("change", updatePreview);
+      elements.resetButton.addEventListener("click", resetEdits);
+      elements.exportButton.addEventListener("click", exportHtml);
+
+      renderEmptyState();
+
+      async function handleFileSelection(event) {
+        const [file] = event.target.files || [];
+        if (!file) {
+          return;
+        }
+
+        const fileText = await file.text();
+        loadHtmlFile(fileText, file.name);
+      }
+
+      function loadHtmlFile(html, fileName) {
+        const parser = new DOMParser();
+        const originalDoc = parser.parseFromString(html, "text/html");
+        const workingDoc = parser.parseFromString(html, "text/html");
+        const extraction = extractEditableSegments(originalDoc, workingDoc);
+
+        state.fileName = fileName;
+        state.originalDoc = originalDoc;
+        state.workingDoc = workingDoc;
+        state.editableSegments = extraction.editableSegments;
+        state.contentScripts = extraction.contentScripts;
+        state.hasInteractiveScripts = hasInteractivePreviewScripts(workingDoc);
+        state.skippedReasons = extraction.skippedReasons;
+
+        elements.scriptPreviewToggle.checked = state.hasInteractiveScripts;
+        renderState();
+        updatePreview();
+      }
+
+      function hasInteractivePreviewScripts(doc) {
+        return Array.from(doc.querySelectorAll("script")).some((script) => {
+          const type = (script.getAttribute("type") || "").trim().toLowerCase();
+          if (script.id === "editable-content") {
+            return false;
+          }
+
+          return (
+            type === "" ||
+            type === "text/javascript" ||
+            type === "application/javascript" ||
+            type === "module"
+          );
+        });
+      }
+
+      function extractEditableSegments(originalDoc, workingDoc) {
+        const domExtraction = extractDomEditableSegments(originalDoc, workingDoc);
+        const scriptExtraction = extractContentScriptSegments(
+          originalDoc,
+          workingDoc,
+          domExtraction.editableSegments.length,
+        );
+
+        return {
+          editableSegments: [...domExtraction.editableSegments, ...scriptExtraction.editableSegments],
+          contentScripts: scriptExtraction.contentScripts,
+          skippedReasons: domExtraction.skippedReasons,
+        };
+      }
+
+      function extractDomEditableSegments(originalDoc, workingDoc) {
+        const editableSegments = [];
+        const skippedReasons = new Map();
+        const elementsToInspect = originalDoc.body ? Array.from(originalDoc.body.querySelectorAll("*")) : [];
+
+        elementsToInspect.forEach((element) => {
+          if (!SAFE_TAGS.has(element.tagName)) {
+            return;
+          }
+
+          const skippedSubtreeReason = getSkippedSubtreeReason(element);
+          if (skippedSubtreeReason) {
+            recordSkip(skippedReasons, skippedSubtreeReason);
+            return;
+          }
+
+          if (isHiddenElement(element)) {
+            recordSkip(skippedReasons, "Hidden element");
+            return;
+          }
+
+          if (containsDisallowedChildren(element)) {
+            recordSkip(skippedReasons, "Contains nested elements or mixed inline markup");
+            return;
+          }
+
+          const normalizedText = extractEditableText(element);
+          if (!normalizedText) {
+            recordSkip(skippedReasons, "Empty text block");
+            return;
+          }
+
+          const domPath = getDomPath(element);
+          const mirror = resolvePath(workingDoc, domPath);
+          if (!mirror) {
+            recordSkip(skippedReasons, "Unable to map block into working document");
+            return;
+          }
+
+          editableSegments.push({
+            id: `segment-${editableSegments.length + 1}`,
+            tagName: element.tagName,
+            domPath,
+            originalText: normalizedText,
+            currentText: normalizedText,
+          });
+
+          syncElementText(mirror, normalizedText);
+        });
+
+        return { editableSegments, skippedReasons };
+      }
+
+      function extractContentScriptSegments(originalDoc, workingDoc, startingIndex) {
+        const editableSegments = [];
+        const contentScripts = [];
+        const originalScripts = Array.from(originalDoc.querySelectorAll("script#editable-content"));
+
+        originalScripts.forEach((originalScript, scriptIndex) => {
+          const scriptId = originalScript.id || `editable-content-${scriptIndex + 1}`;
+          const workingScript = workingDoc.getElementById(scriptId);
+          if (!workingScript) {
+            return;
+          }
+
+          const originalContent = parseEditableContentScript(originalScript.textContent || "");
+          const workingContent = parseEditableContentScript(workingScript.textContent || "");
+          if (!originalContent || !workingContent) {
+            return;
+          }
+
+          const contentScript = {
+            scriptId,
+            variableName: workingContent.variableName,
+            data: workingContent.data,
+          };
+
+          contentScripts.push(contentScript);
+
+          collectScriptStringSegments({
+            value: originalContent.data,
+            pathParts: [],
+            scriptId,
+            variableName: workingContent.variableName,
+            workingData: workingContent.data,
+            editableSegments,
+            nextIndex: startingIndex + editableSegments.length,
+          });
+        });
+
+        return { editableSegments, contentScripts };
+      }
+
+      function parseEditableContentScript(scriptText) {
+        const match = scriptText.match(/\bconst\s+([A-Za-z_$][\w$]*)\s*=/);
+        if (!match) {
+          return null;
+        }
+
+        try {
+          const variableName = match[1];
+          const data = new Function(
+            `"use strict"; ${scriptText}\nreturn typeof ${variableName} === "undefined" ? null : ${variableName};`,
+          )();
+          if (!data || typeof data !== "object") {
+            return null;
+          }
+
+          return { variableName, data };
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function collectScriptStringSegments({
+        value,
+        pathParts,
+        scriptId,
+        variableName,
+        workingData,
+        editableSegments,
+        nextIndex,
+      }) {
+        if (typeof value === "string") {
+          const key = pathParts[pathParts.length - 1];
+          if (NON_EDITABLE_SCRIPT_KEYS.has(String(key))) {
+            return;
+          }
+
+          editableSegments.push({
+            id: `segment-${nextIndex + 1}`,
+            sourceType: "content-script",
+            tagName: variableName,
+            domPath: formatContentPath(pathParts),
+            originalText: value,
+            currentText: getValueAtPath(workingData, pathParts),
+            scriptId,
+            contentPath: [...pathParts],
+            title: buildContentSegmentTitle(pathParts),
+            locationLabel: `script#${scriptId}`,
+          });
+          return;
+        }
+
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            collectScriptStringSegments({
+              value: item,
+              pathParts: [...pathParts, index],
+              scriptId,
+              variableName,
+              workingData,
+              editableSegments,
+              nextIndex: startingIndexForSegments(nextIndex, editableSegments.length),
+            });
+          });
+          return;
+        }
+
+        if (value && typeof value === "object") {
+          Object.entries(value).forEach(([key, child]) => {
+            if (NON_EDITABLE_SCRIPT_KEYS.has(key)) {
+              return;
+            }
+
+            collectScriptStringSegments({
+              value: child,
+              pathParts: [...pathParts, key],
+              scriptId,
+              variableName,
+              workingData,
+              editableSegments,
+              nextIndex: startingIndexForSegments(nextIndex, editableSegments.length),
+            });
+          });
+        }
+      }
+
+      function startingIndexForSegments(nextIndex, currentLength) {
+        return nextIndex + currentLength;
+      }
+
+      function buildContentSegmentTitle(pathParts) {
+        if (pathParts[0] === "notes" && typeof pathParts[1] === "number") {
+          return `Speaker note ${pathParts[1] + 1}`;
+        }
+
+        if (
+          pathParts[0] === "scenarios" &&
+          typeof pathParts[1] === "number" &&
+          typeof pathParts[2] === "string"
+        ) {
+          return `Scenario ${pathParts[1] + 1} ${formatKeyLabel(pathParts[2])}`;
+        }
+
+        const lastPart = pathParts[pathParts.length - 1];
+        if (typeof lastPart === "string") {
+          return formatKeyLabel(lastPart);
+        }
+
+        return "Script field";
+      }
+
+      function formatKeyLabel(value) {
+        return value.replace(/([A-Z])/g, " $1").replace(/^./, (char) => char.toUpperCase());
+      }
+
+      function formatContentPath(pathParts) {
+        return pathParts.reduce((path, part) => {
+          if (typeof part === "number") {
+            return `${path}[${part}]`;
+          }
+
+          return `${path}.${part}`;
+        }, "CONTENT");
+      }
+
+      function getValueAtPath(value, pathParts) {
+        return pathParts.reduce((current, part) => (current == null ? current : current[part]), value);
+      }
+
+      function setValueAtPath(value, pathParts, nextValue) {
+        let current = value;
+
+        for (let index = 0; index < pathParts.length - 1; index += 1) {
+          current = current[pathParts[index]];
+        }
+
+        current[pathParts[pathParts.length - 1]] = nextValue;
+      }
+
+      function serializeEditableContentScript(variableName, data) {
+        const payload = JSON.stringify(data, null, 2).replace(/<\/script/gi, "<\\/script");
+        return `const ${variableName} = ${payload};\n`;
+      }
+
+      function getSkippedSubtreeReason(element) {
+        let current = element;
+
+        while (current && current !== current.ownerDocument.body) {
+          if (SKIPPED_TAGS.has(current.tagName)) {
+            return "Unsupported parent content";
+          }
+
+          if (current !== element && isHiddenElement(current)) {
+            return "Hidden element";
+          }
+
+          current = current.parentElement;
+        }
+
+        return "";
+      }
+
+      function isHiddenElement(element) {
+        if (element.hidden || element.getAttribute("aria-hidden") === "true") {
+          return true;
+        }
+
+        const style = (element.getAttribute("style") || "").replace(/\s+/g, "").toLowerCase();
+        return style.includes("display:none") || style.includes("visibility:hidden");
+      }
+
+      function containsDisallowedChildren(element) {
+        for (const child of element.childNodes) {
+          if (child.nodeType === Node.TEXT_NODE) {
+            continue;
+          }
+
+          if (child.nodeType !== Node.ELEMENT_NODE) {
+            return true;
+          }
+
+          if (child.tagName !== "BR") {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      function normalizeText(text) {
+        return text
+          .replace(/\r\n/g, "\n")
+          .replace(/[ \t]+\n/g, "\n")
+          .replace(/\n[ \t]+/g, "\n")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+
+      function extractEditableText(element) {
+        let rawText = "";
+
+        element.childNodes.forEach((child) => {
+          if (child.nodeType === Node.TEXT_NODE) {
+            rawText += child.textContent || "";
+            return;
+          }
+
+          if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "BR") {
+            rawText += "\n";
+          }
+        });
+
+        return normalizeText(rawText);
+      }
+
+      function getDomPath(element) {
+        const segments = [];
+        let current = element;
+
+        while (current && current.parentElement) {
+          const siblings = Array.from(current.parentElement.children).filter(
+            (sibling) => sibling.tagName === current.tagName,
+          );
+          const index = siblings.indexOf(current);
+          segments.unshift(`${current.tagName}:${index}`);
+          current = current.parentElement;
+        }
+
+        return segments.join(">");
+      }
+
+      function resolvePath(doc, domPath) {
+        const parts = domPath.split(">");
+        let current = doc.documentElement;
+
+        for (const part of parts) {
+          const [tagName, indexText] = part.split(":");
+          const index = Number.parseInt(indexText, 10);
+          const matches = Array.from(current.children).filter((child) => child.tagName === tagName);
+          current = matches[index];
+
+          if (!current) {
+            return null;
+          }
+        }
+
+        return current;
+      }
+
+      function recordSkip(skippedReasons, reason) {
+        skippedReasons.set(reason, (skippedReasons.get(reason) || 0) + 1);
+      }
+
+      function syncElementText(element, value) {
+        const hasBreaks = Array.from(element.childNodes).some(
+          (node) => node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR",
+        );
+
+        if (hasBreaks) {
+          const fragment = element.ownerDocument.createDocumentFragment();
+          const lines = value.replace(/\r\n/g, "\n").split("\n");
+
+          lines.forEach((line, index) => {
+            fragment.appendChild(element.ownerDocument.createTextNode(line));
+            if (index < lines.length - 1) {
+              fragment.appendChild(element.ownerDocument.createElement("br"));
+            }
+          });
+
+          element.replaceChildren(fragment);
+          return;
+        }
+
+        element.textContent = value;
+      }
+
+      function renderState() {
+        elements.fileName.textContent = state.fileName || "No file loaded";
+        elements.extractedCount.textContent = `${state.editableSegments.length} extracted`;
+        elements.skippedCount.textContent = `${getSkippedTotal()} skipped`;
+        elements.resetButton.disabled = !state.workingDoc;
+        elements.exportButton.disabled = !state.workingDoc;
+
+        renderStatusMessage();
+        renderSkipSummary();
+        renderEditorList();
+      }
+
+      function renderEmptyState() {
+        elements.fileName.textContent = "No file loaded";
+        elements.extractedCount.textContent = "0 extracted";
+        elements.skippedCount.textContent = "0 skipped";
+        elements.resetButton.disabled = true;
+        elements.exportButton.disabled = true;
+        elements.statusMessage.textContent = "Upload an HTML file to extract editable text blocks.";
+        elements.skipSummary.hidden = true;
+        elements.skipSummary.textContent = "";
+        elements.editorList.innerHTML = "";
+        elements.previewModeMessage.textContent =
+          "Preview will stay sandboxed until you upload an HTML file.";
+        elements.scriptPreviewToggle.checked = false;
+        elements.previewFrame.setAttribute("sandbox", "");
+        elements.previewFrame.srcdoc = `
+          <!DOCTYPE html>
+          <html lang="en">
+            <body style="font-family: sans-serif; padding: 24px; color: #666;">
+              Preview will appear here after you upload an HTML file.
+            </body>
+          </html>
+        `;
+      }
+
+      function renderStatusMessage() {
+        if (!state.workingDoc) {
+          elements.statusMessage.textContent = "Upload an HTML file to extract editable text blocks.";
+          return;
+        }
+
+        if (!state.editableSegments.length) {
+          elements.statusMessage.textContent =
+            "No safe text blocks were found. Blocks with nested inline markup are intentionally skipped.";
+          return;
+        }
+
+        const domCount = state.editableSegments.filter(
+          (segment) => segment.sourceType !== "content-script",
+        ).length;
+        const scriptCount = state.editableSegments.length - domCount;
+
+        if (scriptCount > 0) {
+          elements.statusMessage.textContent =
+            `Editing updates ${domCount} body text blocks and ${scriptCount} script-backed fields.`;
+          return;
+        }
+
+        elements.statusMessage.textContent =
+          "Editing updates only the extracted body text blocks and preserves the original document structure.";
+      }
+
+      function renderSkipSummary() {
+        const entries = Array.from(state.skippedReasons.entries());
+        if (!entries.length) {
+          elements.skipSummary.hidden = true;
+          elements.skipSummary.textContent = "";
+          return;
+        }
+
+        const summary = entries.map(([reason, count]) => `${count} ${reason.toLowerCase()}`).join(" • ");
+        elements.skipSummary.hidden = false;
+        elements.skipSummary.textContent = `Skipped blocks: ${summary}.`;
+      }
+
+      function renderEditorList() {
+        elements.editorList.innerHTML = "";
+
+        state.editableSegments.forEach((segment) => {
+          const card = document.createElement("article");
+          card.className = "editor-card";
+
+          const header = document.createElement("header");
+          const title = document.createElement("h3");
+          title.textContent = segment.title || `${segment.tagName} block`;
+          const path = document.createElement("span");
+          path.className = "path";
+          path.textContent = segment.locationLabel
+            ? `${segment.locationLabel} -> ${segment.domPath}`
+            : segment.domPath;
+          header.append(title, path);
+
+          const textarea = document.createElement("textarea");
+          textarea.value = segment.currentText;
+          textarea.setAttribute("aria-label", `${segment.tagName} text editor`);
+          textarea.addEventListener("input", (event) => {
+            updateSegment(segment.id, event.target.value);
+          });
+
+          const snippet = document.createElement("p");
+          snippet.className = "snippet";
+          snippet.textContent = `Original: ${truncate(segment.originalText, 120)}`;
+
+          card.append(header, textarea, snippet);
+          elements.editorList.appendChild(card);
+        });
+      }
+
+      function updateSegment(segmentId, value) {
+        const segment = state.editableSegments.find((item) => item.id === segmentId);
+        if (!segment || !state.workingDoc) {
+          return;
+        }
+
+        segment.currentText = value;
+
+        if (segment.sourceType === "content-script") {
+          updateContentScriptSegment(segment, value);
+          updatePreview();
+          return;
+        }
+
+        const target = resolvePath(state.workingDoc, segment.domPath);
+        if (!target) {
+          return;
+        }
+
+        syncElementText(target, value);
+        updatePreview();
+      }
+
+      function updateContentScriptSegment(segment, value) {
+        const contentScript = state.contentScripts.find((item) => item.scriptId === segment.scriptId);
+        if (!contentScript) {
+          return;
+        }
+
+        setValueAtPath(contentScript.data, segment.contentPath, value);
+
+        const targetScript = state.workingDoc.getElementById(segment.scriptId);
+        if (!targetScript) {
+          return;
+        }
+
+        targetScript.textContent = serializeEditableContentScript(
+          contentScript.variableName,
+          contentScript.data,
+        );
+      }
+
+      function resetEdits() {
+        if (!state.originalDoc || !state.fileName) {
+          return;
+        }
+
+        const html = serializeDocument(state.originalDoc);
+        loadHtmlFile(html, state.fileName);
+      }
+
+      function exportHtml() {
+        if (!state.workingDoc) {
+          return;
+        }
+
+        const blob = new Blob([serializeDocument(state.workingDoc)], { type: "text/html" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = buildExportName(state.fileName);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+
+      function updatePreview() {
+        if (!state.workingDoc) {
+          renderEmptyState();
+          return;
+        }
+
+        const interactivePreview = elements.scriptPreviewToggle.checked;
+        elements.previewModeMessage.textContent = interactivePreview
+          ? "Preview runs in a sandboxed iframe with uploaded scripts enabled for interactive SPAs."
+          : "Preview runs in a sandboxed iframe with scripts disabled.";
+        elements.previewFrame.setAttribute("sandbox", interactivePreview ? "allow-scripts" : "");
+        elements.previewFrame.srcdoc = buildPreviewDocument(
+          serializeDocument(state.workingDoc),
+          interactivePreview,
+        );
+      }
+
+      function buildPreviewDocument(html, interactivePreview) {
+        if (!interactivePreview || !looksLikeDeckLayout(html)) {
+          return html;
+        }
+
+        const previewShim = `
+<script>
+  (function () {
+    const PREVIEW_SCALE = ${DECK_PREVIEW_SCALE};
+
+    function fitDeckPreview() {
+      const stage = document.getElementById("stage");
+      const scaler = document.getElementById("scaler");
+      if (!stage || !scaler) {
+        return;
+      }
+
+      const baseWidth = scaler.offsetWidth || 1280;
+      const baseHeight = scaler.offsetHeight || 720;
+      const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight) * PREVIEW_SCALE;
+
+      stage.style.justifyContent = "center";
+      stage.style.alignItems = "center";
+      scaler.style.transform = "scale(" + scale + ")";
+    }
+
+    window.addEventListener("load", () => requestAnimationFrame(fitDeckPreview));
+    window.addEventListener("resize", fitDeckPreview);
+    requestAnimationFrame(fitDeckPreview);
+  })();
+<\/script>`;
+
+        return injectBeforeClosingBody(html, previewShim);
+      }
+
+      function looksLikeDeckLayout(html) {
+        return html.includes('id="stage"') && html.includes('id="scaler"');
+      }
+
+      function injectBeforeClosingBody(html, injection) {
+        if (html.includes("</body>")) {
+          return html.replace("</body>", `${injection}\n</body>`);
+        }
+
+        return `${html}\n${injection}`;
+      }
+
+      function serializeDocument(doc) {
+        return `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`;
+      }
+
+      function buildExportName(fileName) {
+        const dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex === -1) {
+          return `${fileName}-edited.html`;
+        }
+
+        return `${fileName.slice(0, dotIndex)}-edited${fileName.slice(dotIndex)}`;
+      }
+
+      function getSkippedTotal() {
+        return Array.from(state.skippedReasons.values()).reduce((sum, count) => sum + count, 0);
+      }
+
+      function truncate(text, maxLength) {
+        if (text.length <= maxLength) {
+          return text;
+        }
+
+        return `${text.slice(0, maxLength - 1)}…`;
+      }
+    </script>
+  </body>
+</html>
