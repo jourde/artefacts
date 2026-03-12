@@ -7,19 +7,20 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4efe6;
-        --surface: rgba(255, 252, 245, 0.88);
-        --surface-strong: #fffaf0;
-        --border: rgba(83, 55, 23, 0.15);
-        --text: #2c241c;
-        --muted: #706457;
-        --accent: #b85c38;
-        --accent-dark: #924422;
-        --shadow: 0 18px 50px rgba(74, 44, 17, 0.12);
-        --radius: 22px;
-        --radius-sm: 14px;
-        --font-display: "Avenir Next", "Segoe UI", sans-serif;
-        --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+        --bg: #f5f5f4;
+        --surface: #ffffff;
+        --surface-strong: #fafaf9;
+        --surface-muted: #f0f0ef;
+        --border: #dbdbd7;
+        --text: #18181b;
+        --muted: #6b7280;
+        --button-primary: #18181b;
+        --button-secondary: #ffffff;
+        --button-secondary-border: #c9c9c4;
+        --highlight: #d4d4cf;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
       }
 
       * {
@@ -31,10 +32,7 @@
         min-height: 100vh;
         font-family: var(--font-body);
         color: var(--text);
-        background:
-          radial-gradient(circle at top left, rgba(184, 92, 56, 0.18), transparent 28%),
-          radial-gradient(circle at bottom right, rgba(129, 157, 115, 0.22), transparent 30%),
-          linear-gradient(180deg, #f9f4eb 0%, var(--bg) 100%);
+        background: var(--bg);
       }
 
       button,
@@ -45,44 +43,42 @@
 
       .app-shell {
         width: min(1400px, calc(100vw - 32px));
-        margin: 20px auto;
+        margin: 18px auto;
       }
 
       .topbar,
       .panel {
-        backdrop-filter: blur(14px);
         background: var(--surface);
         border: 1px solid var(--border);
-        box-shadow: var(--shadow);
       }
 
       .topbar {
         display: grid;
         grid-template-columns: minmax(220px, 320px) 1fr;
-        gap: 20px;
-        padding: 24px;
-        border-radius: calc(var(--radius) + 4px);
+        gap: 18px;
+        padding: 20px;
+        border-radius: var(--radius);
       }
 
       .brand h1,
       .panel-heading h2 {
         margin: 0;
-        font-family: var(--font-display);
-        font-weight: 700;
-        letter-spacing: -0.03em;
+        font-family: var(--font-body);
+        font-weight: 600;
+        letter-spacing: -0.02em;
       }
 
       .brand h1 {
-        font-size: clamp(1.8rem, 3vw, 2.7rem);
+        font-size: clamp(1.55rem, 2.8vw, 2.2rem);
       }
 
       .eyebrow {
-        margin: 0 0 10px;
-        color: var(--accent-dark);
+        margin: 0 0 8px;
+        color: var(--muted);
         text-transform: uppercase;
-        letter-spacing: 0.14em;
-        font-size: 0.78rem;
-        font-weight: 700;
+        letter-spacing: 0.08em;
+        font-size: 0.72rem;
+        font-weight: 600;
       }
 
       .toolbar {
@@ -109,20 +105,21 @@
       .stats,
       .preview-options,
       .actions {
-        min-height: 88px;
+        min-height: 84px;
         padding: 14px 16px;
-        background: var(--surface-strong);
+        background: var(--surface);
         border: 1px solid var(--border);
       }
 
       .file-picker {
-        display: grid;
-        place-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        color: white;
-        background: linear-gradient(135deg, var(--accent) 0%, #d58f53 100%);
+        color: var(--text);
+        background: var(--surface-muted);
         cursor: pointer;
-        font-weight: 700;
+        font-weight: 600;
       }
 
       .file-picker input {
@@ -139,7 +136,7 @@
         color: var(--muted);
         font-size: 0.82rem;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.04em;
       }
 
       .file-meta strong,
@@ -182,27 +179,30 @@
       }
 
       button {
-        border: 0;
-        border-radius: 999px;
+        border: 1px solid var(--button-secondary-border);
+        border-radius: var(--radius-sm);
         padding: 12px 16px;
-        font-weight: 700;
-        background: #2f3f33;
-        color: white;
+        font-weight: 600;
+        background: var(--button-primary);
+        color: #ffffff;
         cursor: pointer;
-        transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+        transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
       }
 
       button:hover:enabled {
-        transform: translateY(-1px);
+        background: #2c2c2f;
+        border-color: #2c2c2f;
       }
 
       button:disabled {
-        opacity: 0.45;
+        opacity: 0.42;
         cursor: not-allowed;
       }
 
       #reset-button {
-        background: #8b7b68;
+        background: var(--button-secondary);
+        color: var(--text);
+        border-color: var(--button-secondary-border);
       }
 
       .workspace {
@@ -242,12 +242,13 @@
       .panel-heading p {
         margin: 8px 0 0;
         color: var(--muted);
+        font-size: 0.95rem;
       }
 
       .panel-toggle {
         flex-shrink: 0;
         min-width: 112px;
-        background: #e8dfd2;
+        background: var(--button-secondary);
         color: var(--text);
       }
 
@@ -256,13 +257,13 @@
         margin-bottom: 16px;
         padding: 15px 16px;
         border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.72);
+        background: var(--surface-strong);
         color: var(--muted);
       }
 
       .skip-summary {
         color: var(--text);
-        background: rgba(184, 92, 56, 0.08);
+        background: var(--surface-strong);
       }
 
       .editor-list {
@@ -279,11 +280,11 @@
 
       .search-bar input {
         width: 100%;
-        border: 1px solid rgba(83, 55, 23, 0.18);
-        border-radius: 999px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         padding: 12px 16px;
         color: var(--text);
-        background: #fffdfa;
+        background: var(--surface);
       }
 
       .search-status {
@@ -294,23 +295,23 @@
 
       .search-highlight {
         padding: 0 0.18em;
-        border-radius: 0.28em;
-        background: #ffd56a;
-        color: #2c241c;
-        box-shadow: inset 0 -1px 0 rgba(146, 68, 34, 0.18);
+        border-radius: 0.18em;
+        background: var(--highlight);
+        color: var(--text);
+        box-shadow: none;
       }
 
       .empty-search {
         padding: 18px;
-        border: 1px dashed rgba(83, 55, 23, 0.24);
+        border: 1px dashed var(--border);
         border-radius: var(--radius-sm);
         color: var(--muted);
-        background: rgba(255, 255, 255, 0.56);
+        background: var(--surface-strong);
       }
 
       .editor-card {
         padding: 16px;
-        background: rgba(255, 255, 255, 0.74);
+        background: var(--surface);
         border: 1px solid var(--border);
       }
 
@@ -336,11 +337,11 @@
         width: 100%;
         min-height: 110px;
         resize: vertical;
-        border: 1px solid rgba(83, 55, 23, 0.18);
-        border-radius: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         padding: 14px;
         color: var(--text);
-        background: #fffdfa;
+        background: var(--surface);
       }
 
       .editor-card .snippet {
@@ -358,11 +359,11 @@
         aspect-ratio: 16 / 9;
         border: 1px solid var(--border);
         border-radius: var(--radius-sm);
-        background: white;
+        background: var(--surface);
       }
 
       .preview-canvas.deck-mode {
-        background: #05070d;
+        background: #111111;
       }
 
       .preview-frame {
@@ -370,7 +371,7 @@
         width: 100%;
         height: 100%;
         border: 0;
-        background: white;
+        background: var(--surface);
       }
 
       .preview-frame.deck-preview {
