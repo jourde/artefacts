@@ -232,9 +232,23 @@
         margin-bottom: 18px;
       }
 
+      .panel-heading-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
       .panel-heading p {
         margin: 8px 0 0;
         color: var(--muted);
+      }
+
+      .panel-toggle {
+        flex-shrink: 0;
+        min-width: 112px;
+        background: #e8dfd2;
+        color: var(--text);
       }
 
       .status-card,
@@ -254,6 +268,36 @@
       .editor-list {
         display: grid;
         gap: 14px;
+      }
+
+      .search-bar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .search-bar input {
+        width: 100%;
+        border: 1px solid rgba(83, 55, 23, 0.18);
+        border-radius: 999px;
+        padding: 12px 16px;
+        color: var(--text);
+        background: #fffdfa;
+      }
+
+      .search-status {
+        margin-bottom: 16px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .empty-search {
+        padding: 18px;
+        border: 1px dashed rgba(83, 55, 23, 0.24);
+        border-radius: var(--radius-sm);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.56);
       }
 
       .editor-card {
@@ -298,20 +342,51 @@
       }
 
       .preview-canvas {
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        padding: 0 12px 12px;
+        aspect-ratio: 16 / 9;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: white;
+      }
+
+      .preview-canvas.deck-mode {
+        background: #05070d;
       }
 
       .preview-frame {
         display: block;
         width: 100%;
-        aspect-ratio: 16 / 9;
-        height: auto;
-        border: 1px solid var(--border);
+        height: 100%;
+        border: 0;
         background: white;
+      }
+
+      .preview-frame.deck-preview {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1280px;
+        height: 720px;
+        max-width: none;
+        transform: translate(-50%, -50%) scale(var(--preview-scale, 1));
+        transform-origin: center center;
+      }
+
+      .workspace.preview-collapsed {
+        grid-template-columns: minmax(320px, 1fr) 260px;
+      }
+
+      .preview-panel.collapsed .preview-canvas,
+      .preview-panel.collapsed .panel-heading p {
+        display: none;
+      }
+
+      .preview-panel.collapsed {
+        min-height: auto;
       }
 
       @media (max-width: 1100px) {
@@ -327,6 +402,10 @@
           grid-template-columns: 1fr;
         }
 
+        .workspace.preview-collapsed {
+          grid-template-columns: 1fr;
+        }
+
         .panel {
           min-height: 48vh;
         }
@@ -336,8 +415,7 @@
         }
 
         .preview-frame {
-          aspect-ratio: 16 / 9;
-          height: auto;
+          height: 100%;
         }
       }
 
@@ -353,6 +431,10 @@
         }
 
         .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .search-bar {
           grid-template-columns: 1fr;
         }
 
@@ -408,8 +490,12 @@
       <main class="workspace">
         <section class="panel editor-panel">
           <div class="panel-heading">
-            <h2>Editable text</h2>
-            <p>Only safe body text blocks are exposed. Mixed-content blocks are skipped.</p>
+            <div class="panel-heading-row">
+              <div>
+                <h2>Editable text</h2>
+                <p>Only safe body text blocks are exposed. Mixed-content blocks are skipped.</p>
+              </div>
+            </div>
           </div>
 
           <div id="status-message" class="status-card">
@@ -418,13 +504,32 @@
 
           <div id="skip-summary" class="skip-summary" hidden></div>
 
+          <div class="search-bar">
+            <input
+              id="search-input"
+              type="search"
+              placeholder="Search extracted fields"
+              aria-label="Search extracted fields"
+            />
+            <button id="clear-search-button" type="button">Clear</button>
+          </div>
+
+          <div id="search-status" class="search-status" hidden></div>
+
           <div id="editor-list" class="editor-list" aria-live="polite"></div>
         </section>
 
-        <section class="panel preview-panel">
+        <section id="preview-panel" class="panel preview-panel">
           <div class="panel-heading">
-            <h2>Live preview</h2>
-            <p id="preview-mode-message">Preview runs in a sandboxed iframe with scripts disabled.</p>
+            <div class="panel-heading-row">
+              <div>
+                <h2>Live preview</h2>
+                <p id="preview-mode-message">Preview runs in a sandboxed iframe with scripts disabled.</p>
+              </div>
+              <button id="toggle-preview-button" class="panel-toggle" type="button" aria-expanded="true">
+                Collapse
+              </button>
+            </div>
           </div>
 
           <div class="preview-canvas">
@@ -466,7 +571,7 @@
 
       const SKIPPED_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT"]);
       const NON_EDITABLE_SCRIPT_KEYS = new Set(["headBg", "headColor", "color", "bg", "background"]);
-      const DECK_PREVIEW_SCALE = 0.97;
+      const DECK_PREVIEW_SCALE = 0.99;
 
       const state = {
         fileName: "",
@@ -475,6 +580,9 @@
         editableSegments: [],
         contentScripts: [],
         hasInteractiveScripts: false,
+        previewLayout: "default",
+        previewCollapsed: false,
+        searchQuery: "",
         skippedReasons: new Map(),
       };
 
@@ -484,17 +592,29 @@
         extractedCount: document.getElementById("extracted-count"),
         skippedCount: document.getElementById("skipped-count"),
         scriptPreviewToggle: document.getElementById("script-preview-toggle"),
+        searchInput: document.getElementById("search-input"),
+        clearSearchButton: document.getElementById("clear-search-button"),
         resetButton: document.getElementById("reset-button"),
         exportButton: document.getElementById("export-button"),
+        togglePreviewButton: document.getElementById("toggle-preview-button"),
         statusMessage: document.getElementById("status-message"),
         skipSummary: document.getElementById("skip-summary"),
+        searchStatus: document.getElementById("search-status"),
         editorList: document.getElementById("editor-list"),
         previewModeMessage: document.getElementById("preview-mode-message"),
+        workspace: document.querySelector(".workspace"),
+        previewPanel: document.getElementById("preview-panel"),
+        previewCanvas: document.querySelector(".preview-canvas"),
         previewFrame: document.getElementById("preview-frame"),
       };
 
       elements.fileInput.addEventListener("change", handleFileSelection);
       elements.scriptPreviewToggle.addEventListener("change", updatePreview);
+      elements.searchInput.addEventListener("input", handleSearchInput);
+      elements.clearSearchButton.addEventListener("click", clearSearch);
+      elements.togglePreviewButton.addEventListener("click", togglePreviewPanel);
+      elements.previewFrame.addEventListener("load", syncPreviewScale);
+      window.addEventListener("resize", syncPreviewScale);
       elements.resetButton.addEventListener("click", resetEdits);
       elements.exportButton.addEventListener("click", exportHtml);
 
@@ -522,9 +642,12 @@
         state.editableSegments = extraction.editableSegments;
         state.contentScripts = extraction.contentScripts;
         state.hasInteractiveScripts = hasInteractivePreviewScripts(workingDoc);
+        state.previewLayout = looksLikeDeckDocument(workingDoc) ? "deck" : "default";
         state.skippedReasons = extraction.skippedReasons;
+        state.searchQuery = "";
 
         elements.scriptPreviewToggle.checked = state.hasInteractiveScripts;
+        elements.searchInput.value = "";
         renderState();
         updatePreview();
       }
@@ -934,9 +1057,11 @@
         elements.skippedCount.textContent = `${getSkippedTotal()} skipped`;
         elements.resetButton.disabled = !state.workingDoc;
         elements.exportButton.disabled = !state.workingDoc;
+        elements.clearSearchButton.disabled = !state.searchQuery;
 
         renderStatusMessage();
         renderSkipSummary();
+        renderPreviewPanelState();
         renderEditorList();
       }
 
@@ -949,10 +1074,22 @@
         elements.statusMessage.textContent = "Upload an HTML file to extract editable text blocks.";
         elements.skipSummary.hidden = true;
         elements.skipSummary.textContent = "";
+        elements.searchInput.value = "";
+        elements.searchInput.disabled = true;
+        elements.clearSearchButton.disabled = true;
+        elements.searchStatus.hidden = true;
+        elements.searchStatus.textContent = "";
         elements.editorList.innerHTML = "";
         elements.previewModeMessage.textContent =
           "Preview will stay sandboxed until you upload an HTML file.";
         elements.scriptPreviewToggle.checked = false;
+        elements.previewCanvas.classList.remove("deck-mode");
+        elements.previewFrame.classList.remove("deck-preview");
+        elements.previewFrame.style.removeProperty("--preview-scale");
+        elements.workspace.classList.remove("preview-collapsed");
+        elements.previewPanel.classList.remove("collapsed");
+        elements.togglePreviewButton.textContent = "Collapse";
+        elements.togglePreviewButton.setAttribute("aria-expanded", "true");
         elements.previewFrame.setAttribute("sandbox", "");
         elements.previewFrame.srcdoc = `
           <!DOCTYPE html>
@@ -1004,10 +1141,31 @@
         elements.skipSummary.textContent = `Skipped blocks: ${summary}.`;
       }
 
+      function renderPreviewPanelState() {
+        elements.workspace.classList.toggle("preview-collapsed", state.previewCollapsed);
+        elements.previewPanel.classList.toggle("collapsed", state.previewCollapsed);
+        elements.togglePreviewButton.textContent = state.previewCollapsed ? "Expand" : "Collapse";
+        elements.togglePreviewButton.setAttribute("aria-expanded", String(!state.previewCollapsed));
+      }
+
       function renderEditorList() {
         elements.editorList.innerHTML = "";
+        const filteredSegments = getFilteredSegments();
 
-        state.editableSegments.forEach((segment) => {
+        elements.searchInput.disabled = !state.editableSegments.length;
+        renderSearchStatus(filteredSegments.length);
+
+        if (!filteredSegments.length) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-search";
+          emptyState.textContent = state.searchQuery
+            ? "No extracted fields match this search."
+            : "No editable fields are available for this file.";
+          elements.editorList.appendChild(emptyState);
+          return;
+        }
+
+        filteredSegments.forEach((segment) => {
           const card = document.createElement("article");
           card.className = "editor-card";
 
@@ -1035,6 +1193,55 @@
           card.append(header, textarea, snippet);
           elements.editorList.appendChild(card);
         });
+      }
+
+      function renderSearchStatus(filteredCount) {
+        if (!state.searchQuery) {
+          elements.searchStatus.hidden = true;
+          elements.searchStatus.textContent = "";
+          return;
+        }
+
+        elements.searchStatus.hidden = false;
+        elements.searchStatus.textContent = `${filteredCount} of ${state.editableSegments.length} fields match "${state.searchQuery}".`;
+      }
+
+      function getFilteredSegments() {
+        const query = state.searchQuery.trim().toLowerCase();
+        if (!query) {
+          return state.editableSegments;
+        }
+
+        return state.editableSegments.filter((segment) => {
+          const haystack = [
+            segment.title || `${segment.tagName} block`,
+            segment.locationLabel || "",
+            segment.domPath || "",
+            segment.originalText || "",
+            segment.currentText || "",
+          ]
+            .join("\n")
+            .toLowerCase();
+
+          return haystack.includes(query);
+        });
+      }
+
+      function handleSearchInput(event) {
+        state.searchQuery = event.target.value;
+        renderState();
+      }
+
+      function clearSearch() {
+        state.searchQuery = "";
+        elements.searchInput.value = "";
+        renderState();
+      }
+
+      function togglePreviewPanel() {
+        state.previewCollapsed = !state.previewCollapsed;
+        renderPreviewPanelState();
+        syncPreviewScale();
       }
 
       function updateSegment(segmentId, value) {
@@ -1108,61 +1315,35 @@
         }
 
         const interactivePreview = elements.scriptPreviewToggle.checked;
+        const useDeckPreview = interactivePreview && state.previewLayout === "deck";
         elements.previewModeMessage.textContent = interactivePreview
           ? "Preview runs in a sandboxed iframe with uploaded scripts enabled for interactive SPAs."
           : "Preview runs in a sandboxed iframe with scripts disabled.";
         elements.previewFrame.setAttribute("sandbox", interactivePreview ? "allow-scripts" : "");
-        elements.previewFrame.srcdoc = buildPreviewDocument(
-          serializeDocument(state.workingDoc),
-          interactivePreview,
-        );
+        elements.previewCanvas.classList.toggle("deck-mode", useDeckPreview);
+        elements.previewFrame.classList.toggle("deck-preview", useDeckPreview);
+        elements.previewFrame.srcdoc = serializeDocument(state.workingDoc);
+        syncPreviewScale();
       }
 
-      function buildPreviewDocument(html, interactivePreview) {
-        if (!interactivePreview || !looksLikeDeckLayout(html)) {
-          return html;
+      function syncPreviewScale() {
+        if (!elements.previewFrame.classList.contains("deck-preview")) {
+          elements.previewFrame.style.removeProperty("--preview-scale");
+          return;
         }
 
-        const previewShim = `
-<script>
-  (function () {
-    const PREVIEW_SCALE = ${DECK_PREVIEW_SCALE};
-
-    function fitDeckPreview() {
-      const stage = document.getElementById("stage");
-      const scaler = document.getElementById("scaler");
-      if (!stage || !scaler) {
-        return;
-      }
-
-      const baseWidth = scaler.offsetWidth || 1280;
-      const baseHeight = scaler.offsetHeight || 720;
-      const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight) * PREVIEW_SCALE;
-
-      stage.style.justifyContent = "center";
-      stage.style.alignItems = "center";
-      scaler.style.transform = "scale(" + scale + ")";
-    }
-
-    window.addEventListener("load", () => requestAnimationFrame(fitDeckPreview));
-    window.addEventListener("resize", fitDeckPreview);
-    requestAnimationFrame(fitDeckPreview);
-  })();
-<\/script>`;
-
-        return injectBeforeClosingBody(html, previewShim);
-      }
-
-      function looksLikeDeckLayout(html) {
-        return html.includes('id="stage"') && html.includes('id="scaler"');
-      }
-
-      function injectBeforeClosingBody(html, injection) {
-        if (html.includes("</body>")) {
-          return html.replace("</body>", `${injection}\n</body>`);
+        const canvasWidth = elements.previewCanvas.clientWidth;
+        const canvasHeight = elements.previewCanvas.clientHeight;
+        if (!canvasWidth || !canvasHeight) {
+          return;
         }
 
-        return `${html}\n${injection}`;
+        const scale = Math.min(canvasWidth / 1280, canvasHeight / 720) * DECK_PREVIEW_SCALE;
+        elements.previewFrame.style.setProperty("--preview-scale", scale.toFixed(4));
+      }
+
+      function looksLikeDeckDocument(doc) {
+        return Boolean(doc.getElementById("stage") && doc.getElementById("scaler"));
       }
 
       function serializeDocument(doc) {
