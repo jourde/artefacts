@@ -869,8 +869,8 @@ main {
 .activity-toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 4px;
+  flex-wrap: nowrap;
   margin-bottom: 10px;
 }
 
@@ -887,17 +887,18 @@ main {
 
 .choice-btn {
   border: 1px solid #cad5e2;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #fff;
-  padding: 4px 6px;
-  min-height: 28px;
+  padding: 3px 5px;
+  min-height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
   color: #314255;
   max-width: none;
+  flex-shrink: 0;
 }
 
 .choice-btn:hover {
@@ -911,8 +912,8 @@ main {
 }
 
 .choice-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   fill: currentColor;
   flex: 0 0 auto;
 }
@@ -980,22 +981,257 @@ main {
   fill: currentColor;
 }
 
+/* ── Tool picker ─────────────────────────────────────────────── */
+.select-tools-btn {
+  position: relative;
+  color: #4a5568;
+}
+
+.select-tools-btn svg {
+  fill: currentColor;
+  pointer-events: none;
+}
+
+.select-tools-btn[data-count]:not([data-count=""]):not([data-count="0"])::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.select-tools-btn.has-tools {
+  border-color: #4f46e5;
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+.activity-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 4px 6px;
+}
+
+.activity-tools.hidden {
+  display: none;
+}
+
+.tool-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  padding: 2px 6px 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3730a3;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.tool-chip-platform {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.tool-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-chip-remove {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tool-chip-remove:hover {
+  opacity: 1;
+}
+
+.tool-picker {
+  position: fixed;
+  width: min(480px, 95vw);
+  max-height: min(520px, 80vh);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #d4d9e8;
+  border-radius: 14px;
+  background: #f1f3f7;
+  box-shadow: 0 12px 32px rgba(26, 35, 53, 0.22);
+  z-index: 1500;
+  overflow: hidden;
+}
+
+.tool-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 6px;
+  border-bottom: 1px solid #e0e5ef;
+  flex-shrink: 0;
+}
+
+.tool-picker-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.tool-picker-close {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: #6b7280;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+
+.tool-picker-close:hover {
+  background: #e8edf8;
+  color: #1f2937;
+}
+
+.tool-picker-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #e0e5ef;
+  flex-shrink: 0;
+}
+
+.tool-picker-tab {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.tool-picker-tab:hover {
+  background: #e8edf8;
+  color: #1f2937;
+}
+
+.tool-picker-tab.active {
+  background: #fff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+.tool-picker-body {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  padding: 4px 6px 8px;
+}
+
+.tool-picker-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #9ca3af;
+  padding: 10px 8px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tool-picker-item {
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  font-size: 13px;
+}
+
+.tool-picker-item:hover {
+  background: #e8edf8;
+}
+
+.tool-picker-item.selected {
+  background: #e0e7ff;
+  color: #3730a3;
+  font-weight: 600;
+}
+
+.tool-picker-item-check {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: 2px solid #c7d2fe;
+  border-radius: 4px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: transparent;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.tool-picker-item.selected .tool-picker-item-check {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+
 .activity-duration {
   width: 48px;
 }
 
 .mini-label {
   display: inline-flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  min-height: 28px;
-  padding: 0 6px;
+  min-height: 26px;
+  padding: 0 5px;
   border: 1px solid #cad5e2;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #fff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #314255;
+  flex-shrink: 0;
 }
 
 .activity-actions {
@@ -1003,6 +1239,7 @@ main {
   gap: 3px;
   margin-left: auto;
   align-self: center;
+  flex-shrink: 0;
 }
 
 .activity-params {
@@ -1042,9 +1279,9 @@ main {
 .icon-btn {
   border: 1px solid #cfdae6;
   background: #fff;
-  border-radius: 8px;
-  width: 30px;
-  height: 30px;
+  border-radius: 7px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   cursor: pointer;
   line-height: 1;
@@ -1054,16 +1291,18 @@ main {
 }
 
 .delete-btn {
-  background: #e44e5a;
-  border: none;
+  background: #e8ecf1;
+  border: 1px solid #cad5e2;
   border-radius: 999px;
-  color: #fff;
+  color: #5a6a7e;
   width: 26px;
   height: 26px;
 }
 
 .delete-btn:hover {
-  background: #d93d4a;
+  background: #fde8ea;
+  border-color: #f5b8bc;
+  color: #c0303b;
 }
 
 .delete-btn svg {
@@ -1200,7 +1439,7 @@ main {
   }
 
   .activity-toolbar {
-    gap: 8px;
+    gap: 4px;
   }
 
   .save-status {
@@ -1495,6 +1734,11 @@ main {
           <button class="choice-btn activity-location-mode-btn" type="button"></button>
           <button class="choice-btn activity-evaluation-mode-btn" type="button"></button>
           <div class="activity-actions">
+            <button class="icon-btn select-tools-btn" type="button" aria-haspopup="dialog" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+              </svg>
+            </button>
             <button class="icon-btn delete-btn delete-activity-btn" title="Supprimer" aria-label="Supprimer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M6 6l12 12"></path>
@@ -1503,6 +1747,7 @@ main {
             </button>
           </div>
         </div>
+        <div class="activity-tools hidden" role="list"></div>
         <div class="expandable-field">
           <textarea class="activity-description" rows="3"></textarea>
           <button class="expand-btn" type="button" aria-label="Plein écran">⤢</button>
@@ -1524,6 +1769,7 @@ main {
         <p id="info-modal-p2">(UCL Knowledge Lab, UCL Institute of Education, 2013-2026).</p>
         <p id="info-modal-p3">Traitement local : toutes les données restent dans votre navigateur ; aucune donnée n’est transmise en ligne.</p>
         <p id="info-modal-p4">François Jourde (2026) • CC BY-SA<br />Code source : <a href="https://github.com/jourde/learning-designer" target="_blank" rel="noopener noreferrer">https://github.com/jourde/learning-designer</a></p>
+        <p id="info-modal-p5"></p>
         <div class="modal-actions">
           <button id="info-modal-close-btn" class="btn btn-primary" type="button">Fermer</button>
         </div>
@@ -1658,6 +1904,98 @@ const EVAL_OPTIONS = [
   { value: "summative", label: "Sommative", short: "Somm.", icon: ICONS.summative },
   { value: "certificative", label: "Certificative", short: "Certif.", icon: ICONS.certificative }
 ];
+
+const TOOLS_DATA = [
+  // Moodle – Ressources – Informer
+  { id: "moodle:text-media",          platform: "moodle", category: "moodle-resources",        labelFr: "Zone texte et média",            labelEn: "Text and media area" },
+  { id: "moodle:file",                platform: "moodle", category: "moodle-resources",        labelFr: "Fichier",                        labelEn: "File" },
+  { id: "moodle:folder",              platform: "moodle", category: "moodle-resources",        labelFr: "Dossier",                        labelEn: "Folder" },
+  { id: "moodle:page",                platform: "moodle", category: "moodle-resources",        labelFr: "Page",                           labelEn: "Page" },
+  { id: "moodle:book",                platform: "moodle", category: "moodle-resources",        labelFr: "Livre",                          labelEn: "Book" },
+  { id: "moodle:url",                 platform: "moodle", category: "moodle-resources",        labelFr: "URL",                            labelEn: "URL" },
+  // Moodle – Activités – Informer et évaluer
+  { id: "moodle:forum",               platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Forum",                          labelEn: "Forum" },
+  { id: "moodle:assignment",          platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Devoir",                         labelEn: "Assignment" },
+  { id: "moodle:quiz",                platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Test (quiz)",                    labelEn: "Quiz" },
+  { id: "moodle:lesson",              platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Leçon",                          labelEn: "Lesson" },
+  { id: "moodle:chat",                platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Chat",                           labelEn: "Chat" },
+  { id: "moodle:workshop",            platform: "moodle", category: "moodle-inform-evaluate",  labelFr: "Atelier",                        labelEn: "Workshop" },
+  // Moodle – Mettre en commun des données
+  { id: "moodle:database",            platform: "moodle", category: "moodle-share-data",       labelFr: "Base de données",                labelEn: "Database" },
+  { id: "moodle:glossary",            platform: "moodle", category: "moodle-share-data",       labelFr: "Glossaire",                      labelEn: "Glossary" },
+  { id: "moodle:wiki",                platform: "moodle", category: "moodle-share-data",       labelFr: "Wiki",                           labelEn: "Wiki" },
+  // Moodle – Faire ressortir des tendances
+  { id: "moodle:choice",              platform: "moodle", category: "moodle-trends",           labelFr: "Sondage",                        labelEn: "Choice" },
+  { id: "moodle:feedback",            platform: "moodle", category: "moodle-trends",           labelFr: "Feedback",                       labelEn: "Feedback" },
+  { id: "moodle:survey",              platform: "moodle", category: "moodle-trends",           labelFr: "Consultation",                   labelEn: "Survey" },
+  // H5P – En vedette
+  { id: "h5p:interactive-video",      platform: "h5p",    category: "h5p-featured",            labelFr: "Vidéo interactive",              labelEn: "Interactive Video" },
+  { id: "h5p:course-presentation",    platform: "h5p",    category: "h5p-featured",            labelFr: "Présentation de cours",          labelEn: "Course Presentation" },
+  { id: "h5p:branching-scenario",     platform: "h5p",    category: "h5p-featured",            labelFr: "Scénario ramifié",               labelEn: "Branching Scenario" },
+  // H5P – Tous les types de contenus
+  { id: "h5p:accordion",              platform: "h5p",    category: "h5p-all",                 labelFr: "Accordéon",                      labelEn: "Accordion" },
+  { id: "h5p:advent-calendar",        platform: "h5p",    category: "h5p-all",                 labelFr: "Calendrier de l'Avent",          labelEn: "Advent Calendar" },
+  { id: "h5p:agamotto",               platform: "h5p",    category: "h5p-all",                 labelFr: "Agamotto",                       labelEn: "Agamotto" },
+  { id: "h5p:ar-scavenger",           platform: "h5p",    category: "h5p-all",                 labelFr: "Chasse au trésor en RA",         labelEn: "AR Scavenger" },
+  { id: "h5p:arithmetic-quiz",        platform: "h5p",    category: "h5p-all",                 labelFr: "Quiz arithmétique",              labelEn: "Arithmetic Quiz" },
+  { id: "h5p:audio-recorder",         platform: "h5p",    category: "h5p-all",                 labelFr: "Enregistreur audio",             labelEn: "Audio Recorder" },
+  { id: "h5p:chart",                  platform: "h5p",    category: "h5p-all",                 labelFr: "Graphique",                      labelEn: "Chart" },
+  { id: "h5p:collage",                platform: "h5p",    category: "h5p-all",                 labelFr: "Collage",                        labelEn: "Collage" },
+  { id: "h5p:complex-fill-blanks",    platform: "h5p",    category: "h5p-all",                 labelFr: "Texte à trous complexe",         labelEn: "Complex Fill the Blanks" },
+  { id: "h5p:cornell-notes",          platform: "h5p",    category: "h5p-all",                 labelFr: "Notes Cornell",                  labelEn: "Cornell Notes" },
+  { id: "h5p:crossword",              platform: "h5p",    category: "h5p-all",                 labelFr: "Mots croisés",                   labelEn: "Crossword" },
+  { id: "h5p:dialog-cards",           platform: "h5p",    category: "h5p-all",                 labelFr: "Cartes dialogues",               labelEn: "Dialog Cards" },
+  { id: "h5p:dictation",              platform: "h5p",    category: "h5p-all",                 labelFr: "Dictée",                         labelEn: "Dictation" },
+  { id: "h5p:documentation-tool",     platform: "h5p",    category: "h5p-all",                 labelFr: "Outil de documentation",         labelEn: "Documentation Tool" },
+  { id: "h5p:drag-and-drop",          platform: "h5p",    category: "h5p-all",                 labelFr: "Glisser-déposer",                labelEn: "Drag and Drop" },
+  { id: "h5p:drag-the-words",         platform: "h5p",    category: "h5p-all",                 labelFr: "Glisser les mots",               labelEn: "Drag the Words" },
+  { id: "h5p:essay",                  platform: "h5p",    category: "h5p-all",                 labelFr: "Essai",                          labelEn: "Essay" },
+  { id: "h5p:fill-in-the-blanks",     platform: "h5p",    category: "h5p-all",                 labelFr: "Texte à trous",                  labelEn: "Fill in the Blanks" },
+  { id: "h5p:find-multiple-hotspots", platform: "h5p",    category: "h5p-all",                 labelFr: "Trouver plusieurs zones",        labelEn: "Find Multiple Hotspots" },
+  { id: "h5p:find-the-hotspot",       platform: "h5p",    category: "h5p-all",                 labelFr: "Trouver la zone",                labelEn: "Find the Hotspot" },
+  { id: "h5p:find-the-words",         platform: "h5p",    category: "h5p-all",                 labelFr: "Cherche les mots",               labelEn: "Find the Words" },
+  { id: "h5p:flashcards",             platform: "h5p",    category: "h5p-all",                 labelFr: "Cartes mémoire",                 labelEn: "Flashcards" },
+  { id: "h5p:game-map",               platform: "h5p",    category: "h5p-all",                 labelFr: "Carte de jeu",                   labelEn: "Game Map" },
+  { id: "h5p:guess-the-answer",       platform: "h5p",    category: "h5p-all",                 labelFr: "Devinez la réponse",             labelEn: "Guess the Answer" },
+  { id: "h5p:iframe-embedder",        platform: "h5p",    category: "h5p-all",                 labelFr: "Intégrateur Iframe",             labelEn: "Iframe Embedder" },
+  { id: "h5p:image-hotspots",         platform: "h5p",    category: "h5p-all",                 labelFr: "Zones interactives sur image",   labelEn: "Image Hotspots" },
+  { id: "h5p:image-juxtaposition",    platform: "h5p",    category: "h5p-all",                 labelFr: "Juxtaposition d'images",         labelEn: "Image Juxtaposition" },
+  { id: "h5p:image-pairing",          platform: "h5p",    category: "h5p-all",                 labelFr: "Appariement d'images",           labelEn: "Image Pairing" },
+  { id: "h5p:image-sequencing",       platform: "h5p",    category: "h5p-all",                 labelFr: "Séquence d'images",              labelEn: "Image Sequencing" },
+  { id: "h5p:image-slider",           platform: "h5p",    category: "h5p-all",                 labelFr: "Diaporama d'images",             labelEn: "Image Slider" },
+  { id: "h5p:impressive-presentation",platform: "h5p",    category: "h5p-all",                 labelFr: "Présentation impressionnante",   labelEn: "Impressive Presentation" },
+  { id: "h5p:information-wall",       platform: "h5p",    category: "h5p-all",                 labelFr: "Mur d'informations",             labelEn: "Information Wall" },
+  { id: "h5p:interactive-book",       platform: "h5p",    category: "h5p-all",                 labelFr: "Livre interactif",               labelEn: "Interactive Book" },
+  { id: "h5p:kewar-code",             platform: "h5p",    category: "h5p-all",                 labelFr: "Code QR (KewAr)",                labelEn: "KewAr Code" },
+  { id: "h5p:mark-the-words",         platform: "h5p",    category: "h5p-all",                 labelFr: "Surligner les mots",             labelEn: "Mark the Words" },
+  { id: "h5p:memory-game",            platform: "h5p",    category: "h5p-all",                 labelFr: "Jeu de mémoire",                 labelEn: "Memory Game" },
+  { id: "h5p:multiple-choice",        platform: "h5p",    category: "h5p-all",                 labelFr: "Choix multiple",                 labelEn: "Multiple Choice" },
+  { id: "h5p:multimedia-choice",      platform: "h5p",    category: "h5p-all",                 labelFr: "Choix multimédia",               labelEn: "Multimedia Choice" },
+  { id: "h5p:page",                   platform: "h5p",    category: "h5p-all",                 labelFr: "Page",                           labelEn: "Page" },
+  { id: "h5p:personality-quiz",       platform: "h5p",    category: "h5p-all",                 labelFr: "Quiz de personnalité",           labelEn: "Personality Quiz" },
+  { id: "h5p:questionnaire",          platform: "h5p",    category: "h5p-all",                 labelFr: "Questionnaire",                  labelEn: "Questionnaire" },
+  { id: "h5p:question-set",           platform: "h5p",    category: "h5p-all",                 labelFr: "Quiz (ensemble de questions)",   labelEn: "Quiz (Question Set)" },
+  { id: "h5p:single-choice-set",      platform: "h5p",    category: "h5p-all",                 labelFr: "Choix unique",                   labelEn: "Single Choice Set" },
+  { id: "h5p:sort-the-paragraphs",    platform: "h5p",    category: "h5p-all",                 labelFr: "Trier les paragraphes",          labelEn: "Sort the Paragraphs" },
+  { id: "h5p:speak-the-words",        platform: "h5p",    category: "h5p-all",                 labelFr: "Parle les mots",                 labelEn: "Speak the Words" },
+  { id: "h5p:speak-the-words-set",    platform: "h5p",    category: "h5p-all",                 labelFr: "Ensemble vocal",                 labelEn: "Speak the Words Set" },
+  { id: "h5p:structure-strip",        platform: "h5p",    category: "h5p-all",                 labelFr: "Bande de structure",             labelEn: "Structure Strip" },
+  { id: "h5p:summary",                platform: "h5p",    category: "h5p-all",                 labelFr: "Résumé",                         labelEn: "Summary" },
+  { id: "h5p:timeline",               platform: "h5p",    category: "h5p-all",                 labelFr: "Frise chronologique",            labelEn: "Timeline" },
+  { id: "h5p:true-false-question",    platform: "h5p",    category: "h5p-all",                 labelFr: "Question vrai/faux",             labelEn: "True/False Question" },
+  { id: "h5p:virtual-tour",           platform: "h5p",    category: "h5p-all",                 labelFr: "Visite virtuelle (360°)",        labelEn: "Virtual Tour (360°)" },
+];
+
+const TOOL_IDS_SET = new Set(TOOLS_DATA.map(tool => tool.id));
+
+const TOOL_CATEGORY_LABELS = {
+  "moodle-resources":       { fr: "Ressources – Informer",                     en: "Resources – Inform" },
+  "moodle-inform-evaluate": { fr: "Activités – Informer et évaluer",           en: "Activities – Inform & Evaluate" },
+  "moodle-share-data":      { fr: "Activités – Mettre en commun des données",  en: "Activities – Share Data" },
+  "moodle-trends":          { fr: "Activités – Faire ressortir des tendances", en: "Activities – Identify Trends" },
+  "h5p-featured":           { fr: "H5P – En vedette",                          en: "H5P – Featured" },
+  "h5p-all":                { fr: "H5P – Tous les types de contenus",          en: "H5P – All Content Types" },
+};
 
 let uid = 0;
 const nextId = () => `id-${Date.now()}-${uid++}`;
@@ -1856,6 +2194,12 @@ const I18N = {
     sessionNotesLabel: "Notes de la séance",
     deleteSession: "Supprimer la séance",
     deleteActivity: "Supprimer l'activité",
+    selectTools: "Sélectionner des outils",
+    toolPickerTitle: "Outils numériques",
+    toolPickerClose: "Fermer",
+    toolsAriaLabel: "Outils sélectionnés",
+    removeToolAriaLabel: (name) => `Retirer ${name}`,
+    toolCount: (n) => n === 1 ? "1 outil" : `${n} outils`,
     groupTitleType: "Type d'apprentissage",
     groupTitleGroup: "Groupe",
     groupTitleTrainer: "Formateur",
@@ -1927,6 +2271,7 @@ const I18N = {
     infoP2: "(UCL Knowledge Lab, UCL Institute of Education, 2013-2026).",
     infoP3: "Traitement local : toutes les données restent dans votre navigateur ; aucune donnée n’est transmise en ligne.",
     infoP4: "François Jourde (2026) • CC BY-SA<br />Code source : <a href=\"https://github.com/jourde/learning-designer\" target=\"_blank\" rel=\"noopener noreferrer\">https://github.com/jourde/learning-designer</a>",
+    infoP5: "Outils Moodle : <a href=\"https://moodletoolguide.net/\" target=\"_blank\" rel=\"noopener noreferrer\">moodletoolguide.net</a> • Outils H5P : <a href=\"https://h5p.org/content-types-and-applications\" target=\"_blank\" rel=\"noopener noreferrer\">h5p.org/content-types-and-applications</a>",
     noData: "Aucune donnée",
     learningDaysLabel: "Jours d'apprentissage",
     learningHoursLabel: "Heures d'apprentissage",
@@ -2001,6 +2346,12 @@ const I18N = {
     sessionNotesLabel: "Session notes",
     deleteSession: "Delete session",
     deleteActivity: "Delete activity",
+    selectTools: "Select tools",
+    toolPickerTitle: "Digital tools",
+    toolPickerClose: "Close",
+    toolsAriaLabel: "Selected tools",
+    removeToolAriaLabel: (name) => `Remove ${name}`,
+    toolCount: (n) => n === 1 ? "1 tool" : `${n} tools`,
     groupTitleType: "Learning type",
     groupTitleGroup: "Group",
     groupTitleTrainer: "Trainer",
@@ -2072,6 +2423,7 @@ const I18N = {
     infoP2: "(UCL Knowledge Lab, UCL Institute of Education, 2013-2026).",
     infoP3: "Local processing: all data remains in your browser; no data is transmitted online.",
     infoP4: "François Jourde (2026) • CC BY-SA<br />Source code: <a href=\"https://github.com/jourde/learning-designer\" target=\"_blank\" rel=\"noopener noreferrer\">https://github.com/jourde/learning-designer</a>",
+    infoP5: "Moodle tools: <a href=\"https://moodletoolguide.net/\" target=\"_blank\" rel=\"noopener noreferrer\">moodletoolguide.net</a> • H5P tools: <a href=\"https://h5p.org/content-types-and-applications\" target=\"_blank\" rel=\"noopener noreferrer\">h5p.org/content-types-and-applications</a>",
     noData: "No data",
     learningDaysLabel: "Learning days",
     learningHoursLabel: "Learning hours",
@@ -2313,6 +2665,7 @@ function applyLocalizedUI() {
   document.getElementById("info-modal-p2").textContent = t("infoP2");
   document.getElementById("info-modal-p3").textContent = t("infoP3");
   document.getElementById("info-modal-p4").innerHTML = t("infoP4");
+  document.getElementById("info-modal-p5").innerHTML = t("infoP5");
   infoModalCloseBtn.textContent = t("close");
   document.querySelector("label[for='lang-select']").textContent = t("uiLanguage");
   updateSaveStatus();
@@ -2509,6 +2862,10 @@ let activeChoiceTrigger = null;
 let activeChoiceItems = [];
 let activeChoiceIndex = -1;
 
+let activeToolPicker = null;
+let activeToolPickerTrigger = null;
+let activeToolPickerTab = "moodle";
+
 function focusChoiceItem(index) {
   if (!activeChoiceItems.length) return;
   const safeIndex = Math.max(0, Math.min(index, activeChoiceItems.length - 1));
@@ -2529,6 +2886,219 @@ function closeChoiceMenu(restoreFocus = false) {
   activeChoiceTrigger = null;
   activeChoiceItems = [];
   activeChoiceIndex = -1;
+}
+
+function closeToolPicker(restoreFocus = false) {
+  if (!activeToolPicker) return;
+  activeToolPicker.remove();
+  if (activeToolPickerTrigger) {
+    activeToolPickerTrigger.setAttribute("aria-expanded", "false");
+    if (restoreFocus) activeToolPickerTrigger.focus();
+  }
+  activeToolPicker = null;
+  activeToolPickerTrigger = null;
+}
+
+function positionToolPicker(panel, trigger) {
+  const rect = trigger.getBoundingClientRect();
+  panel.style.left = `${rect.left}px`;
+  panel.style.top = `${rect.bottom + 4}px`;
+  const panelRect = panel.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom + 4;
+  if (left + panelRect.width > window.innerWidth - 8) left = window.innerWidth - panelRect.width - 8;
+  if (left < 8) left = 8;
+  if (top + panelRect.height > window.innerHeight - 8) top = rect.top - panelRect.height - 4;
+  if (top < 8) top = 8;
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+}
+
+function renderPickerBody(body, platform, activity) {
+  body.innerHTML = "";
+  const lang = currentLang();
+  const categories = Object.keys(TOOL_CATEGORY_LABELS).filter(cat => cat.startsWith(platform));
+  categories.forEach(categoryKey => {
+    const categoryTitle = TOOL_CATEGORY_LABELS[categoryKey][lang];
+    const tools = TOOLS_DATA.filter(tool => tool.category === categoryKey);
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "tool-picker-section-title";
+    sectionTitle.setAttribute("aria-hidden", "true");
+    sectionTitle.textContent = categoryTitle;
+    body.appendChild(sectionTitle);
+    tools.forEach(tool => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "tool-picker-item";
+      const isSelected = activity.tools.includes(tool.id);
+      if (isSelected) item.classList.add("selected");
+      const checkBox = document.createElement("span");
+      checkBox.className = "tool-picker-item-check";
+      checkBox.setAttribute("aria-hidden", "true");
+      checkBox.textContent = isSelected ? "✓" : "";
+      const labelEl = document.createElement("span");
+      labelEl.textContent = lang === "en" ? tool.labelEn : tool.labelFr;
+      item.appendChild(checkBox);
+      item.appendChild(labelEl);
+      item.addEventListener("click", () => {
+        if (activity.tools.includes(tool.id)) {
+          activity.tools = activity.tools.filter(id => id !== tool.id);
+        } else {
+          activity.tools = [...activity.tools, tool.id];
+        }
+        saveState();
+        const nowSelected = activity.tools.includes(tool.id);
+        item.classList.toggle("selected", nowSelected);
+        checkBox.textContent = nowSelected ? "✓" : "";
+        updateActivityToolsDisplay(activeToolPickerTrigger, activity);
+      });
+      body.appendChild(item);
+    });
+  });
+}
+
+function switchPickerTab(platform, body, activity) {
+  activeToolPickerTab = platform;
+  activeToolPicker.querySelectorAll(".tool-picker-tab").forEach(tab => {
+    const isActive = tab.dataset.platform === platform;
+    tab.classList.toggle("active", isActive);
+  });
+  renderPickerBody(body, platform, activity);
+}
+
+function openToolPicker(trigger, activity) {
+  if (activeToolPicker && activeToolPickerTrigger === trigger) {
+    closeToolPicker(true);
+    return;
+  }
+  closeToolPicker();
+  closeChoiceMenu();
+
+  const panel = document.createElement("div");
+  panel.className = "tool-picker";
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-modal", "false");
+  panel.setAttribute("aria-label", t("toolPickerTitle"));
+
+  const header = document.createElement("div");
+  header.className = "tool-picker-header";
+  const titleEl = document.createElement("span");
+  titleEl.className = "tool-picker-title";
+  titleEl.textContent = t("toolPickerTitle");
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "tool-picker-close";
+  closeBtn.textContent = "✕";
+  closeBtn.setAttribute("aria-label", t("toolPickerClose"));
+  closeBtn.addEventListener("click", () => closeToolPicker(true));
+  header.appendChild(titleEl);
+  header.appendChild(closeBtn);
+  panel.appendChild(header);
+
+  const tabsRow = document.createElement("div");
+  tabsRow.className = "tool-picker-tabs";
+  tabsRow.setAttribute("role", "tablist");
+  const body = document.createElement("div");
+  body.className = "tool-picker-body";
+
+  ["moodle", "h5p"].forEach(platform => {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = "tool-picker-tab" + (platform === activeToolPickerTab ? " active" : "");
+    tab.dataset.platform = platform;
+    tab.textContent = platform === "moodle" ? "Moodle" : "H5P";
+    tab.setAttribute("role", "tab");
+    tab.addEventListener("click", () => switchPickerTab(platform, body, activity));
+    tabsRow.appendChild(tab);
+  });
+
+  panel.appendChild(tabsRow);
+  renderPickerBody(body, activeToolPickerTab, activity);
+  panel.appendChild(body);
+
+  panel.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") { closeToolPicker(true); return; }
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const items = Array.from(body.querySelectorAll(".tool-picker-item"));
+      const idx = items.indexOf(document.activeElement);
+      if (idx === -1) { items[0]?.focus(); return; }
+      const next = event.key === "ArrowDown"
+        ? (idx + 1) % items.length
+        : (idx - 1 + items.length) % items.length;
+      items[next].focus();
+    }
+    if (event.key === "Tab") {
+      const focusables = Array.from(panel.querySelectorAll("button:not([disabled])"));
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    }
+  });
+
+  document.body.appendChild(panel);
+  activeToolPicker = panel;
+  activeToolPickerTrigger = trigger;
+  trigger.setAttribute("aria-expanded", "true");
+  positionToolPicker(panel, trigger);
+  body.querySelector(".tool-picker-item")?.focus();
+}
+
+function updateActivityToolsDisplay(trigger, activity) {
+  if (!trigger) return;
+  const card = trigger.closest(".activity-card");
+  if (!card) return;
+  const count = activity.tools.length;
+  trigger.dataset.count = count;
+  trigger.classList.toggle("has-tools", count > 0);
+  trigger.setAttribute("aria-label", count > 0
+    ? `${t("selectTools")} (${t("toolCount")(count)})`
+    : t("selectTools"));
+  const toolsRow = card.querySelector(".activity-tools");
+  if (!toolsRow) return;
+  toolsRow.classList.toggle("hidden", count === 0);
+  toolsRow.setAttribute("aria-label", t("toolsAriaLabel"));
+  toolsRow.innerHTML = "";
+  const lang = currentLang();
+  activity.tools.forEach(toolId => {
+    const toolDef = TOOLS_DATA.find(td => td.id === toolId);
+    if (!toolDef) return;
+    const chip = document.createElement("span");
+    chip.className = "tool-chip";
+    chip.setAttribute("role", "listitem");
+    const platformBadge = document.createElement("span");
+    platformBadge.className = "tool-chip-platform";
+    platformBadge.setAttribute("aria-hidden", "true");
+    platformBadge.textContent = toolDef.platform.toUpperCase();
+    const nameEl = document.createElement("span");
+    nameEl.className = "tool-chip-name";
+    const label = lang === "en" ? toolDef.labelEn : toolDef.labelFr;
+    nameEl.textContent = label;
+    nameEl.title = label;
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "tool-chip-remove";
+    removeBtn.setAttribute("aria-label", t("removeToolAriaLabel")(label));
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      activity.tools = activity.tools.filter(id => id !== toolId);
+      saveState();
+      updateActivityToolsDisplay(trigger, activity);
+      if (activeToolPicker && activeToolPickerTrigger === trigger) {
+        renderPickerBody(activeToolPicker.querySelector(".tool-picker-body"), activeToolPickerTab, activity);
+      }
+    });
+    chip.appendChild(platformBadge);
+    chip.appendChild(nameEl);
+    chip.appendChild(removeBtn);
+    toolsRow.appendChild(chip);
+  });
 }
 
 function openChoiceMenu(trigger, options, currentValue, onSelect) {
@@ -2636,6 +3206,8 @@ function openChoiceMenu(trigger, options, currentValue, onSelect) {
 }
 
 function normalizeActivity(activity) {
+  if (!Array.isArray(activity.tools)) activity.tools = [];
+  activity.tools = activity.tools.filter(id => TOOL_IDS_SET.has(id));
   const legacyGroupSize = Number(activity.groupSize || 0);
   if (!["whole", "subgroups", "individual"].includes(activity.groupMode)) {
     if (legacyGroupSize > 1 && legacyGroupSize < 15) {
@@ -3964,6 +4536,11 @@ document.addEventListener("keydown", (event) => {
     closeChoiceMenu(true);
     return;
   }
+  if (activeToolPicker && event.key === "Escape") {
+    event.preventDefault();
+    closeToolPicker(true);
+    return;
+  }
   if (!activeModalBackdrop) return;
   if (event.key === "Escape") {
     event.preventDefault();
@@ -3987,6 +4564,11 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (activeToolPicker) {
+    if (!activeToolPicker.contains(event.target) && !event.target.closest(".select-tools-btn")) {
+      closeToolPicker();
+    }
+  }
   if (!activeChoiceMenu) return;
   if (activeChoiceMenu.contains(event.target)) return;
   if (event.target.closest(".choice-btn")) return;
@@ -3994,7 +4576,12 @@ document.addEventListener("click", (event) => {
 });
 
 window.addEventListener("resize", closeChoiceMenu);
+window.addEventListener("resize", closeToolPicker);
 window.addEventListener("scroll", closeChoiceMenu, true);
+window.addEventListener("scroll", (event) => {
+  if (activeToolPicker && activeToolPicker.contains(event.target)) return;
+  closeToolPicker();
+}, true);
 
 function stripGradientForSession(session) {
   if (!session.activities.length) return "linear-gradient(90deg, #cccccc, #bbbbbb)";
@@ -4125,6 +4712,7 @@ board.addEventListener("drop", (event) => {
 
 function render() {
   closeChoiceMenu();
+  closeToolPicker();
   applyLocalizedUI();
   renderTopPanel();
   const boardLayout = getBoardLayout();
@@ -4265,6 +4853,7 @@ function render() {
       const activityNotes = activityFrag.querySelector(".activity-notes");
       const activityNotesInput = activityFrag.querySelector(".activity-notes-input");
       const deleteActivityBtn = activityFrag.querySelector(".delete-activity-btn");
+      const selectToolsBtn = activityFrag.querySelector(".select-tools-btn");
 
       activityCard.style.borderLeftColor = colorForType(activity.type);
       activityCard.dataset.activityId = activity.id;
@@ -4304,6 +4893,7 @@ function render() {
       deleteActivityBtn.title = t("deleteActivity");
       deleteActivityBtn.setAttribute("aria-label", deleteActivityBtn.title);
       activityNotes.classList.toggle("hidden", !(state.allNotesExpanded || session.notesExpanded));
+      updateActivityToolsDisplay(selectToolsBtn, activity);
       activityCard.addEventListener("dragstart", (event) => {
         if (isInteractiveTarget(event.target)) {
           event.preventDefault();
@@ -4427,6 +5017,15 @@ function render() {
         announce(t("moved"));
       });
 
+      selectToolsBtn.addEventListener("click", () => openToolPicker(selectToolsBtn, activity));
+      selectToolsBtn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
+          e.preventDefault();
+          openToolPicker(selectToolsBtn, activity);
+        }
+        if (e.key === "Escape") closeToolPicker(true);
+      });
+
       activitiesWrap.appendChild(activityFrag);
     });
 
@@ -4445,7 +5044,8 @@ function render() {
         locationMode: "onsite",
         evaluationMode: "none",
         description: "",
-        notes: ""
+        notes: "",
+        tools: []
       });
       saveState();
       render();
