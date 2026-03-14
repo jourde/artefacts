@@ -33,7 +33,7 @@
 html,
 body {
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   background:
     radial-gradient(circle at top left, rgba(20, 91, 180, 0.08), transparent 30%),
     linear-gradient(180deg, #f7fafd 0%, var(--bg) 100%);
@@ -542,6 +542,12 @@ select:focus-visible,
   line-height: 1.15;
 }
 
+.modal p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .modal label {
   display: block;
   margin-top: 2px;
@@ -698,9 +704,8 @@ select:focus-visible,
 }
 
 main {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+  flex: 1 1 auto;
+  overflow: visible;
   background: transparent;
 }
 
@@ -709,8 +714,6 @@ main {
   gap: 14px;
   flex-direction: row;
   align-items: stretch;
-  height: 100%;
-  min-height: 0;
   padding: 18px 14px 20px;
 }
 
@@ -718,16 +721,12 @@ main {
   flex-direction: row;
   align-items: stretch;
   overflow-x: auto;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
 }
 
 .board.layout-list {
   flex-direction: column;
   align-items: stretch;
   overflow-x: hidden;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
   gap: 14px;
   padding: 18px clamp(18px, 4vw, 72px) 20px;
 }
@@ -744,7 +743,7 @@ main {
 
 .board.layout-columns .session-card {
   flex: 0 0 390px;
-  height: 100%;
+  height: auto;
   min-height: 560px;
 }
 
@@ -769,8 +768,8 @@ main {
 
 .delete-session-btn {
   position: absolute;
-  top: -7px;
-  right: -7px;
+  top: 6px;
+  right: 6px;
   border-radius: 999px;
 }
 
@@ -798,8 +797,6 @@ main {
 .activities {
   flex: 1 1 auto;
   padding: 0 12px 12px;
-  overflow-y: auto;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -866,12 +863,13 @@ main {
   align-items: flex-start;
   margin-bottom: 0;
   flex: 0 0 auto;
+  width: 100%;
 }
 
 .activity-toolbar {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
@@ -889,14 +887,14 @@ main {
 
 .choice-btn {
   border: 1px solid #cad5e2;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
-  padding: 8px 10px;
-  min-height: 40px;
+  padding: 4px 6px;
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
   color: #314255;
   max-width: none;
@@ -913,8 +911,8 @@ main {
 }
 
 .choice-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: currentColor;
   flex: 0 0 auto;
 }
@@ -925,11 +923,7 @@ main {
 }
 
 .choice-btn .choice-label {
-  display: inline;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.15;
-  white-space: nowrap;
+  display: none;
 }
 
 .choice-menu {
@@ -987,17 +981,17 @@ main {
 }
 
 .activity-duration {
-  width: 52px;
+  width: 48px;
 }
 
 .mini-label {
   display: inline-flex;
   gap: 6px;
   align-items: center;
-  min-height: 40px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 0 6px;
   border: 1px solid #cad5e2;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -1008,7 +1002,7 @@ main {
   display: inline-flex;
   gap: 3px;
   margin-left: auto;
-  align-self: flex-end;
+  align-self: center;
 }
 
 .activity-params {
@@ -1018,6 +1012,7 @@ main {
   gap: 8px;
   margin-bottom: 0;
   flex: 0 0 auto;
+  width: 100%;
 }
 
 .activity-param {
@@ -1060,8 +1055,11 @@ main {
 
 .delete-btn {
   background: #e44e5a;
-  border-color: #bf2f3c;
+  border: none;
+  border-radius: 999px;
   color: #fff;
+  width: 26px;
+  height: 26px;
 }
 
 .delete-btn:hover {
@@ -1069,17 +1067,18 @@ main {
 }
 
 .delete-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 11px;
+  height: 11px;
   display: block;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.9;
+  stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .session-footer {
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1484,43 +1483,17 @@ main {
     <template id="activity-template">
       <div class="activity-card">
         <div class="activity-toolbar">
-          <div class="activity-controls">
-            <span class="activity-param">
-              <span class="activity-param-label activity-type-label">Type</span>
-              <button class="choice-btn activity-type-btn" type="button"></button>
-            </span>
-            <label class="activity-param activity-param-duration">
-              <span class="activity-param-label activity-duration-label">Durée</span>
-              <span class="mini-label">
-                <span class="sr-only activity-duration-sr-label">Durée en minutes</span>
-                <span class="duration-symbol" aria-hidden="true">⏱</span>
-                <input class="activity-duration" type="number" min="1" />
-                <span class="duration-unit-inline" aria-hidden="true">min</span>
-              </span>
-            </label>
-            <span class="activity-param">
-              <span class="activity-param-label activity-group-label">Groupe</span>
-              <button class="choice-btn activity-group-mode-btn" type="button"></button>
-            </span>
-          </div>
-          <div class="activity-params">
-            <span class="activity-param">
-              <span class="activity-param-label activity-trainer-label">Formateur</span>
-              <button class="choice-btn activity-trainer-mode-btn" type="button"></button>
-            </span>
-            <span class="activity-param">
-              <span class="activity-param-label activity-sync-label">Rythme</span>
-              <button class="choice-btn activity-sync-mode-btn" type="button"></button>
-            </span>
-            <span class="activity-param">
-              <span class="activity-param-label activity-location-label">Modalité</span>
-              <button class="choice-btn activity-location-mode-btn" type="button"></button>
-            </span>
-            <span class="activity-param">
-              <span class="activity-param-label activity-evaluation-label">Évaluation</span>
-              <button class="choice-btn activity-evaluation-mode-btn" type="button"></button>
-            </span>
-          </div>
+          <button class="choice-btn activity-type-btn" type="button"></button>
+          <span class="mini-label">
+            <span class="sr-only">Durée en minutes</span>
+            <span class="duration-symbol" aria-hidden="true">⏱</span>
+            <input class="activity-duration" type="number" min="1" aria-label="Durée en minutes" />
+          </span>
+          <button class="choice-btn activity-group-mode-btn" type="button"></button>
+          <button class="choice-btn activity-trainer-mode-btn" type="button"></button>
+          <button class="choice-btn activity-sync-mode-btn" type="button"></button>
+          <button class="choice-btn activity-location-mode-btn" type="button"></button>
+          <button class="choice-btn activity-evaluation-mode-btn" type="button"></button>
           <div class="activity-actions">
             <button class="icon-btn delete-btn delete-activity-btn" title="Supprimer" aria-label="Supprimer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1593,7 +1566,7 @@ main {
     <script>
 (() => {
 "use strict";
-const STORAGE_KEY = "learning-designer-fr-v2";
+const STORAGE_KEY = "learning-designer-fr-v3";
 
 const LEARNING_TYPES = [
   { id: "read", label: "Lire / Regarder / Écouter", color: "#5cc9de" },
@@ -1883,13 +1856,15 @@ const I18N = {
     sessionNotesLabel: "Notes de la séance",
     deleteSession: "Supprimer la séance",
     deleteActivity: "Supprimer l'activité",
-    groupTitleType: "Type",
+    groupTitleType: "Type d'apprentissage",
     groupTitleGroup: "Groupe",
     groupTitleTrainer: "Formateur",
     groupTitlePacing: "Rythme",
     groupTitleMode: "Modalité",
     groupTitleEvaluation: "Évaluation",
     newActivityDescription: "Nouvelle activité",
+    sessionTitlePlaceholder: "Moment",
+    activityDescriptionPlaceholder: "Activité",
     newDesignConfirm: "Créer un nouveau design et écraser le contenu actuel ?",
     importInvalid: "Fichier invalide. Importez un JSON ou CSV exporté depuis cette application.",
     commandPlaceholder: "Collez ici la commande institutionnelle déjà définie...",
@@ -2026,13 +2001,15 @@ const I18N = {
     sessionNotesLabel: "Session notes",
     deleteSession: "Delete session",
     deleteActivity: "Delete activity",
-    groupTitleType: "Type",
+    groupTitleType: "Learning type",
     groupTitleGroup: "Group",
     groupTitleTrainer: "Trainer",
     groupTitlePacing: "Pacing",
     groupTitleMode: "Mode",
     groupTitleEvaluation: "Assessment",
     newActivityDescription: "New activity",
+    sessionTitlePlaceholder: "Moment",
+    activityDescriptionPlaceholder: "Activity",
     newDesignConfirm: "Create a new design and replace current content?",
     importInvalid: "Invalid file. Import a JSON or CSV exported by this application.",
     commandPlaceholder: "Paste the previously defined institutional brief here...",
@@ -4178,6 +4155,7 @@ function render() {
     );
     strip.style.background = stripGradientForSession(session);
     title.value = session.title;
+    title.placeholder = t("sessionTitlePlaceholder");
     title.setAttribute("aria-label", `${t("sessionTitleLabel")} ${sessionIndex + 1}`);
     title.addEventListener("input", (e) => {
       session.title = e.target.value;
@@ -4307,17 +4285,18 @@ function render() {
       setChoiceButton(syncModeBtn, SYNC_OPTIONS, activity.syncMode);
       setChoiceButton(locationModeBtn, LOCATION_OPTIONS, activity.locationMode);
       setChoiceButton(evaluationModeBtn, EVAL_OPTIONS, activity.evaluationMode);
-      typeLabel.textContent = t("groupTitleType");
-      durationLabel.textContent = currentLang() === "en" ? "Duration" : "Durée";
-      groupLabel.textContent = t("groupTitleGroup");
-      trainerLabel.textContent = t("groupTitleTrainer");
-      syncLabel.textContent = t("groupTitlePacing");
-      locationLabel.textContent = t("groupTitleMode");
-      evaluationLabel.textContent = t("groupTitleEvaluation");
+      if (typeLabel) typeLabel.textContent = t("groupTitleType");
+      if (durationLabel) durationLabel.textContent = currentLang() === "en" ? "Duration" : "Durée";
+      if (groupLabel) groupLabel.textContent = t("groupTitleGroup");
+      if (trainerLabel) trainerLabel.textContent = t("groupTitleTrainer");
+      if (syncLabel) syncLabel.textContent = t("groupTitlePacing");
+      if (locationLabel) locationLabel.textContent = t("groupTitleMode");
+      if (evaluationLabel) evaluationLabel.textContent = t("groupTitleEvaluation");
       durationInput.value = activity.duration;
       durationInput.setAttribute("inputmode", "numeric");
       durationInput.setAttribute("aria-label", `${t("activityDurationLabel")} ${activityIndex + 1}`);
       description.value = activity.description;
+      description.placeholder = t("activityDescriptionPlaceholder");
       description.setAttribute("aria-label", `${t("activityDescriptionLabel")} ${activityIndex + 1}`);
       activityNotesInput.value = activity.notes || "";
       activityNotesInput.setAttribute("aria-label", `${t("activityNotesLabel")} ${activityIndex + 1}`);
@@ -4465,7 +4444,7 @@ function render() {
         syncMode: "sync",
         locationMode: "onsite",
         evaluationMode: "none",
-        description: t("newActivityDescription"),
+        description: "",
         notes: ""
       });
       saveState();
@@ -4605,7 +4584,7 @@ function bindTopPanelEvents() {
 addSessionBtn.addEventListener("click", () => {
   state.sessions.push({
     id: nextId(),
-    title: defaultSessionTitle(state.sessions.length + 1),
+    title: "",
     objectives: "",
     notes: "",
     notesExpanded: false,
