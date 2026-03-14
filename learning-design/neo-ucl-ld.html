@@ -2000,6 +2000,20 @@ const TOOL_CATEGORY_LABELS = {
 let uid = 0;
 const nextId = () => `id-${Date.now()}-${uid++}`;
 const DEFAULT_DAY_HOURS = 7;
+const AUTOSAVE_INTERVAL_MS = 10_000;
+
+/**
+ * Returns a debounced version of fn that fires after `delay` ms of inactivity.
+ * @param {Function} fn
+ * @param {number} delay - milliseconds
+ */
+function debounce(fn, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
 const DEFAULT_META = {
   name: "",
   uiLanguage: "fr",
@@ -2194,6 +2208,9 @@ const I18N = {
     sessionNotesLabel: "Notes de la séance",
     deleteSession: "Supprimer la séance",
     deleteActivity: "Supprimer l'activité",
+    activityDeleted: "Activité supprimée.",
+    activityAdded: "Activité ajoutée.",
+    sessionDeleted: "Séance supprimée.",
     selectTools: "Sélectionner des outils",
     toolPickerTitle: "Outils numériques",
     toolPickerClose: "Fermer",
@@ -2346,6 +2363,9 @@ const I18N = {
     sessionNotesLabel: "Session notes",
     deleteSession: "Delete session",
     deleteActivity: "Delete activity",
+    activityDeleted: "Activity deleted.",
+    activityAdded: "Activity added.",
+    sessionDeleted: "Session deleted.",
     selectTools: "Select tools",
     toolPickerTitle: "Digital tools",
     toolPickerClose: "Close",
@@ -2800,9 +2820,7 @@ function saveState() {
 
 function setupAutoSave() {
   // Filet de sécurité: persistance périodique même sans clic explicite.
-  window.setInterval(() => {
-    saveState();
-  }, 10000);
+  window.setInterval(saveState, AUTOSAVE_INTERVAL_MS);
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) saveState();
@@ -2850,9 +2868,15 @@ function setChoiceButton(button, options, value) {
   const option = getOption(options, value);
   const groupTitle = button.dataset.groupTitle || "";
   button.dataset.value = option.value;
-  button.innerHTML = `${option.icon}<span class="choice-label">${option.label}</span>`;
-  button.title = groupTitle ? `${groupTitle}: ${option.label}` : option.label;
-  button.setAttribute("aria-label", groupTitle ? `${groupTitle}: ${option.label}` : option.label);
+  // Icon is static trusted SVG; label is set via textContent to prevent future injection.
+  button.innerHTML = option.icon;
+  const labelSpan = document.createElement("span");
+  labelSpan.className = "choice-label";
+  labelSpan.textContent = option.label;
+  button.appendChild(labelSpan);
+  const accessibleLabel = groupTitle ? `${groupTitle}: ${option.label}` : option.label;
+  button.title = accessibleLabel;
+  button.setAttribute("aria-label", accessibleLabel);
   button.setAttribute("aria-haspopup", "listbox");
   button.setAttribute("aria-expanded", "false");
 }
@@ -3407,8 +3431,11 @@ function renderPieOuterLabels(wrapEl, pieEl, labelsEl, tooltipEl, data, codeForS
   if (!wrapEl || !pieEl || !labelsEl || !tooltipEl) return;
   hidePieTooltip(tooltipEl);
   labelsEl.innerHTML = "";
-  pieEl.onmousemove = null;
-  pieEl.onmouseleave = null;
+  // Cancel previous listeners via AbortController instead of property assignment.
+  if (pieEl._pieAbort) pieEl._pieAbort.abort();
+  const pieAbort = new AbortController();
+  pieEl._pieAbort = pieAbort;
+  const { signal } = pieAbort;
 
   if (!data || data.sum <= 0) return;
 
@@ -3453,17 +3480,17 @@ function renderPieOuterLabels(wrapEl, pieEl, labelsEl, tooltipEl, data, codeForS
     labelsEl.appendChild(label);
   });
 
-  pieEl.onmousemove = (event) => {
+  pieEl.addEventListener("mousemove", (event) => {
     const segment = segmentForPointer(data, pieEl, event);
     if (!segment) {
       hidePieTooltip(tooltipEl);
       return;
     }
     showPieTooltip(wrapEl, tooltipEl, segment, event.clientX, event.clientY);
-  };
-  pieEl.onmouseleave = () => {
+  }, { signal });
+  pieEl.addEventListener("mouseleave", () => {
     hidePieTooltip(tooltipEl);
-  };
+  }, { signal });
 }
 
 function renderGroupBar(data) {
@@ -3831,8 +3858,8 @@ function buildHtmlExportDocument() {
             <p><strong>Rythme:</strong> ${escapeHtml(labelForSyncMode(activity.syncMode))}</p>
             <p><strong>Modalité:</strong> ${escapeHtml(labelForLocationMode(activity.locationMode))}</p>
             <p><strong>Évaluation:</strong> ${escapeHtml(labelForEvaluationMode(activity.evaluationMode))}</p>
-            <p><strong>Description:</strong> ${escapeHtml(activity.description || "")}</p>
-            ${activity.notes ? `<p><strong>Notes:</strong> ${escapeHtml(activity.notes)}</p>` : ""}
+            <p><strong>Description:</strong> ${escapeHtmlWithBreaks(activity.description || "")}</p>
+            ${activity.notes ? `<p><strong>Notes:</strong> ${escapeHtmlWithBreaks(activity.notes)}</p>` : ""}
           </li>
         `
         )
@@ -4575,13 +4602,13 @@ document.addEventListener("click", (event) => {
   closeChoiceMenu();
 });
 
-window.addEventListener("resize", closeChoiceMenu);
-window.addEventListener("resize", closeToolPicker);
-window.addEventListener("scroll", closeChoiceMenu, true);
+window.addEventListener("resize", closeChoiceMenu, { passive: true });
+window.addEventListener("resize", closeToolPicker, { passive: true });
+window.addEventListener("scroll", closeChoiceMenu, { capture: true, passive: true });
 window.addEventListener("scroll", (event) => {
   if (activeToolPicker && activeToolPicker.contains(event.target)) return;
   closeToolPicker();
-}, true);
+}, { capture: true, passive: true });
 
 function stripGradientForSession(session) {
   if (!session.activities.length) return "linear-gradient(90deg, #cccccc, #bbbbbb)";
@@ -5014,7 +5041,7 @@ function render() {
         session.activities = session.activities.filter((a) => a.id !== activity.id);
         saveState();
         render();
-        announce(t("moved"));
+        announce(t("activityDeleted"));
       });
 
       selectToolsBtn.addEventListener("click", () => openToolPicker(selectToolsBtn, activity));
@@ -5049,14 +5076,14 @@ function render() {
       });
       saveState();
       render();
-      announce(t("moved"));
+      announce(t("activityAdded"));
     });
 
     deleteSessionBtn.addEventListener("click", () => {
       state.sessions = state.sessions.filter((s) => s.id !== session.id);
       saveState();
       render();
-      announce(t("moved"));
+      announce(t("sessionDeleted"));
     });
 
     toggleSessionNotesBtn.addEventListener("click", () => {
@@ -5120,20 +5147,21 @@ function bindTopPanelEvents() {
     state.meta.name = event.target.value;
     saveState();
   });
+  const debouncedRenderTopPanel = debounce(renderTopPanel, 300);
   metaLearningDaysInput.addEventListener("input", (event) => {
     setLearningTime(event.target.value, state.meta.learningHours, state.meta.learningMinutes);
     saveState();
-    renderTopPanel();
+    debouncedRenderTopPanel();
   });
   metaLearningHoursInput.addEventListener("input", (event) => {
     setLearningTime(state.meta.learningDays, event.target.value, state.meta.learningMinutes);
     saveState();
-    renderTopPanel();
+    debouncedRenderTopPanel();
   });
   metaLearningMinutesInput.addEventListener("input", (event) => {
     setLearningTime(state.meta.learningDays, state.meta.learningHours, event.target.value);
     saveState();
-    renderTopPanel();
+    debouncedRenderTopPanel();
   });
   metaDeliverySelect.addEventListener("change", (event) => {
     state.meta.modeDelivery = event.target.value;
@@ -5330,6 +5358,12 @@ importModalBackdrop.addEventListener("click", (event) => {
 importFileInput.addEventListener("change", async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
+  const MAX_IMPORT_SIZE = 5 * 1024 * 1024; // 5 MB
+  if (file.size > MAX_IMPORT_SIZE) {
+    alert(t("importInvalid"));
+    importFileInput.value = "";
+    return;
+  }
   const forcedFormat = String(importFileInput.dataset.format || "").toLowerCase();
   const filename = String(file.name || "").toLowerCase();
   const selectedFormat = forcedFormat === "csv" || filename.endsWith(".csv") ? "csv" : "json";
